@@ -66,7 +66,7 @@ unsigned int Shader::GetID() const {
     return ID;
 }
 
-void Shader::Use() const {
+void Shader::Activate() const {
     glUseProgram(ID);
 }
 

@@ -13,7 +13,7 @@ public:
     [[nodiscard]] unsigned int GetID() const;
 
     // use/activate the shader
-    void Use() const;
+    void Activate() const;
 
     // utility uniform functions
     void SetBool(const std::string& name, bool value) const;
@@ -27,7 +27,6 @@ public:
     void SetVec2(const std::string& name, float x, float y) const;
 
     void SetVec3(const std::string& name, const glm::vec3& value) const;
-
 
     void SetVec3(const std::string& name, float x, float y, float z) const;
 
