@@ -22,6 +22,8 @@ public:
 
     [[nodiscard]] const glm::vec3& GetPosition() const;
 
+    [[nodiscard]] const glm::vec3& GetFront() const;
+
     void ProcessKeyboard(CameraMovement direction, float deltaTime);
 
     void ProcessMouseMovement(float xoffset, float yoffset);
