@@ -1,13 +1,8 @@
-#pragma once
-
+#include "filesystem/filesystem.h"
 #include <filesystem>
-#include <string>
 
-namespace filesystem {
-
-std::string path(const std::string& p) {
+std::string Filesystem::path(const std::string& p) {
     auto cwd = std::filesystem::current_path().string();
     cwd.erase(cwd.find_last_of('/'));
     return cwd + "/" + p;
-}
 }
