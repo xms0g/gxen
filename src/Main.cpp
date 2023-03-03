@@ -2,13 +2,14 @@
 #include <SDL2/SDL.h>
 #include "glad/glad.h"
 #include "glm/glm.hpp"
-#include "filesystem/filesystem.hpp"
+#include "image/stb_image.h"
+#include "filesystem/filesystem.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "Shader.h"
 #include "Camera.h"
 #include "Configs.hpp"
 #include "Input.h"
-#include "Texture.h"
+#include "Model.h"
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -63,117 +64,19 @@ int main() {
         return -1;
     }
 
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    stbi_set_flip_vertically_on_load(true);
+
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
 
     // build and compile our shader program
-    Shader cubeShader(filesystem::path(SHADER_DIR + "flashLight.vert.glsl"),
-                      filesystem::path(SHADER_DIR + "flashLight.frag.glsl"));
+    Shader ourShader(Filesystem::path(SHADER_DIR + "model.vert.glsl"),
+                      Filesystem::path(SHADER_DIR + "model.frag.glsl"));
 
-    Shader lightShader(filesystem::path(SHADER_DIR + "light.vert.glsl"),
-                       filesystem::path(SHADER_DIR + "light.frag.glsl"));
-
-    // set up vertex data (and buffer(s)) and configure vertex attributes
-    // ------------------------------------------------------------------
-    float vertices[] = {
-            // positions          // normals           // texture coords
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 1.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f,
-
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-
-            -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            -0.5f, -0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, -1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.5f, 0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-
-            -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-            0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 1.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            -0.5f, -0.5f, 0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-            -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f, 0.0f, 1.0f,
-
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-            0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 1.0f,
-            0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-            -0.5f, 0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f,
-            -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f
-    };
-
-    glm::vec3 cubePositions[] = {
-            glm::vec3( 0.0f,  0.0f,  0.0f),
-            glm::vec3( 2.0f,  5.0f, -15.0f),
-            glm::vec3(-1.5f, -2.2f, -2.5f),
-            glm::vec3(-3.8f, -2.0f, -12.3f),
-            glm::vec3( 2.4f, -0.4f, -3.5f),
-            glm::vec3(-1.7f,  3.0f, -7.5f),
-            glm::vec3( 1.3f, -2.0f, -2.5f),
-            glm::vec3( 1.5f,  2.0f, -2.5f),
-            glm::vec3( 1.5f,  0.2f, -1.5f),
-            glm::vec3(-1.3f,  1.0f, -1.5f)
-    };
-
-    ///////////////////////////////////////////////////////////////////////
-    // VAO, VBO Configuration                                            //
-    //////////////////////////////////////////////////////////////////////
-    // first, configure the cube's VAO (and VBO)
-    unsigned int VBO, cubeVAO;
-    glGenVertexArrays(1, &cubeVAO);
-    glGenBuffers(1, &VBO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindVertexArray(cubeVAO);
-    // position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
-    glEnableVertexAttribArray(0);
-    // normal coord attribute
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture attribute
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) (6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    // second, configure the light's VAO (VBO stays the same; the vertices are the same for the light object which is also a 3D cube)
-    unsigned int lightVAO;
-    glGenVertexArrays(1, &lightVAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glBindVertexArray(lightVAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*) 0);
-    glEnableVertexAttribArray(0);
-
-    ///////////////////////////////////////////////////////////////////////
-    // Texture Loading                                                   //
-    //////////////////////////////////////////////////////////////////////
-    unsigned diffuseMap = texture::load(filesystem::path(TEXTURE_DIR + "container2.png").c_str());
-    unsigned specularMap = texture::load(filesystem::path(TEXTURE_DIR + "container2_specular.png").c_str());
-
-    cubeShader.Activate();
-    cubeShader.SetInt("material.diffuse", 0);
-    cubeShader.SetInt("material.specular", 1);
+    // load models
+    // -----------
+    Model ourModel(Filesystem::path(ASSET_DIR + "backpack/backpack.obj"));
 
 #ifdef DEBUG
     std::cout << "OpenGL version supported by this platform: " << glGetString(GL_VERSION) << std::endl;
@@ -194,70 +97,24 @@ int main() {
 //        lightPos.x += cos(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
 //        lightPos.z += sin(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
         // be sure to activate shader when setting uniforms/drawing objects
-        cubeShader.Activate();
-        cubeShader.SetVec3("light.position", camera.GetPosition());
-        cubeShader.SetVec3("light.direction", camera.GetFront());
-        cubeShader.SetFloat("light.cutOff", glm::cos(glm::radians(12.5f)));
-        cubeShader.SetFloat("light.outerCutOff", glm::cos(glm::radians(17.5f)));
-        cubeShader.SetVec3("viewPos", camera.GetPosition());
-        // light properties
-        cubeShader.SetVec3("light.ambient", 0.2f, 0.2f, 0.2f);
-        cubeShader.SetVec3("light.diffuse", 1.5f, 1.5f, 1.5f);
-        cubeShader.SetVec3("light.specular", 1.0f, 1.0f, 1.0f);
-        cubeShader.SetFloat("light.constant", 1.0f);
-        cubeShader.SetFloat("light.linear", 0.09f);
-        cubeShader.SetFloat("light.quadratic", 0.032f);
-        // Material properties
-        cubeShader.SetFloat("material.shininess", 64.0f);
+        ourShader.Activate();
 
         // view/projection transformations
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(camera.GetZoom()),
                                                 (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-        cubeShader.SetMat4("projection", projection);
-        cubeShader.SetMat4("view", view);
-
-        // bind diffuse map
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, diffuseMap);
-
-        // bind specular map
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, specularMap);
-
-        // render the cube
-        glBindVertexArray(cubeVAO);
-
-        for (int i = 0; i < 10; i++) {
-            glm::mat4 model = glm::mat4(1.0f);
-            model = glm::translate(model, cubePositions[i]);
-            float angle = 20.0f * i;
-            model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
-            cubeShader.SetMat4("model", model);
-
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-        }
-
-        // also draw the lamp object
-//        lightShader.Activate();
-//        lightShader.SetMat4("projection", projection);
-//        lightShader.SetMat4("view", view);
-//        glm::mat4 model = glm::mat4(1.0f);
-//        model = glm::translate(model, lightPos);
-//        model = glm::scale(model, glm::vec3(0.2f)); // a smaller cube
-//        lightShader.SetMat4("model", model);
-//
-//        glBindVertexArray(lightVAO);
-//        glDrawArrays(GL_TRIANGLES, 0, 36);
+        ourShader.SetMat4("projection", projection);
+        ourShader.SetMat4("view", view);
+        // render the loaded model
+        glm::mat4 model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));	// it's a bit too big for our scene, so scale it down
+        ourShader.SetMat4("model", model);
+        ourModel.Draw(ourShader);
 
         // SDL swap buffers
         SDL_GL_SwapWindow(window);
     }
-
-    // Clean
-    glDeleteVertexArrays(1, &cubeVAO);
-    glDeleteVertexArrays(1, &lightVAO);
-    glDeleteBuffers(1, &VBO);
 
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);

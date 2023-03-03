@@ -32,6 +32,7 @@ unsigned int texture::load(const char* path) {
     } else {
         std::cerr << "Texture failed to load at path: " << path << std::endl;
         stbi_image_free(data);
+        return 0;
     }
 
     return textureID;
