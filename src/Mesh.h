@@ -48,5 +48,5 @@ private:
     unsigned int VBO{}, EBO{};
 
     // initializes all the buffer objects/arrays
-    void setupMesh();
+    void SetupMesh();
 };

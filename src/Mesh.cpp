@@ -8,7 +8,7 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
         indices(std::move(indices)),
         textures(std::move(textures)) {
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
-    setupMesh();
+    SetupMesh();
 }
 
 
@@ -48,7 +48,7 @@ void Mesh::Draw(Shader& shader) {
 }
 
 
-void Mesh::setupMesh() {
+void Mesh::SetupMesh() {
     // create buffers/arrays
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
