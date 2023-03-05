@@ -61,7 +61,7 @@ void SDLWindow::UpdateFpsCounter(float dt) {
         char tmp[128];
         double fps = (double) frameCount / elapsedSeconds;
 
-        sprintf(tmp, "%s @ fps: %.2f", m_title.c_str(), fps);
+        snprintf(tmp, 128, "%s @ fps: %.2f", m_title.c_str(), fps);
 
         SDL_SetWindowTitle(window, tmp);
         frameCount = 0;
