@@ -50,7 +50,7 @@ SDLWindow::~SDLWindow() {
     SDL_Quit();
 }
 
-void SDLWindow::updateFpsCounter(float dt) {
+void SDLWindow::UpdateFpsCounter(float dt) {
     double elapsedSeconds;
 
     currentSeconds += dt / 1000.0;
@@ -69,11 +69,11 @@ void SDLWindow::updateFpsCounter(float dt) {
     frameCount++;
 }
 
-void SDLWindow::clear() {
+void SDLWindow::Clear() {
     glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void SDLWindow::swapBuffer() {
+void SDLWindow::SwapBuffer() {
     SDL_GL_SwapWindow(window);
 }

@@ -10,11 +10,11 @@ public:
 
     ~SDLWindow() override;
 
-    void updateFpsCounter(float dt) override;
+    void UpdateFpsCounter(float dt) override;
 
-    void clear() override;
+    void Clear() override;
 
-    void swapBuffer() override;
+    void SwapBuffer() override;
 
 private:
     const std::string m_title;

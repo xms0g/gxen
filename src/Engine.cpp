@@ -54,7 +54,7 @@ void Engine::Update() {
     deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0f;
     millisecsPreviousFrame = SDL_GetTicks();
 
-    window->updateFpsCounter(deltaTime);
+    window->UpdateFpsCounter(deltaTime);
 
     shader->Activate();
     // view/projection transformations
@@ -72,7 +72,7 @@ void Engine::Update() {
 
 
 void Engine::Render() {
-    window->clear();
+    window->Clear();
 
 //        glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
 //        lightPos.x += cos(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
@@ -82,5 +82,5 @@ void Engine::Render() {
     model->Draw(*shader);
 
     // SDL swap buffers
-    window->swapBuffer();
+    window->SwapBuffer();
 }
