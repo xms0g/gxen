@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <unordered_set>
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
@@ -24,7 +25,7 @@ private:
 
     std::vector<Texture> LoadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
-    std::vector<Texture> textures_loaded;
+    std::unordered_set<std::string> texturesLoaded;
     std::vector<Mesh> meshes;
     std::string directory;
     bool gammaCorrection;
