@@ -1,4 +1,4 @@
-#include "SdlWindow.h"
+#include "SDLWindow.h"
 #include <iostream>
 #include "glad/glad.h"
 

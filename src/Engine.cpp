@@ -3,7 +3,7 @@
 #include "image/stb_image.h"
 #include "filesystem/filesystem.h"
 #include "glad/glad.h"
-#include "SdlWindow.h"
+#include "SDLWindow.h"
 #include "Configs.hpp"
 
 
