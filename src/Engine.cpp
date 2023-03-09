@@ -25,6 +25,10 @@ Engine::Engine() :
     // configure global opengl state
     glEnable(GL_DEPTH_TEST);
 
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    glFrontFace(GL_CCW);
+
     shader = std::make_unique<Shader>(Filesystem::path(SHADER_DIR + "model.vert.glsl"),
                                       Filesystem::path(SHADER_DIR + "model.frag.glsl"));
     model = std::make_unique<Model>(Filesystem::path(ASSET_DIR + "backpack/backpack.obj"));
