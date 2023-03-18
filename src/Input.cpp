@@ -1,21 +1,21 @@
 #include "Input.h"
 #include <SDL2/SDL.h>
-#include "Configs.hpp"
 #include "Camera.h"
 #include "../libs/imgui/imgui_impl_sdl.h"
 
 
-Input::Input() :
-        mouseLastX(SCR_WIDTH / 2.0f),
-        mouseLastY(SCR_HEIGHT / 2.0f),
-        firstMouse(true) {}
-
-
-void Input::Process(Camera& camera, float dt, bool& isRunning) {
+void Input::Process(Camera& camera, SDL_Window* window, float dt, bool& isRunning) {
     SDL_Event event;
     SDL_PollEvent(&event);
 
     ImGui_ImplSDL2_ProcessEvent(&event);
+
+    if (event.type == SDL_QUIT)
+        isRunning = false;
+    if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE &&
+        event.window.windowID == SDL_GetWindowID(window))
+        isRunning = false;
+
     ImGuiIO& io = ImGui::GetIO();
 
     int mouseX, mouseY;
@@ -25,7 +25,6 @@ void Input::Process(Camera& camera, float dt, bool& isRunning) {
     io.MouseDown[1] = buttons & SDL_BUTTON(SDL_BUTTON_RIGHT);
 
     ProcessKeyboard(camera, dt, isRunning);
-    ProcessMouse(camera);
 }
 
 
@@ -43,29 +42,4 @@ void Input::ProcessKeyboard(Camera& camera, float dt, bool& isRunning) {
     } else if (keystate[SDL_SCANCODE_D]) {
         camera.ProcessKeyboard(RIGHT, dt);
     }
-}
-
-
-void Input::ProcessMouse(Camera& camera) {
-    SDL_GetMouseState(&mouseX, &mouseY);
-    CalculateMouseOffset();
-    //camera.ProcessMouseMovement(mouseOffsetX, mouseOffsetY);
-}
-
-
-void Input::CalculateMouseOffset() {
-    float xpos = static_cast<float>(mouseX);
-    float ypos = static_cast<float>(mouseY);
-
-    if (firstMouse) {
-        mouseLastX = xpos;
-        mouseLastY = ypos;
-        firstMouse = false;
-    }
-
-    mouseOffsetX = xpos - mouseLastX;
-    mouseOffsetY = mouseLastY - ypos; // reversed since y-coordinates go from bottom to top
-
-    mouseLastX = xpos;
-    mouseLastY = ypos;
 }

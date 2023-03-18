@@ -1,8 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <SDL2/SDL.h>
-#include "glm/glm.hpp"
 #include "Window.hpp"
 #include "Shader.h"
 #include "Model.h"

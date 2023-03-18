@@ -1,5 +1,7 @@
 #include "Engine.h"
 #include <iostream>
+#include <SDL2/SDL.h>
+#include "glm/glm.hpp"
 #include "image/stb_image.h"
 #include "filesystem/filesystem.h"
 #include "glad/glad.h"
@@ -54,7 +56,7 @@ bool Engine::IsRunning() const {
 
 
 void Engine::ProcessInput() {
-    input->Process(*camera, deltaTime, isRunning);
+    input->Process(*camera, dynamic_cast<SDLWindow*>(window.get())->GetWindow(), deltaTime, isRunning);
 }
 
 
