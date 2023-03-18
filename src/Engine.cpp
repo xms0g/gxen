@@ -31,6 +31,10 @@ Engine::Engine() :
 
     shader = std::make_unique<Shader>(Filesystem::path(SHADER_DIR + "model.vert.glsl"),
                                       Filesystem::path(SHADER_DIR + "model.frag.glsl"));
+
+    gui = std::make_unique<Gui>(dynamic_cast<SDLWindow*>(window.get())->GetWindow(),
+                                dynamic_cast<SDLWindow*>(window.get())->GetContext());
+
     model = std::make_unique<Model>(Filesystem::path(ASSET_DIR + "backpack/backpack.obj"));
 
     isRunning = true;
@@ -84,6 +88,8 @@ void Engine::Render() {
     // be sure to activate shader when setting uniforms/drawing objects
 
     model->Draw(*shader);
+
+    gui->Render();
 
     // SDL swap buffers
     window->SwapBuffer();

@@ -22,6 +22,7 @@ set(STB_IMAGE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/image/include)
 set(KHR_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/KHR/include)
 
 file(GLOB_RECURSE SOURCES "src/*")
+file(GLOB_RECURSE IMGUI "libs/imgui/*")
 set(GLAD
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/glad/src/glad.c
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/glad/include/glad/glad.h)
@@ -32,7 +33,7 @@ set(FILESYSTEM
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/filesystem/src/filesystem.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/filesystem/include/filesystem/filesystem.h)
 
-set(COMPILATION_UNIT ${SOURCES} ${GLAD} ${STB_IMAGE} ${FILESYSTEM})
+set(COMPILATION_UNIT ${SOURCES} ${GLAD} ${STB_IMAGE} ${FILESYSTEM} ${IMGUI})
 
 add_executable(${PROJECT_NAME} ${COMPILATION_UNIT})
 
