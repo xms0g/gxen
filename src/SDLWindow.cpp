@@ -50,6 +50,14 @@ SDLWindow::~SDLWindow() {
     SDL_Quit();
 }
 
+SDL_Window* SDLWindow::GetWindow() const {
+    return window;
+}
+
+void* SDLWindow::GetContext() const {
+    return context;
+}
+
 void SDLWindow::UpdateFpsCounter(float dt) {
     double elapsedSeconds;
 

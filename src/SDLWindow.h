@@ -10,6 +10,10 @@ public:
 
     ~SDLWindow() override;
 
+    [[nodiscard]] SDL_Window* GetWindow() const;
+
+    [[nodiscard]] void* GetContext() const;
+
     void UpdateFpsCounter(float dt) override;
 
     void Clear() override;
