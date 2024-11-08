@@ -1,5 +1,4 @@
-#include "Engine.h"
-
+#include "engine.h"
 
 int main() {
     Engine glEngine;

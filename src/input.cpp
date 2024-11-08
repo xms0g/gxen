@@ -1,6 +1,6 @@
-#include "Input.h"
+#include "input.h"
 #include <SDL2/SDL.h>
-#include "Camera.h"
+#include "camera.h"
 #include "../libs/imgui/imgui_impl_sdl.h"
 
 
@@ -34,12 +34,12 @@ void Input::ProcessKeyboard(Camera& camera, float dt, bool& isRunning) {
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         isRunning = false;
     } else if (keystate[SDL_SCANCODE_W]) {
-        camera.ProcessKeyboard(FORWARD, dt);
+        camera.processKeyboard(FORWARD, dt);
     } else if (keystate[SDL_SCANCODE_S]) {
-        camera.ProcessKeyboard(BACKWARD, dt);
+        camera.processKeyboard(BACKWARD, dt);
     } else if (keystate[SDL_SCANCODE_A]) {
-        camera.ProcessKeyboard(LEFT, dt);
+        camera.processKeyboard(LEFT, dt);
     } else if (keystate[SDL_SCANCODE_D]) {
-        camera.ProcessKeyboard(RIGHT, dt);
+        camera.processKeyboard(RIGHT, dt);
     }
 }

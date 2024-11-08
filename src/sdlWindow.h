@@ -2,7 +2,7 @@
 
 #include <string>
 #include <SDL2/SDL.h>
-#include "Window.hpp"
+#include "window.hpp"
 
 class SDLWindow : public IWindow {
 public:

@@ -1,13 +1,12 @@
-#include "Engine.h"
+#include "engine.h"
 #include <iostream>
 #include <SDL2/SDL.h>
 #include "glm/glm.hpp"
 #include "image/stb_image.h"
 #include "filesystem/filesystem.h"
 #include "glad/glad.h"
-#include "SDLWindow.h"
-#include "Configs.hpp"
-
+#include "sdlWindow.h"
+#include "configs.hpp"
 
 Engine::Engine() :
         window(std::make_unique<SDLWindow>("OpenGL Test")),
@@ -68,8 +67,8 @@ void Engine::Update() {
 
     shader->Activate();
     // view/projection transformations
-    glm::mat4 viewMat = camera->GetViewMatrix();
-    glm::mat4 projectionMat = glm::perspective(glm::radians(camera->GetZoom()),
+    glm::mat4 viewMat = camera->getViewMatrix();
+    glm::mat4 projectionMat = glm::perspective(glm::radians(camera->getZoom()),
                                             (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
     shader->SetMat4("projection", projectionMat);
     shader->SetMat4("view", viewMat);
