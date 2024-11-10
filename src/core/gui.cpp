@@ -1,4 +1,6 @@
 #include "gui.h"
+#include <string>
+#include "glad/glad.h"
 #include "../../libs/imgui/imgui.h"
 #include "../../libs/imgui/imgui_impl_sdl.h"
 #include "../../libs/imgui/imgui_impl_opengl3.h"
@@ -23,7 +25,7 @@ Gui::~Gui() {
     ImGui::DestroyContext();
 }
 
-void Gui::Render() {
+void Gui::render() {
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplSDL2_NewFrame();
@@ -32,13 +34,20 @@ void Gui::Render() {
 //    bool show_demo_window = true;
 //    ImGui::ShowDemoWindow(&show_demo_window);
 
-
-    if (ImGui::Begin("FPS")) {
-        ImGui::Text("%s", "Test");
-    }
-    ImGui::End();
+    renderGraphicsInfo();
 
     //Render ImGui
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+}
+
+void Gui::renderGraphicsInfo() const {
+    if (ImGui::Begin("Graphics")) {
+        ImGui::Text("%s FPS", std::to_string(mFPS).c_str());
+        ImGui::Text("OpenGL version: %s", glGetString(GL_VERSION));
+        ImGui::Text("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+        ImGui::Text("OpenGL Driver Vendor: %s", glGetString(GL_VENDOR));
+        ImGui::Text("OpenGL Renderer: %s", glGetString(GL_RENDERER));
+    }
+    ImGui::End();
 }

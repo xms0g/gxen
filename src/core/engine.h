@@ -25,7 +25,17 @@ private:
 
     void Render();
 
+    void updateFpsCounter();
+
+    // Frame
+    double mPreviousSeconds{0.0};
+    double mCurrentSeconds{0.0};
+    uint32_t mCurrentFrameCount{0};
+    uint32_t mFPS{0};
+
+    // Engine
     bool isRunning{true};
+
     std::unique_ptr<Window> mWindow;
     std::unique_ptr<Gui> mGui;
     std::unique_ptr<Camera> mCamera;
@@ -33,7 +43,7 @@ private:
     std::unique_ptr<Shader> mShader;
     std::unique_ptr<Model> mModel;
 
-    float deltaTime{};
-    uint32_t millisecsPreviousFrame{0};
+    float mDeltaTime{};
+    uint32_t mMillisecsPreviousFrame{0};
 
 };

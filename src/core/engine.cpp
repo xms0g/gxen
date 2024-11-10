@@ -62,14 +62,17 @@ void Engine::run() {
 }
 
 void Engine::ProcessInput() {
-    mInput->process(*mCamera, mWindow->nativeHandle(), deltaTime, isRunning);
+    mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 }
 
 void Engine::Update() {
-    deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0f;
-    millisecsPreviousFrame = SDL_GetTicks();
+    mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
+    mMillisecsPreviousFrame = SDL_GetTicks();
 
-    //window->UpdateFpsCounter(deltaTime);
+    updateFpsCounter();
+#ifdef DEBUG
+    mGui->setFPS(mFPS);
+#endif
 
     mShader->activate();
     // view/projection transformations
@@ -85,10 +88,12 @@ void Engine::Update() {
     modelMat = glm::scale(modelMat,
                           glm::vec3(1.0f, 1.0f, 1.0f));    // it's a bit too big for our scene, so scale it down
     mShader->setMat4("model", modelMat);
+
+    mCamera->update();
 }
 
 void Engine::Render() {
-    mWindow->clear();
+    mWindow->clear(0.2f, 0.3f, 0.3f, 1.0f);
 
 //        glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
 //        lightPos.x += cos(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
@@ -97,8 +102,25 @@ void Engine::Render() {
 
     mModel->Draw(*mShader);
 
-    mGui->Render();
+#ifdef DEBUG
+    mGui->render();
+#endif
 
     // SDL swap buffers
     mWindow->swapBuffer();
+}
+
+void Engine::updateFpsCounter() {
+    double elapsedSeconds;
+
+    mCurrentFrameCount++;
+
+    mCurrentSeconds += mDeltaTime;
+    elapsedSeconds = mCurrentSeconds - mPreviousSeconds;
+    // limit text updates to 4 per second
+    if (elapsedSeconds > 0.25) {
+        mPreviousSeconds = mCurrentSeconds;
+        mFPS = mCurrentFrameCount / elapsedSeconds;
+        mCurrentFrameCount = 0;
+    }
 }
