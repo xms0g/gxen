@@ -16,11 +16,11 @@ Engine::Engine() = default;
 Engine::~Engine() = default;
 
 void Engine::init() {
-    window = std::make_unique<Window>();
-    camera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
-    input = std::make_unique<Input>();
+    mWindow = std::make_unique<Window>();
+    mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+    mInput = std::make_unique<Input>();
 
-    window->init("X-Engine");
+    mWindow->init("X-Engine");
     // glad: load all OpenGL function pointers
     // ---------------------------------------
     if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
@@ -38,14 +38,12 @@ void Engine::init() {
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    shader = std::make_unique<Shader>(fs::path(SHADER_DIR + "model.vert.glsl"),
-                                      fs::path(SHADER_DIR + "model.frag.glsl"));
+    mShader = std::make_unique<Shader>(fs::path(SHADER_DIR + "model.vert.glsl"),
+                                       fs::path(SHADER_DIR + "model.frag.glsl"));
 
-    gui = std::make_unique<Gui>(window->nativeHandle(), window->glContext());
+    mGui = std::make_unique<Gui>(mWindow->nativeHandle(), mWindow->glContext());
 
-    model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"));
-
-    isRunning = true;
+    mModel = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"));
 
 #ifndef DEBUG
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << '\n';
@@ -64,7 +62,7 @@ void Engine::run() {
 }
 
 void Engine::ProcessInput() {
-    input->process(*camera, window->nativeHandle(), deltaTime, isRunning);
+    mInput->process(*mCamera, mWindow->nativeHandle(), deltaTime, isRunning);
 }
 
 void Engine::Update() {
@@ -73,34 +71,34 @@ void Engine::Update() {
 
     //window->UpdateFpsCounter(deltaTime);
 
-    shader->activate();
+    mShader->activate();
     // view/projection transformations
-    glm::mat4 viewMat = camera->getViewMatrix();
-    glm::mat4 projectionMat = glm::perspective(glm::radians(camera->getZoom()),
+    glm::mat4 viewMat = mCamera->getViewMatrix();
+    glm::mat4 projectionMat = glm::perspective(glm::radians(mCamera->getZoom()),
                                                (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-    shader->setMat4("projection", projectionMat);
-    shader->setMat4("view", viewMat);
+    mShader->setMat4("projection", projectionMat);
+    mShader->setMat4("view", viewMat);
     // render the loaded model
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat,
                               glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
     modelMat = glm::scale(modelMat,
                           glm::vec3(1.0f, 1.0f, 1.0f));    // it's a bit too big for our scene, so scale it down
-    shader->setMat4("model", modelMat);
+    mShader->setMat4("model", modelMat);
 }
 
 void Engine::Render() {
-    window->clear();
+    mWindow->clear();
 
 //        glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
 //        lightPos.x += cos(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
 //        lightPos.z += sin(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
     // be sure to activate shader when setting uniforms/drawing objects
 
-    model->Draw(*shader);
+    mModel->Draw(*mShader);
 
-    gui->Render();
+    mGui->Render();
 
     // SDL swap buffers
-    window->swapBuffer();
+    mWindow->swapBuffer();
 }

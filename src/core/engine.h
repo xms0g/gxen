@@ -25,13 +25,13 @@ private:
 
     void Render();
 
-    bool isRunning;
-    std::unique_ptr<Window> window;
-    std::unique_ptr<Gui> gui;
-    std::unique_ptr<Camera> camera;
-    std::unique_ptr<Input> input;
-    std::unique_ptr<Shader> shader;
-    std::unique_ptr<Model> model;
+    bool isRunning{true};
+    std::unique_ptr<Window> mWindow;
+    std::unique_ptr<Gui> mGui;
+    std::unique_ptr<Camera> mCamera;
+    std::unique_ptr<Input> mInput;
+    std::unique_ptr<Shader> mShader;
+    std::unique_ptr<Model> mModel;
 
     float deltaTime{};
     uint32_t millisecsPreviousFrame{0};
