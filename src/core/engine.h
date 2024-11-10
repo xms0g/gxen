@@ -8,11 +8,11 @@ class Camera;
 class Window;
 class Input;
 class Gui;
-class Engine {
+class XEngine {
 public:
-    Engine();
+    XEngine();
 
-    ~Engine();
+    ~XEngine();
 
     void init();
 

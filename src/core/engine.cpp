@@ -11,11 +11,11 @@
 #include "gui.h"
 #include "../utils/filesystem.hpp"
 
-Engine::Engine() = default;
+XEngine::XEngine() = default;
 
-Engine::~Engine() = default;
+XEngine::~XEngine() = default;
 
-void Engine::init() {
+void XEngine::init() {
     mWindow = std::make_unique<Window>();
     mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
     mInput = std::make_unique<Input>();
@@ -53,7 +53,7 @@ void Engine::init() {
 #endif
 }
 
-void Engine::run() {
+void XEngine::run() {
     while (isRunning) {
         ProcessInput();
         Update();
@@ -61,11 +61,11 @@ void Engine::run() {
     }
 }
 
-void Engine::ProcessInput() {
+void XEngine::ProcessInput() {
     mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 }
 
-void Engine::Update() {
+void XEngine::Update() {
     mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
     mMillisecsPreviousFrame = SDL_GetTicks();
 
@@ -92,7 +92,7 @@ void Engine::Update() {
     mCamera->update();
 }
 
-void Engine::Render() {
+void XEngine::Render() {
     mWindow->clear(0.2f, 0.3f, 0.3f, 1.0f);
 
 //        glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
@@ -110,7 +110,7 @@ void Engine::Render() {
     mWindow->swapBuffer();
 }
 
-void Engine::updateFpsCounter() {
+void XEngine::updateFpsCounter() {
     double elapsedSeconds;
 
     mCurrentFrameCount++;
