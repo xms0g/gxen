@@ -15,7 +15,6 @@ if(ASSIMP_FOUND)
     include_directories(${ASSIMP_INCLUDE_DIR})
 endif()
 
-set(FILESYSTEM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/filesystem/include)
 set(GLM_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/glm/include)
 set(GLAD_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/glad/include)
 set(STB_IMAGE_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs/image/include)
@@ -29,17 +28,13 @@ set(GLAD
 set(STB_IMAGE
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/image/src/stb_image.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/libs/image/include/image/stb_image.h)
-set(FILESYSTEM
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/filesystem/src/filesystem.cpp
-        ${CMAKE_CURRENT_SOURCE_DIR}/libs/filesystem/include/filesystem/filesystem.h)
 
-set(COMPILATION_UNIT ${SOURCES} ${GLAD} ${STB_IMAGE} ${FILESYSTEM} ${IMGUI})
+set(COMPILATION_UNIT src/main.cpp ${SOURCES} ${GLAD} ${STB_IMAGE} ${IMGUI})
 
 add_executable(${PROJECT_NAME} ${COMPILATION_UNIT})
 
 target_include_directories(${PROJECT_NAME} PUBLIC
         ${GLAD_INCLUDE_DIRS}
-        ${FILESYSTEM_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${STB_IMAGE_INCLUDE_DIRS}
         ${KHR_INCLUDE_DIRS})

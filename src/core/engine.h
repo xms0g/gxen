@@ -8,7 +8,6 @@
 #include "camera.h"
 #include "gui.h"
 
-
 class Engine {
 public:
     Engine();

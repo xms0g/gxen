@@ -3,10 +3,10 @@
 #include <SDL2/SDL.h>
 #include "glm/glm.hpp"
 #include "image/stb_image.h"
-#include "filesystem/filesystem.h"
 #include "glad/glad.h"
 #include "sdlWindow.h"
-#include "configs.hpp"
+#include "../config/config.hpp"
+#include "../utils/filesystem.hpp"
 
 Engine::Engine() :
         window(std::make_unique<SDLWindow>("OpenGL Test")),
@@ -30,13 +30,13 @@ Engine::Engine() :
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    shader = std::make_unique<Shader>(Filesystem::path(SHADER_DIR + "model.vert.glsl"),
-                                      Filesystem::path(SHADER_DIR + "model.frag.glsl"));
+    shader = std::make_unique<Shader>(fs::path(SHADER_DIR + "model.vert.glsl"),
+                                      fs::path(SHADER_DIR + "model.frag.glsl"));
 
     gui = std::make_unique<Gui>(dynamic_cast<SDLWindow*>(window.get())->GetWindow(),
                                 dynamic_cast<SDLWindow*>(window.get())->GetContext());
 
-    model = std::make_unique<Model>(Filesystem::path(ASSET_DIR + "backpack/backpack.obj"));
+    model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"));
 
     isRunning = true;
 
@@ -48,16 +48,13 @@ Engine::Engine() :
 #endif
 }
 
-
 bool Engine::IsRunning() const {
     return isRunning;
 }
 
-
 void Engine::ProcessInput() {
-    input->Process(*camera, dynamic_cast<SDLWindow*>(window.get())->GetWindow(), deltaTime, isRunning);
+    input->process(*camera, dynamic_cast<SDLWindow*>(window.get())->GetWindow(), deltaTime, isRunning);
 }
-
 
 void Engine::Update() {
     deltaTime = (SDL_GetTicks() - millisecsPreviousFrame) / 1000.0f;
@@ -65,20 +62,19 @@ void Engine::Update() {
 
     window->UpdateFpsCounter(deltaTime);
 
-    shader->Activate();
+    shader->activate();
     // view/projection transformations
     glm::mat4 viewMat = camera->getViewMatrix();
     glm::mat4 projectionMat = glm::perspective(glm::radians(camera->getZoom()),
                                             (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
-    shader->SetMat4("projection", projectionMat);
-    shader->SetMat4("view", viewMat);
+    shader->setMat4("projection", projectionMat);
+    shader->setMat4("view", viewMat);
     // render the loaded model
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat, glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
     modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));    // it's a bit too big for our scene, so scale it down
-    shader->SetMat4("model", modelMat);
+    shader->setMat4("model", modelMat);
 }
-
 
 void Engine::Render() {
     window->Clear();

@@ -1,12 +1,12 @@
-#include "engine.h"
+#include "core/engine.h"
 
 int main() {
-    Engine glEngine;
+    Engine xngn;
 
-    while (glEngine.IsRunning()) {
-        glEngine.ProcessInput();
-        glEngine.Update();
-        glEngine.Render();
+    while (xngn.IsRunning()) {
+        xngn.ProcessInput();
+        xngn.Update();
+        xngn.Render();
     }
 
     return 0;
