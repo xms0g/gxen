@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 template<typename T>
 class IWindow {
 public:
