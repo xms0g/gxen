@@ -78,15 +78,13 @@ void XEngine::Update() {
     // view/projection transformations
     glm::mat4 viewMat = mCamera->getViewMatrix();
     glm::mat4 projectionMat = glm::perspective(glm::radians(mCamera->getZoom()),
-                                               (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f, 100.0f);
+                                               (float) SCR_WIDTH / (float) SCR_HEIGHT, ZNEAR, ZFAR);
     mShader->setMat4("projection", projectionMat);
     mShader->setMat4("view", viewMat);
     // render the loaded model
     glm::mat4 modelMat = glm::mat4(1.0f);
-    modelMat = glm::translate(modelMat,
-                              glm::vec3(0.0f, 0.0f, 0.0f)); // translate it down so it's at the center of the scene
-    modelMat = glm::scale(modelMat,
-                          glm::vec3(1.0f, 1.0f, 1.0f));    // it's a bit too big for our scene, so scale it down
+    modelMat = glm::translate(modelMat, glm::vec3(0.0f, 0.0f, 0.0f));
+    modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));
     mShader->setMat4("model", modelMat);
 
     mCamera->update();
