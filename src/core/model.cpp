@@ -2,15 +2,14 @@
 #include <iostream>
 #include "glm/glm.hpp"
 #include "image/stb_image.h"
-#include "texture.h"
 
 Model::Model(const std::string& path, bool gamma) : gammaCorrection(gamma) {
     LoadModel(path);
 }
 
 void Model::Draw(Shader& shader) {
-    for (auto& meshe: meshes)
-        meshe.Draw(shader);
+    for (auto& mesh: meshes)
+        mesh.Draw(shader);
 }
 
 void Model::LoadModel(const std::string& path) {

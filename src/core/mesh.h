@@ -4,6 +4,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "texture.h"
 
 class Shader;
 struct Vertex {
@@ -22,12 +23,6 @@ struct Vertex {
     int m_BoneIDs[MAX_BONE_INFLUENCE];
     //weights from each bone
     float m_Weights[MAX_BONE_INFLUENCE];
-};
-
-struct Texture {
-    unsigned int id;
-    std::string type;
-    std::string path;
 };
 
 class Mesh {
