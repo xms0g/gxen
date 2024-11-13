@@ -98,7 +98,7 @@ void XEngine::Render() {
 //        lightPos.z += sin(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
     // be sure to activate shader when setting uniforms/drawing objects
 
-    mModel->Draw(*mShader);
+    mModel->draw(*mShader);
 
 #ifdef DEBUG
     mGui->render();

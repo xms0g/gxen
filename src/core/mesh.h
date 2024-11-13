@@ -10,19 +10,19 @@ class Shader;
 struct Vertex {
 #define MAX_BONE_INFLUENCE 4
     // position
-    glm::vec3 Position;
+    glm::vec3 position;
     // normal
-    glm::vec3 Normal;
+    glm::vec3 normal;
     // texCoords
-    glm::vec2 TexCoords;
+    glm::vec2 texcoord;
     // tangent
-    glm::vec3 Tangent;
+    glm::vec3 tangent;
     // bitangent
-    glm::vec3 Bitangent;
+    glm::vec3 bitangent;
     //bone indexes which will influence this vertex
-    int m_BoneIDs[MAX_BONE_INFLUENCE];
+    int boneIDs[MAX_BONE_INFLUENCE];
     //weights from each bone
-    float m_Weights[MAX_BONE_INFLUENCE];
+    float weights[MAX_BONE_INFLUENCE];
 };
 
 class Mesh {
@@ -30,17 +30,17 @@ public:
     Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
 
     // render the mesh
-    void Draw(Shader& shader);
+    void draw(Shader& shader);
 
 private:
     // mesh Data
-    std::vector<Vertex> vertices;
-    std::vector<unsigned int> indices;
-    std::vector<Texture> textures;
-    unsigned int VAO{};
+    std::vector<Vertex> mVertices;
+    std::vector<unsigned int> mIndices;
+    std::vector<Texture> mTextures;
+    unsigned int mVAO{};
     // render data
-    unsigned int VBO{}, EBO{};
+    unsigned int mVBO{}, mEBO{};
 
     // initializes all the buffer objects/arrays
-    void SetupMesh();
+    void setupMesh();
 };

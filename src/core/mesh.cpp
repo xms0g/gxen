@@ -4,24 +4,24 @@
 #include "shader.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) :
-        vertices(std::move(vertices)),
-        indices(std::move(indices)),
-        textures(std::move(textures)) {
+        mVertices(std::move(vertices)),
+        mIndices(std::move(indices)),
+        mTextures(std::move(textures)) {
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
-    SetupMesh();
+    setupMesh();
 }
 
-void Mesh::Draw(Shader& shader) {
-    // bind appropriate textures
+void Mesh::draw(Shader& shader) {
+    // bind appropriate mTextures
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
     unsigned int normalNr = 1;
     unsigned int heightNr = 1;
-    for (unsigned int i = 0; i < textures.size(); i++) {
+    for (unsigned int i = 0; i < mTextures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
         std::string number;
-        std::string name = textures[i].type;
+        std::string name = mTextures[i].type;
         if (name == "texture_diffuse")
             number = std::to_string(diffuseNr++);
         else if (name == "texture_specular")
@@ -34,33 +34,33 @@ void Mesh::Draw(Shader& shader) {
         // now set the sampler to the correct texture unit
         shader.setInt(name + number, i);
         // and finally bind the texture
-        glBindTexture(GL_TEXTURE_2D, textures[i].id);
+        glBindTexture(GL_TEXTURE_2D, mTextures[i].id);
     }
 
     // draw mesh
-    glBindVertexArray(VAO);
-    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(indices.size()), GL_UNSIGNED_INT, nullptr);
+    glBindVertexArray(mVAO);
+    glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mIndices.size()), GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 
     // always good practice to set everything back to defaults once configured.
     glActiveTexture(GL_TEXTURE0);
 }
 
-void Mesh::SetupMesh() {
+void Mesh::setupMesh() {
     // create vao
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    glGenVertexArrays(1, &mVAO);
+    glBindVertexArray(mVAO);
 
     // create buffers
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+    glGenBuffers(1, &mVBO);
+    glGenBuffers(1, &mEBO);
 
     // bind the buffer to be used
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, mVBO);
+    glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), &mVertices[0], GL_STATIC_DRAW);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(unsigned int), &mIndices[0], GL_STATIC_DRAW);
 
     // set the vertex attribute pointers
     // vertex Positions
