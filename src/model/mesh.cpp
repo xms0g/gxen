@@ -3,7 +3,7 @@
 #include "glad/glad.h"
 #include "../renderer/shader.h"
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) :
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture>& textures) :
         mVertices(std::move(vertices)),
         mIndices(std::move(indices)),
         mTextures(std::move(textures)) {
@@ -17,6 +17,7 @@ void Mesh::draw(Shader& shader) {
     unsigned int specularNr = 1;
     unsigned int normalNr = 1;
     unsigned int heightNr = 1;
+
     for (unsigned int i = 0; i < mTextures.size(); i++) {
         glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
         // retrieve texture number (the N in diffuse_textureN)
