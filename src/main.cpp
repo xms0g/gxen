@@ -18,8 +18,8 @@ int main() {
 
     auto scene = std::make_unique<Scene>();
     auto model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
-                                         fs::path(SHADER_DIR + "model.vert.glsl"),
-                                         fs::path(SHADER_DIR + "model.frag.glsl"));
+                                         fs::path(SHADER_DIR + "model.vert"),
+                                         fs::path(SHADER_DIR + "model.frag"));
     scene->addModel(model);
 
     xngn.addScene(scene);
