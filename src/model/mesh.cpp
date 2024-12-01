@@ -1,7 +1,7 @@
 #include "mesh.h"
 #include <utility>
 #include "glad/glad.h"
-#include "shader.h"
+#include "../renderer/shader.h"
 
 Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures) :
         mVertices(std::move(vertices)),

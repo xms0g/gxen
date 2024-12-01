@@ -3,13 +3,16 @@
 #include "glm/glm.hpp"
 #include "image/stb_image.h"
 
-Model::Model(const std::string& path, bool gamma) : mGammaCorrection(gamma) {
+Model::Model(const std::string& path, const std::string& vertexPath, const std::string& fragmentPath, bool gamma)
+        : mGammaCorrection(gamma) {
     loadModel(path);
+
+    mShader = std::make_unique<Shader>(vertexPath, fragmentPath);
 }
 
-void Model::draw(Shader& shader) {
+void Model::draw() {
     for (auto& mesh: mMeshes)
-        mesh.draw(shader);
+        mesh.draw(*mShader);
 }
 
 void Model::loadModel(const std::string& path) {

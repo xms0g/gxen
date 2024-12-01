@@ -2,12 +2,12 @@
 
 #include <memory>
 
-class Shader;
-class Model;
+class Scene;
 class Camera;
 class Window;
 class Input;
 class Gui;
+class Renderer;
 class XEngine {
 public:
     XEngine();
@@ -17,6 +17,8 @@ public:
     void init();
 
     void run();
+
+    void addScene(std::unique_ptr<Scene>& scene);
 
 private:
     void ProcessInput();
@@ -30,8 +32,10 @@ private:
     // Frame
     double mPreviousSeconds{0.0};
     double mCurrentSeconds{0.0};
-    uint32_t mCurrentFrameCount{0};
+    float mDeltaTime{};
     uint32_t mFPS{0};
+    uint32_t mCurrentFrameCount{0};
+    uint32_t mMillisecsPreviousFrame{0};
 
     // Engine
     bool isRunning{true};
@@ -40,10 +44,8 @@ private:
     std::unique_ptr<Gui> mGui;
     std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;
-    std::unique_ptr<Shader> mShader;
-    std::unique_ptr<Model> mModel;
+    std::unique_ptr<Renderer> mRenderer;
+    std::unique_ptr<Scene> mScene;
 
-    float mDeltaTime{};
-    uint32_t mMillisecsPreviousFrame{0};
 
 };
