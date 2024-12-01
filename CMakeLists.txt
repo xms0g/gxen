@@ -3,6 +3,11 @@ project(xngn VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 20)
 
+if (APPLE)
+    add_compile_options(-gdwarf-4)
+endif ()
+
+
 find_package(OpenGL REQUIRED)
 
 find_package(SDL2 REQUIRED)
