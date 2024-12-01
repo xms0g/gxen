@@ -1,5 +1,6 @@
 #include "core/engine.h"
 #include "scene/scene.h"
+#include "model/model.h"
 #include "io/filesystem.hpp"
 #include "config/config.hpp"
 

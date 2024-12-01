@@ -1,10 +1,12 @@
 #pragma once
 #include <vector>
-#include "../model/model.h"
 
+class Model;
 class Scene {
 public:
     Scene() = default;
+
+    ~Scene() = default;
 
     void addModel(std::unique_ptr<Model>& model);
 

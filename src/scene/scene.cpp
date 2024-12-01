@@ -1,4 +1,5 @@
 #include "scene.h"
+#include "../model/model.h"
 
 void Scene::addModel(std::unique_ptr<Model>& model) {
     models.push_back(std::move(model));

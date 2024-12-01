@@ -4,6 +4,7 @@
 #include "input.h"
 #include "camera.h"
 #include "gui.h"
+#include "../model/model.h"
 #include "../scene/scene.h"
 #include "../renderer/renderer.h"
 
@@ -12,14 +13,19 @@ XEngine::XEngine() = default;
 XEngine::~XEngine() = default;
 
 void XEngine::init() {
-    mWindow = std::make_unique<Window>();
-    mWindow->init("XEngine");
+    try {
+        mWindow = std::make_unique<Window>();
+        mWindow->init("XEngine");
 
-    mRenderer = std::make_unique<Renderer>();
-    mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
-    mInput = std::make_unique<Input>();
+        mRenderer = std::make_unique<Renderer>();
+        mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+        mInput = std::make_unique<Input>();
 
-    mGui = std::make_unique<Gui>(mWindow->nativeHandle(), mWindow->glContext());
+        mGui = std::make_unique<Gui>(mWindow->nativeHandle(), mWindow->glContext());
+    } catch (std::runtime_error& e) {
+        std::cerr << e.what() << '\n';
+    }
+
 }
 
 void XEngine::run() {
