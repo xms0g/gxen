@@ -8,6 +8,7 @@ class Window;
 class Input;
 class Gui;
 class Renderer;
+
 class XEngine {
 public:
     XEngine();
@@ -21,11 +22,11 @@ public:
     void addScene(std::unique_ptr<Scene>& scene);
 
 private:
-    void ProcessInput();
+    void processInput();
 
-    void Update();
+    void update();
 
-    void Render();
+    void render();
 
     void updateFpsCounter();
 
@@ -39,6 +40,7 @@ private:
 
     // Engine
     bool isRunning{true};
+    float rotationAngle; //TODO: will be removed
 
     std::unique_ptr<Window> mWindow;
     std::unique_ptr<Gui> mGui;
@@ -46,6 +48,5 @@ private:
     std::unique_ptr<Input> mInput;
     std::unique_ptr<Renderer> mRenderer;
     std::unique_ptr<Scene> mScene;
-
 
 };

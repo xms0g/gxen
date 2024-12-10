@@ -25,17 +25,19 @@ Renderer::Renderer() {
     glFrontFace(GL_CCW);
 }
 
-void Renderer::update(Model& model, glm::mat4 viewMatrix, float zoom) {
+void Renderer::update(Model& model, glm::mat4 viewMatrix, float zoom, float rt) {
     Shader& modelShader = model.getShader();
     modelShader.activate();
     // view/projection transformations
-    glm::mat4 projectionMat = glm::perspective(glm::radians(zoom),
-                                               (float) SCR_WIDTH / (float) SCR_HEIGHT, ZNEAR, ZFAR);
+    glm::mat4 projectionMat = glm::perspective(
+            glm::radians(zoom),
+            (float) SCR_WIDTH / (float) SCR_HEIGHT, ZNEAR, ZFAR);
     modelShader.setMat4("projection", projectionMat);
     modelShader.setMat4("view", viewMatrix);
     // render the loaded model
     glm::mat4 modelMat = glm::mat4(1.0f);
     modelMat = glm::translate(modelMat, glm::vec3(0.0f, 0.0f, 0.0f));
+    modelMat = glm::rotate(modelMat, glm::radians(rt), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
     modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));
     modelShader.setMat4("model", modelMat);
 }

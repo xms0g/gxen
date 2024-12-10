@@ -12,8 +12,7 @@
 
 class Model {
 public:
-    Model(std::string const& path, const std::string& vertexPath, const std::string& fragmentPath,
-          bool gamma = false);
+    Model(std::string const& path, const std::string& vertexPath, const std::string& fragmentPath);
 
     [[nodiscard]] Shader& getShader() const { return *mShader; }
 
@@ -32,6 +31,5 @@ private:
     std::vector<Mesh> mMeshes;
     std::string mDirectory;
     std::unique_ptr<Shader> mShader;
-    bool mGammaCorrection{};
 };
 

@@ -18,7 +18,7 @@ void XEngine::init() {
         mWindow->init("XEngine");
 
         mRenderer = std::make_unique<Renderer>();
-        mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 3.0f));
+        mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 8.0f));
         mInput = std::make_unique<Input>();
 
         mGui = std::make_unique<Gui>(mWindow->nativeHandle(), mWindow->glContext());
@@ -30,9 +30,9 @@ void XEngine::init() {
 
 void XEngine::run() {
     while (isRunning) {
-        ProcessInput();
-        Update();
-        Render();
+        processInput();
+        update();
+        render();
     }
 }
 
@@ -40,11 +40,11 @@ void XEngine::addScene(std::unique_ptr<Scene>& scene) {
     mScene = std::move(scene);
 }
 
-void XEngine::ProcessInput() {
+void XEngine::processInput() {
     mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 }
 
-void XEngine::Update() {
+void XEngine::update() {
     mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
     mMillisecsPreviousFrame = SDL_GetTicks();
 
@@ -54,15 +54,14 @@ void XEngine::Update() {
 #endif
     mCamera->update();
 
+    rotationAngle += 0.1f;
     for (auto& model: mScene->getModels()) {
-        mRenderer->update(*model, mCamera->getViewMatrix(), mCamera->getZoom());
+        mRenderer->update(*model, mCamera->getViewMatrix(), mCamera->getZoom(), rotationAngle);
     }
-
-
 }
 
-void XEngine::Render() {
-    mWindow->clear(0.2f, 0.3f, 0.3f, 1.0f);
+void XEngine::render() {
+    mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
 //        glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
 //        lightPos.x += cos(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
