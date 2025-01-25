@@ -1,13 +1,16 @@
 #pragma once
 
+#include <memory>
 #include "glm/glm.hpp"
+#include "../core/camera.h"
 
-class Model;
+class Entity;
+class Camera;
 class Renderer {
 public:
     Renderer();
 
-    void update(Model& model, glm::mat4 viewMatrix, float zoom, float rt);
+    void update(std::unique_ptr<Entity>& entity, Camera& camera, float rt);
 
-    void render(Model& model);
+    void render(std::unique_ptr<Entity>& entity);
 };

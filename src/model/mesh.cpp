@@ -11,7 +11,7 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, st
     setupMesh();
 }
 
-void Mesh::draw(Shader& shader) {
+void Mesh::draw(Shader& shader) const {
     // bind appropriate mTextures
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;

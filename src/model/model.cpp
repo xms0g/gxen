@@ -9,11 +9,10 @@ Model::Model(const std::string& path, const std::string& vertexPath, const std::
     mShader = std::make_unique<Shader>(vertexPath, fragmentPath);
 }
 
-void Model::draw() {
+void Model::draw() const {
     for (auto& mesh: mMeshes)
         mesh.draw(*mShader);
 }
-
 void Model::loadModel(const std::string& path) {
     // read file via ASSIMP
     Assimp::Importer importer;

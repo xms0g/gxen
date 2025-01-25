@@ -8,15 +8,16 @@
 #include <assimp/postprocess.h>
 #include "mesh.h"
 #include "texture.h"
+#include "../entity/entity.hpp"
 #include "../renderer/shader.h"
 
-class Model {
+class Model: public Entity {
 public:
     Model(std::string const& path, const std::string& vertexPath, const std::string& fragmentPath);
 
-    [[nodiscard]] Shader& getShader() const { return *mShader; }
+    [[nodiscard]] Shader& getShader() const override { return *mShader; }
 
-    void draw();
+    void draw() const override;
 
 private:
     void loadModel(std::string const& path);

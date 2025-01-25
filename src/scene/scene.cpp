@@ -1,10 +1,10 @@
 #include "scene.h"
-#include "../model/model.h"
+#include "../entity/entity.hpp"
 
-void Scene::addModel(std::unique_ptr<Model>& model) {
-    models.push_back(std::move(model));
+void Scene::addEntity(std::unique_ptr<Entity>& entity) {
+    entities.push_back(std::move(entity));
 }
 
-std::vector<std::unique_ptr<Model>>& Scene::getModels() {
-    return models;
+std::vector<std::unique_ptr<Entity>>& Scene::getEntities() {
+    return entities;
 }

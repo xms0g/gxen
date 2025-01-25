@@ -55,8 +55,8 @@ void XEngine::update() {
     mCamera->update();
 
     rotationAngle += 0.1f;
-    for (auto& model: mScene->getModels()) {
-        mRenderer->update(*model, mCamera->getViewMatrix(), mCamera->getZoom(), rotationAngle);
+    for (auto& entity: mScene->getEntities()) {
+        mRenderer->update(entity, mCamera, rotationAngle);
     }
 }
 
@@ -68,8 +68,8 @@ void XEngine::render() {
 //        lightPos.z += sin(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
     // be sure to activate shader when setting uniforms/drawing objects
 
-    for (auto& model: mScene->getModels()) {
-        mRenderer->render(*model);
+    for (auto& entity: mScene->getEntities()) {
+        mRenderer->render(entity);
     }
 #ifdef DEBUG
     mGui->render();

@@ -1,6 +1,7 @@
 #include "core/engine.h"
 #include "scene/scene.h"
 #include "model/model.h"
+#include "light/light.h"
 #include "io/filesystem.hpp"
 #include "config/config.hpp"
 
@@ -17,10 +18,15 @@ int main() {
     xngn.init();
 
     auto scene = std::make_unique<Scene>();
-    auto model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
-                                         fs::path(SHADER_DIR + "model.vert"),
-                                         fs::path(SHADER_DIR + "model.frag"));
-    scene->addModel(model);
+    std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(1.2f, 1.0f, 2.0f),
+                                                            fs::path(SHADER_DIR + "light.vert"),
+                                                            fs::path(SHADER_DIR + "light.frag"));
+
+    std::unique_ptr<Entity> model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
+                                                            fs::path(SHADER_DIR + "model.vert"),
+                                                            fs::path(SHADER_DIR + "model.frag"));
+    scene->addEntity(model);
+    scene->addEntity(light);
 
     xngn.addScene(scene);
 
