@@ -28,29 +28,12 @@ void XEngine::run() {
         mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
         mMillisecsPreviousFrame = SDL_GetTicks();
 
-        updateFpsCounter();
-
 #ifdef DEBUG
-        mRenderer->gui()->setFPS(mFPS);
+        mRenderer->gui()->updateFpsCounter(mDeltaTime);
 #endif
 
         mScene->update();
 
         mRenderer->render();
-    }
-}
-
-void XEngine::updateFpsCounter() {
-    double elapsedSeconds;
-
-    mCurrentFrameCount++;
-
-    mCurrentSeconds += mDeltaTime;
-    elapsedSeconds = mCurrentSeconds - mPreviousSeconds;
-    // limit text updates to 4 per second
-    if (elapsedSeconds > 0.25) {
-        mPreviousSeconds = mCurrentSeconds;
-        mFPS = mCurrentFrameCount / elapsedSeconds;
-        mCurrentFrameCount = 0;
     }
 }

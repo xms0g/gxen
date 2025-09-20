@@ -17,20 +17,12 @@ public:
     void run();
 
 private:
-    void updateFpsCounter();
-
-    // Frame
-    double mPreviousSeconds{0.0};
-    double mCurrentSeconds{0.0};
     float mDeltaTime{};
-    uint32_t mFPS{0};
-    uint32_t mCurrentFrameCount{0};
     uint32_t mMillisecsPreviousFrame{0};
-
     // Engine
     bool isRunning{true};
 
-    Scene* mScene;
+    Scene* mScene{};
     std::unique_ptr<Input> mInput;
     std::unique_ptr<Renderer> mRenderer;
 };

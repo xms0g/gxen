@@ -9,11 +9,11 @@ class Scene;
 
 class Renderer {
 public:
-    Renderer(Scene* scene);
+    explicit Renderer(Scene* scene);
 
-    Window* window() const { return mWindow.get(); }
+    [[nodiscard]] Window* window() const { return mWindow.get(); }
 
-    Gui* gui() const { return mGui.get(); }
+    [[nodiscard]] Gui* gui() const { return mGui.get(); }
 
     void render() const;
 

@@ -26,8 +26,12 @@ void Scene::update() const {
         // render the loaded model
         auto modelMat = glm::mat4(1.0f);
         modelMat = glm::translate(modelMat, entity->position);
-        modelMat = glm::rotate(modelMat, glm::radians(entity->rotation), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
-        modelMat = glm::scale(modelMat, glm::vec3(entity->scale, entity->scale, entity->scale));
+        modelMat = glm::scale(modelMat, glm::vec3(entity->scale));
+        if (entity->rotation != 0.0f) {
+            static float angle = 0.0f;
+            angle += entity->rotation;
+            modelMat = glm::rotate(modelMat, glm::radians(angle), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
+        }
         modelShader->setMat4("model", modelMat);
     }
 }

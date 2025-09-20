@@ -37,7 +37,7 @@ unsigned int texture::load(const char* path) {
     return textureID;
 }
 
-unsigned int texture::loadCubemap(std::vector<std::string>& faces) {
+unsigned int texture::loadCubemap(const std::vector<std::string>& faces) {
     GLuint textureID;
 
     glGenTextures(1, &textureID);

@@ -41,6 +41,19 @@ void Gui::render() {
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
+void Gui::updateFpsCounter(const float dt) {
+    mCurrentFrameCount++;
+
+    mCurrentSeconds += dt;
+    double elapsedSeconds = mCurrentSeconds - mPreviousSeconds;
+    // limit text updates to 4 per second
+    if (elapsedSeconds > 0.25) {
+        mPreviousSeconds = mCurrentSeconds;
+        mFPS = mCurrentFrameCount / elapsedSeconds;
+        mCurrentFrameCount = 0;
+    }
+}
+
 void Gui::renderGraphicsInfo() const {
     if (ImGui::Begin("Graphics")) {
         ImGui::Text("%s FPS", std::to_string(mFPS).c_str());

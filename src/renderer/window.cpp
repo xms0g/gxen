@@ -8,7 +8,7 @@ Window::~Window() {
     SDL_Quit();
 }
 
-void Window::initImpl(const char* title, int width, int height, bool fullscreen) {
+void Window::initImpl(const char* title, int width, int height, const bool fullscreen) {
     if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         throw std::runtime_error("Failed to initialize SDL_VIDEO");
     }
@@ -49,7 +49,7 @@ void Window::initImpl(const char* title, int width, int height, bool fullscreen)
     mGlContext = SDL_GL_CreateContext(mWindow);
 }
 
-void Window::clearImpl(float r, float g, float b, float a) {
+void Window::clearImpl(const float r, const float g, const float b, const float a) {
     glClearColor(r, g, b, a);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

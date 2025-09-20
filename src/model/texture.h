@@ -13,5 +13,5 @@ struct Texture {
 namespace texture {
 GLuint load(const char* path);
 
-GLuint loadCubemap(std::vector<std::string>& faces);
+GLuint loadCubemap(const std::vector<std::string>& faces);
 }

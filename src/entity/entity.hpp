@@ -1,5 +1,4 @@
-#ifndef XNGN_ENTITY_HPP
-#define XNGN_ENTITY_HPP
+#pragma once
 
 #include "glm/glm.hpp"
 
@@ -13,5 +12,3 @@ struct Entity {
     [[nodiscard]] virtual Shader* shader() const = 0;
     virtual void draw() const = 0;
 };
-
-#endif //XNGN_ENTITY_HPP

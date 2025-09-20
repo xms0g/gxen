@@ -22,7 +22,7 @@ void Input::process(Camera* camera, SDL_Window* window, const float dt, bool& is
 
 }
 
-void Input::processKeyboard(Camera* camera, float dt, bool& isRunning) {
+void Input::processKeyboard(Camera* camera, const float dt, bool& isRunning) {
     auto* keystate = SDL_GetKeyboardState(nullptr);
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {

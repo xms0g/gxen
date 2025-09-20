@@ -8,14 +8,16 @@ public:
 
     ~Gui();
 
-    void setFPS(double fps) { mFPS = fps; }
-
     void render();
+
+    void updateFpsCounter(float dt);
 
 private:
     void renderGraphicsInfo() const;
 
-    double mFPS{0.0};
-    uint64_t mGenerationCount{0};
-    uint32_t mAliveCellCount{0};
+    // Frame
+    double mPreviousSeconds{0.0};
+    double mCurrentSeconds{0.0};
+    uint32_t mFPS{0};
+    uint32_t mCurrentFrameCount{0};
 };

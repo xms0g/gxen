@@ -22,11 +22,11 @@ public:
 private:
     void loadModel(std::string const& path);
 
-    void processNode(aiNode* node, const aiScene* scene);
+    void processNode(const aiNode* node, const aiScene* scene);
 
     Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
-    std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+    std::vector<Texture> loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const std::string& typeName);
 
     std::unordered_set<std::string> mTexturesLoaded;
     std::vector<Mesh> mMeshes;
