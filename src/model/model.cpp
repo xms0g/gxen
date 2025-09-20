@@ -5,7 +5,6 @@
 
 Model::Model(const std::string& path, const std::string& vertexPath, const std::string& fragmentPath) {
     loadModel(path);
-
     mShader = std::make_unique<Shader>(vertexPath, fragmentPath);
 }
 

@@ -22,10 +22,12 @@ int main() {
     std::unique_ptr<Entity> model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
                                                             fs::path(SHADER_DIR + "model.vert"),
                                                             fs::path(SHADER_DIR + "model.frag"));
+    model->position = glm::vec3(0.0f);
+    model->scale = 1.0f;
+
     scene->addEntity(model);
 
     xngn.run();
 
     return 0;
-
 }

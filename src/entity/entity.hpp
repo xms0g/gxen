@@ -2,10 +2,13 @@
 #define XNGN_ENTITY_HPP
 
 class Shader;
-class Entity {
-public:
+struct Entity {
+    float rotation{0.0f};
+    float scale{1.0f};
+    glm::vec3 position{0.0f};
+
     virtual ~Entity() = default;
-    [[nodiscard]] virtual Shader& getShader() const = 0;
+    [[nodiscard]] virtual Shader* getShader() const = 0;
     virtual void draw() const = 0;
 };
 

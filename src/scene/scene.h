@@ -2,7 +2,7 @@
 
 #include <vector>
 
-class Entity;
+struct Entity;
 class Camera;
 class Scene {
 public:
@@ -10,7 +10,7 @@ public:
 
     ~Scene() = default;
 
-    Camera* camera() const { return mCamera.get(); }
+    [[nodiscard]] Camera* camera() const { return mCamera.get(); }
 
     void update();
 
@@ -19,7 +19,6 @@ public:
     std::vector<std::unique_ptr<Entity>>& getEntities() { return entities; }
 
 private:
-    float rotation{0.0f};
     std::unique_ptr<Camera> mCamera;
     std::vector<std::unique_ptr<Entity>> entities;
 };

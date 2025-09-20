@@ -15,7 +15,7 @@ class Model: public Entity {
 public:
     Model(std::string const& path, const std::string& vertexPath, const std::string& fragmentPath);
 
-    [[nodiscard]] Shader& getShader() const override { return *mShader; }
+    [[nodiscard]] Shader* getShader() const override { return mShader.get(); }
 
     void draw() const override;
 
