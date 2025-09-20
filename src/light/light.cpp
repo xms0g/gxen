@@ -64,8 +64,6 @@ Light::Light(const glm::vec3 pos, const std::string& vertexPath, const std::stri
 }
 
 void Light::draw() const {
-    mShader->activate();
-
     glBindVertexArray(mVAO);
     glDrawArrays(GL_TRIANGLES, 0, 36);
     glBindVertexArray(0);
