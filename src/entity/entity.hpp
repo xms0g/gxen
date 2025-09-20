@@ -10,7 +10,7 @@ struct Entity {
     glm::vec3 position{0.0f};
 
     virtual ~Entity() = default;
-    [[nodiscard]] virtual Shader* getShader() const = 0;
+    [[nodiscard]] virtual Shader* shader() const = 0;
     virtual void draw() const = 0;
 };
 

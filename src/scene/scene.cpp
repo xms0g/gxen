@@ -14,7 +14,7 @@ void Scene::update() const {
     mCamera->update();
 
     for (const auto& entity : entities) {
-        const Shader* modelShader = entity->getShader();
+        const Shader* modelShader = entity->shader();
         modelShader->activate();
 
         // view/projection transformations

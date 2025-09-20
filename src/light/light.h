@@ -14,7 +14,7 @@ public:
 
     void draw() const override;
 
-    [[nodiscard]] Shader* getShader() const override { return mShader.get(); }
+    [[nodiscard]] Shader* shader() const override { return mShader.get(); }
 
 private:
     unsigned int mVAO{};

@@ -38,7 +38,7 @@ void Renderer::render() const {
     mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
     for (const auto& entity: mScene->getEntities()) {
-        entity->getShader()->activate();
+        entity->shader()->activate();
         entity->draw();
     }
 
