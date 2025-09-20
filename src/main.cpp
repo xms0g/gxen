@@ -26,7 +26,7 @@ int main() {
                                                             fs::path(SHADER_DIR + "model.vert"),
                                                             fs::path(SHADER_DIR + "model.frag"));
     scene->addEntity(model);
-    scene->addEntity(light);
+    //scene->addEntity(light);
 
     xngn.addScene(scene);
 

@@ -19,7 +19,7 @@ public:
 
     void update();
 
-    glm::mat4 getViewMatrix();
+    glm::mat4 getViewMatrix() const;
 
     [[nodiscard]] float getZoom() const;
 

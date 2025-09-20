@@ -2,11 +2,14 @@
 #include <vector>
 
 class Entity;
+class Camera;
 class Scene {
 public:
     Scene() = default;
 
     ~Scene() = default;
+
+    void update(const Camera& camera, float rt);
 
     void addEntity(std::unique_ptr<Entity>& model);
 

@@ -4,6 +4,7 @@
 #include "input.h"
 #include "camera.h"
 #include "gui.h"
+#include "glm/glm.hpp"
 #include "../model/model.h"
 #include "../scene/scene.h"
 #include "../renderer/renderer.h"
@@ -49,15 +50,15 @@ void XEngine::update() {
     mMillisecsPreviousFrame = SDL_GetTicks();
 
     updateFpsCounter();
+
 #ifdef DEBUG
     mGui->setFPS(mFPS);
 #endif
+
     mCamera->update();
 
     rotationAngle += 0.1f;
-    for (auto& entity: mScene->getEntities()) {
-        mRenderer->update(entity, mCamera, rotationAngle);
-    }
+    mScene->update(*mCamera, rotationAngle);
 }
 
 void XEngine::render() {

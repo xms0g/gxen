@@ -40,7 +40,7 @@ void Camera::update() {
     mUp = glm::normalize(glm::cross(mRight, mFront));
 }
 
-glm::mat4 Camera::getViewMatrix() {
+glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(mPosition, mPosition + mFront, mUp);
 }
 
