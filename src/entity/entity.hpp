@@ -1,6 +1,8 @@
 #ifndef XNGN_ENTITY_HPP
 #define XNGN_ENTITY_HPP
 
+#include "glm/glm.hpp"
+
 class Shader;
 struct Entity {
     float rotation{0.0f};

@@ -10,12 +10,10 @@ Scene::Scene() {
     mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 8.0f));
 }
 
-void Scene::update() {
+void Scene::update() const {
     mCamera->update();
 
     for (const auto& entity : entities) {
-        entity->rotation += 0.1f;
-
         const Shader* modelShader = entity->getShader();
         modelShader->activate();
 

@@ -11,7 +11,8 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices,
     setupMesh();
 }
 
-void Mesh::draw(Shader& shader) const {
+void Mesh::draw(const Shader* shader) const {
+    shader->activate();
     // bind appropriate mTextures
     unsigned int diffuseNr = 1;
     unsigned int specularNr = 1;
@@ -33,7 +34,7 @@ void Mesh::draw(Shader& shader) const {
             number = std::to_string(heightNr++); // transfer unsigned int to string
 
         // now set the sampler to the correct texture unit
-        shader.setInt(name + number, i);
+        shader->setInt(name + number, i);
         // and finally bind the texture
         glBindTexture(GL_TEXTURE_2D, mTextures[i].id);
     }

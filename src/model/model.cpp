@@ -10,7 +10,7 @@ Model::Model(const std::string& path, const std::string& vertexPath, const std::
 
 void Model::draw() const {
     for (auto& mesh: mMeshes)
-        mesh.draw(*mShader);
+        mesh.draw(mShader.get());
 }
 void Model::loadModel(const std::string& path) {
     // read file via ASSIMP

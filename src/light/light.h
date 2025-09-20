@@ -6,19 +6,20 @@
 #include "../entity/entity.hpp"
 
 class Shader;
-class Light : public Entity {
+class Light final : public Entity {
 public:
     Light(glm::vec3 pos, const std::string& vertexPath, const std::string& fragmentPath);
 
-    [[nodiscard]] glm::vec3 pos() const { return mPos; }
+    [[nodiscard]] glm::vec3 pos() const { return position; }
 
     void draw() const override;
 
-    [[nodiscard]] Shader& getShader() const override { return *mShader; }
+    [[nodiscard]] Shader* getShader() const override { return mShader.get(); }
 
 private:
+    unsigned int mVAO{};
+    unsigned int mVBO{};
     std::unique_ptr<Shader> mShader;
-    glm::vec3 mPos;
 };
 
 #endif //XNGN_LIGHT_H

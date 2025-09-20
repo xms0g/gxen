@@ -12,9 +12,9 @@ public:
 
     [[nodiscard]] Camera* camera() const { return mCamera.get(); }
 
-    void update();
+    void update() const;
 
-    void addEntity(std::unique_ptr<Entity>& model);
+    void addEntity(std::unique_ptr<Entity>& entity);
 
     std::vector<std::unique_ptr<Entity>>& getEntities() { return entities; }
 
