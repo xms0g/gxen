@@ -3,10 +3,7 @@
 #include <memory>
 
 class Scene;
-class Camera;
-class Window;
 class Input;
-class Gui;
 class Renderer;
 
 class XEngine {
@@ -34,7 +31,6 @@ private:
     bool isRunning{true};
 
     Scene* mScene;
-    std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;
     std::unique_ptr<Renderer> mRenderer;
 };

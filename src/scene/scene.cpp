@@ -1,23 +1,29 @@
 #include "scene.h"
 #include "glm/glm.hpp"
+#include "glm/ext/matrix_clip_space.hpp"
+#include "glm/ext/matrix_transform.hpp"
 #include "../core/camera.h"
 #include "../renderer/shader.h"
 #include "../entity/entity.hpp"
-#include "glm/ext/matrix_clip_space.hpp"
-#include "glm/ext/matrix_transform.hpp"
 
-void Scene::update(const Camera& camera) {
+Scene::Scene() {
+    mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 8.0f));
+}
+
+void Scene::update() {
     rotation += 0.1f;
+
+    mCamera->update();
 
     for (const auto& entity : entities) {
         Shader& modelShader = entity->getShader();
         modelShader.activate();
 
         // view/projection transformations
-        glm::mat4 projectionMat = glm::perspective(glm::radians(camera.getZoom()),
+        glm::mat4 projectionMat = glm::perspective(glm::radians(mCamera->getZoom()),
             static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), ZNEAR, ZFAR);
         modelShader.setMat4("projection", projectionMat);
-        modelShader.setMat4("view", camera.getViewMatrix());
+        modelShader.setMat4("view", mCamera->getViewMatrix());
 
         // render the loaded model
         auto modelMat = glm::mat4(1.0f);
@@ -30,8 +36,4 @@ void Scene::update(const Camera& camera) {
 
 void Scene::addEntity(std::unique_ptr<Entity>& entity) {
     entities.push_back(std::move(entity));
-}
-
-std::vector<std::unique_ptr<Entity>>& Scene::getEntities() {
-    return entities;
 }

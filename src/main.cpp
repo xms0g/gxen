@@ -1,7 +1,7 @@
 #include "core/engine.h"
+#include "core/camera.h"
 #include "scene/scene.h"
 #include "model/model.h"
-#include "light/light.h"
 #include "io/filesystem.hpp"
 #include "config/config.hpp"
 
