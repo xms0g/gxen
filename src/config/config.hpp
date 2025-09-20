@@ -11,7 +11,7 @@ const std::string ASSET_DIR = "assets/";
 
 constexpr unsigned int SCR_WIDTH = 1600;
 constexpr unsigned int SCR_HEIGHT = 900;
-constexpr float ASPECT = (float) SCR_WIDTH / (float) SCR_HEIGHT;
+constexpr float ASPECT = static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT);
 
 // Camera Settings
 constexpr float YAW{-90.0f};

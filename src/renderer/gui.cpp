@@ -31,8 +31,8 @@ void Gui::render() {
     ImGui_ImplSDL2_NewFrame();
     ImGui::NewFrame();
 
-//    bool show_demo_window = true;
-//    ImGui::ShowDemoWindow(&show_demo_window);
+    bool show_demo_window = true;
+    ImGui::ShowDemoWindow(&show_demo_window);
 
     renderGraphicsInfo();
 

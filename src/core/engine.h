@@ -15,19 +15,11 @@ public:
 
     ~XEngine();
 
-    void init();
+    void init(Scene* scene);
 
     void run();
 
-    void addScene(std::unique_ptr<Scene>& scene);
-
 private:
-    void processInput();
-
-    void update();
-
-    void render();
-
     void updateFpsCounter();
 
     // Frame
@@ -40,13 +32,9 @@ private:
 
     // Engine
     bool isRunning{true};
-    float rotationAngle; //TODO: will be removed
 
-    std::unique_ptr<Window> mWindow;
-    std::unique_ptr<Gui> mGui;
+    Scene* mScene;
     std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;
     std::unique_ptr<Renderer> mRenderer;
-    std::unique_ptr<Scene> mScene;
-
 };

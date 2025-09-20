@@ -9,14 +9,13 @@ public:
         initImpl(title, width, height, fullscreen);
     }
 
-    inline T* nativeHandle() const {
+    T* nativeHandle() const {
         return mWindow;
     }
 
     void clear(float r = 0.0f, float g = 0.0f, float b = 0.0f, float a = 0.0f) {
         clearImpl(r, g, b, a);
     }
-
 
 protected:
     virtual void initImpl(const char* title, int width, int height, bool fullscreen) = 0;
@@ -25,5 +24,5 @@ protected:
 
     virtual void swapBuffer() = 0;
 
-    T* mWindow;
+    T* mWindow = nullptr;
 };

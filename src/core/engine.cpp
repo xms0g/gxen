@@ -1,10 +1,10 @@
 #include "engine.h"
 #include <iostream>
-#include "window.h"
 #include "input.h"
 #include "camera.h"
-#include "gui.h"
-#include "glm/glm.hpp"
+#include "../config/config.hpp"
+#include "../renderer/gui.h"
+#include "../renderer/window.h"
 #include "../model/model.h"
 #include "../scene/scene.h"
 #include "../renderer/renderer.h"
@@ -13,71 +13,36 @@ XEngine::XEngine() = default;
 
 XEngine::~XEngine() = default;
 
-void XEngine::init() {
+void XEngine::init(Scene* scene) {
+    mScene = scene;
     try {
-        mWindow = std::make_unique<Window>();
-        mWindow->init("XEngine");
-
-        mRenderer = std::make_unique<Renderer>();
+        mRenderer = std::make_unique<Renderer>(scene);
         mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 8.0f));
         mInput = std::make_unique<Input>();
-
-        mGui = std::make_unique<Gui>(mWindow->nativeHandle(), mWindow->glContext());
     } catch (std::runtime_error& e) {
         std::cerr << e.what() << '\n';
     }
-
 }
 
 void XEngine::run() {
     while (isRunning) {
-        processInput();
-        update();
-        render();
-    }
-}
+        mInput->process(*mCamera, mRenderer->window()->nativeHandle(), mDeltaTime, isRunning);
 
-void XEngine::addScene(std::unique_ptr<Scene>& scene) {
-    mScene = std::move(scene);
-}
+        mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
+        mMillisecsPreviousFrame = SDL_GetTicks();
 
-void XEngine::processInput() {
-    mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
-}
-
-void XEngine::update() {
-    mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
-    mMillisecsPreviousFrame = SDL_GetTicks();
-
-    updateFpsCounter();
+        updateFpsCounter();
 
 #ifdef DEBUG
-    mGui->setFPS(mFPS);
+        mRenderer->gui()->setFPS(mFPS);
 #endif
 
-    mCamera->update();
+        mCamera->update();
 
-    rotationAngle += 0.1f;
-    mScene->update(*mCamera, rotationAngle);
-}
+        mScene->update(*mCamera);
 
-void XEngine::render() {
-    mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
-
-//        glm::vec3 lightPos{1.2f, 1.0f, 2.0f};
-//        lightPos.x += cos(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
-//        lightPos.z += sin(static_cast<float>(SDL_GetTicks() / 1000.0)) * 2.0f;
-    // be sure to activate shader when setting uniforms/drawing objects
-
-    for (auto& entity: mScene->getEntities()) {
-        mRenderer->render(entity);
+        mRenderer->render();
     }
-#ifdef DEBUG
-    mGui->render();
-#endif
-
-    // SDL swap buffers
-    mWindow->swapBuffer();
 }
 
 void XEngine::updateFpsCounter() {

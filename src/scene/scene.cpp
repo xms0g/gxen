@@ -6,7 +6,9 @@
 #include "glm/ext/matrix_clip_space.hpp"
 #include "glm/ext/matrix_transform.hpp"
 
-void Scene::update(const Camera& camera, float rt) {
+void Scene::update(const Camera& camera) {
+    rotation += 0.1f;
+
     for (const auto& entity : entities) {
         Shader& modelShader = entity->getShader();
         modelShader.activate();
@@ -20,7 +22,7 @@ void Scene::update(const Camera& camera, float rt) {
         // render the loaded model
         auto modelMat = glm::mat4(1.0f);
         modelMat = glm::translate(modelMat, glm::vec3(0.0f, 0.0f, 0.0f));
-        modelMat = glm::rotate(modelMat, glm::radians(rt), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
+        modelMat = glm::rotate(modelMat, glm::radians(rotation), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
         modelMat = glm::scale(modelMat, glm::vec3(1.0f, 1.0f, 1.0f));
         modelShader.setMat4("model", modelMat);
     }

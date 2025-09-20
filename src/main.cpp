@@ -15,20 +15,14 @@
 
 int main() {
     XEngine xngn;
-    xngn.init();
+    const auto scene = std::make_unique<Scene>();
 
-    auto scene = std::make_unique<Scene>();
-    std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(1.2f, 1.0f, 2.0f),
-                                                            fs::path(SHADER_DIR + "light.vert"),
-                                                            fs::path(SHADER_DIR + "light.frag"));
+    xngn.init(scene.get());
 
     std::unique_ptr<Entity> model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
                                                             fs::path(SHADER_DIR + "model.vert"),
                                                             fs::path(SHADER_DIR + "model.frag"));
     scene->addEntity(model);
-    //scene->addEntity(light);
-
-    xngn.addScene(scene);
 
     xngn.run();
 
