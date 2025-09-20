@@ -5,7 +5,7 @@ class Shader;
 class Entity {
 public:
     virtual ~Entity() = default;
-    virtual Shader& getShader() const = 0;
+    [[nodiscard]] virtual Shader& getShader() const = 0;
     virtual void draw() const = 0;
 };
 
