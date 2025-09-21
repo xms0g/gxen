@@ -33,6 +33,9 @@ void Scene::update() const {
             modelMat = glm::rotate(modelMat, glm::radians(angle), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
         }
         modelShader->setMat4("model", modelMat);
+
+    	glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
+    	modelShader->setMat3("normalMatrix", normalMatrix);
     }
 }
 
