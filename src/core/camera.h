@@ -2,6 +2,7 @@
 
 #include "glm/glm.hpp"
 #include "../config/config.hpp"
+#include "glm/ext/matrix_transform.hpp"
 
 enum CameraMovement {
     FORWARD,
@@ -19,13 +20,13 @@ public:
 
     void update();
 
-    glm::mat4 getViewMatrix() const;
+    [[nodiscard]] glm::mat4 viewMatrix() const { return glm::lookAt(mPosition, mPosition + mFront, mUp); }
 
-    [[nodiscard]] float getZoom() const;
+    [[nodiscard]] float zoom() const { return mZoom; }
 
-    [[nodiscard]] glm::vec3 getPosition() const;
+    [[nodiscard]] glm::vec3 position() const { return mPosition; }
 
-    [[nodiscard]] glm::vec3 getFront() const;
+    [[nodiscard]] glm::vec3 front() const { return mFront; }
 
     void processKeyboard(CameraMovement direction, float deltaTime);
 

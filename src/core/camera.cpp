@@ -40,22 +40,6 @@ void Camera::update() {
 	mUp = glm::normalize(glm::cross(mRight, mFront));
 }
 
-glm::mat4 Camera::getViewMatrix() const {
-	return glm::lookAt(mPosition, mPosition + mFront, mUp);
-}
-
-float Camera::getZoom() const {
-	return mZoom;
-}
-
-glm::vec3 Camera::getPosition() const {
-	return mPosition;
-}
-
-glm::vec3 Camera::getFront() const {
-	return mFront;
-}
-
 void Camera::processKeyboard(const CameraMovement direction, const float deltaTime) {
 	const float velocity = mMovementSpeed * deltaTime;
 	if (direction == FORWARD)

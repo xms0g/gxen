@@ -18,10 +18,10 @@ void Scene::update() const {
         modelShader->activate();
 
         // view/projection transformations
-        glm::mat4 projectionMat = glm::perspective(glm::radians(mCamera->getZoom()),
+        glm::mat4 projectionMat = glm::perspective(glm::radians(mCamera->zoom()),
             static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT), ZNEAR, ZFAR);
         modelShader->setMat4("projection", projectionMat);
-        modelShader->setMat4("view", mCamera->getViewMatrix());
+        modelShader->setMat4("view", mCamera->viewMatrix());
 
         // render the loaded model
         auto modelMat = glm::mat4(1.0f);
