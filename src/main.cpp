@@ -1,10 +1,12 @@
 #include "core/engine.h"
 #include "core/camera.h"
+#include "renderer/shader.h"
 #include "model/model.h"
 #include "io/filesystem.hpp"
 #include "config/config.hpp"
 #include "ECS/registry.h"
 #include "ECS/components/model.hpp"
+#include "ECS/components/materialComponent.hpp"
 #include "ECS/components/transform.hpp"
 
 #define VERSION_MAJOR 0
@@ -23,12 +25,14 @@ int main() {
 
 	auto backpack = registry.createEntity();
 	backpack.addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(1.0f), 0.1f);
-	backpack.addComponent<ModelComponent>(std::make_shared<Model>(
-			fs::path(ASSET_DIR + "backpack/backpack.obj"),
+	backpack.addComponent<ModelComponent>(
+		std::make_shared<Model>(
+			fs::path(ASSET_DIR + "backpack/backpack.obj")));
+
+	backpack.addComponent<MaterialComponent>(
+		std::make_shared<Shader>(
 			fs::path(SHADER_DIR + "model.vert"),
 			fs::path(SHADER_DIR + "model_lit.frag")));
-
-
 	// std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(3.2f, 1.0f, 2.0f),
 	//                                                         fs::path(SHADER_DIR + "light.vert"),
 	//                                                         fs::path(SHADER_DIR + "light.frag"));

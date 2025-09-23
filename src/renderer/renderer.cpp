@@ -5,12 +5,14 @@
 #include "glad/glad.h"
 #include "window.h"
 #include "gui.h"
+#include "shader.h"
 #include "../config/config.hpp"
 #include "../core/camera.h"
 #include "../model/model.h"
 #include "../ECS/registry.h"
 #include "../ECS/components/model.hpp"
 #include "../ECS/components/transform.hpp"
+#include "../ECS/components/materialComponent.hpp"
 
 Renderer::Renderer() {
 	RequireComponent<TransformComponent>();
@@ -42,10 +44,11 @@ void Renderer::render(const Camera* camera) const {
     mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
 	for (const auto& entity : getSystemEntities()) {
-		const auto transform = entity.getComponent<TransformComponent>();
-		const auto model = entity.getComponent<ModelComponent>();
+		const auto& transform = entity.getComponent<TransformComponent>();
+		const auto& model = entity.getComponent<ModelComponent>();
+		const auto& mat = entity.getComponent<MaterialComponent>();
 
-		const Shader* modelShader = model.model->shader();
+		const Shader* modelShader = mat.shader.get();
 		modelShader->activate();
 
 		// view/projection transformations
@@ -54,7 +57,6 @@ void Renderer::render(const Camera* camera) const {
 		modelShader->setMat4("projection", projectionMat);
 		modelShader->setMat4("view", camera->viewMatrix());
 
-		// render the loaded model
 		auto modelMat = glm::mat4(1.0f);
 		modelMat = glm::translate(modelMat, transform.position);
 		modelMat = glm::scale(modelMat, glm::vec3(transform.scale));
@@ -77,7 +79,7 @@ void Renderer::render(const Camera* camera) const {
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
 		modelShader->setMat3("normalMatrix", normalMatrix);
 
-		model.model->draw();
+		model.model->draw(modelShader);
 	}
 
 #ifdef DEBUG

@@ -2,7 +2,7 @@
 
 #include <bitset>
 
-static constexpr size_t MAX_COMPONENTS = 32;
+static constexpr size_t MAX_COMPONENTS = 8;
 using Signature = std::bitset<MAX_COMPONENTS>;
 
 class Entity {

@@ -32,14 +32,11 @@ public:
     void draw(const Shader* shader) const;
 
 private:
+	void setupMesh();
+
     // mesh Data
     std::vector<Vertex> mVertices;
     std::vector<unsigned int> mIndices;
     std::vector<Texture> mTextures;
-    unsigned int mVAO{};
-    // render data
-    unsigned int mVBO{}, mEBO{};
-
-    // initializes all the buffer objects/arrays
-    void setupMesh();
+    unsigned int mVAO{}, mVBO{}, mEBO{};
 };

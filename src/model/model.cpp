@@ -2,15 +2,15 @@
 #include <iostream>
 #include "glm/glm.hpp"
 #include "image/stb_image.h"
+#include "../renderer/shader.h"
 
-Model::Model(const std::string& path, const std::string& vertexPath, const std::string& fragmentPath) {
+Model::Model(const std::string& path) {
     loadModel(path);
-    mShader = std::make_unique<Shader>(vertexPath, fragmentPath);
 }
 
-void Model::draw() const {
+void Model::draw(const Shader* shader) const {
     for (auto& mesh: mMeshes)
-        mesh.draw(mShader.get());
+        mesh.draw(shader);
 }
 void Model::loadModel(const std::string& path) {
     // read file via ASSIMP

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vector>
+#include <memory>
 
 class Model;
 struct ModelComponent {
