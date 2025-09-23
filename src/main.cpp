@@ -23,21 +23,11 @@ int main() {
 
 	auto backpack = registry.createEntity();
 	backpack.addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(1.0f), 0.1f);
-	auto model = std::make_shared<Model>(
+	backpack.addComponent<ModelComponent>(std::make_shared<Model>(
 			fs::path(ASSET_DIR + "backpack/backpack.obj"),
 			fs::path(SHADER_DIR + "model.vert"),
-			fs::path(SHADER_DIR + "model_lit.frag"));
-	backpack.addComponent<ModelComponent>(model);
+			fs::path(SHADER_DIR + "model_lit.frag")));
 
-
-	// std::unique_ptr<Entity> model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
-	//                                                         fs::path(SHADER_DIR + "model.vert"),
-	//                                                         fs::path(SHADER_DIR + "model_lit.frag"));
-	// model->position = glm::vec3(0.0f);
-	// model->scale = 1.0f;
-	// model->rotation = 0.0f;
-	//
-	// scene->addEntity(model);
 
 	// std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(3.2f, 1.0f, 2.0f),
 	//                                                         fs::path(SHADER_DIR + "light.vert"),
@@ -46,6 +36,7 @@ int main() {
 	// scene->addEntity(light);
 
 	registry.update();
+
 	xngn.run();
 
 	return 0;

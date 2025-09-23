@@ -3,13 +3,11 @@
 
 #include <memory>
 #include "glm/glm.hpp"
-#include "../entity/entity.hpp"
 
 class Shader;
 class Light {
 public:
     Light(glm::vec3 pos, const std::string& vertexPath, const std::string& fragmentPath);
-
 
     void draw() const ;
 

@@ -61,6 +61,7 @@ void Renderer::render(const Camera* camera) const {
 
 		if (transform.rotation != 0.0f) {
 			static float angle = 0.0f;
+
 			angle += transform.rotation;
 			modelMat = glm::rotate(modelMat, glm::radians(angle), glm::vec3(0, 1, 0));//rotation y = 0.0 degrees
 		}
