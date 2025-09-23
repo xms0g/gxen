@@ -11,6 +11,17 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices,
     setupMesh();
 }
 
+Mesh::~Mesh() {
+	glDeleteVertexArrays(1, &mVAO);
+    glDeleteBuffers(1, &mVBO);
+    glDeleteBuffers(1, &mEBO);
+
+	for (auto& texture : mTextures) {
+        glDeleteTextures(1, &texture.id);
+    }
+}
+
+
 void Mesh::draw(const Shader* shader) const {
     // bind appropriate mTextures
     unsigned int diffuseNr = 1;

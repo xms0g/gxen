@@ -6,7 +6,7 @@
 #include "config/config.hpp"
 #include "ECS/registry.h"
 #include "ECS/components/model.hpp"
-#include "ECS/components/materialComponent.hpp"
+#include "ECS/components/shaderComponent.hpp"
 #include "ECS/components/transform.hpp"
 
 #define VERSION_MAJOR 0
@@ -29,7 +29,7 @@ int main() {
 		std::make_shared<Model>(
 			fs::path(ASSET_DIR + "backpack/backpack.obj")));
 
-	backpack.addComponent<MaterialComponent>(
+	backpack.addComponent<ShaderComponent>(
 		std::make_shared<Shader>(
 			fs::path(SHADER_DIR + "model.vert"),
 			fs::path(SHADER_DIR + "model_lit.frag")));

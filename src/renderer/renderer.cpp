@@ -12,12 +12,12 @@
 #include "../ECS/registry.h"
 #include "../ECS/components/model.hpp"
 #include "../ECS/components/transform.hpp"
-#include "../ECS/components/materialComponent.hpp"
+#include "../ECS/components/shaderComponent.hpp"
 
 Renderer::Renderer() {
 	RequireComponent<TransformComponent>();
 	RequireComponent<ModelComponent>();
-	RequireComponent<MaterialComponent>();
+	RequireComponent<ShaderComponent>();
 
 	mWindow = std::make_unique<Window>();
 	mWindow->init("XEngine");
@@ -45,46 +45,46 @@ void Renderer::render(const Camera* camera) const {
 	mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
 	for (const auto& entity: getSystemEntities()) {
-		const auto& tc = entity.getComponent<TransformComponent>();
-		const auto& mat = entity.getComponent<MaterialComponent>();
+		if (entity.hasComponent<ModelComponent>() && entity.hasComponent<ShaderComponent>()) {
+			const auto& tc = entity.getComponent<TransformComponent>();
+			const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
-		const Shader* shader = mat.shader.get();
-		shader->activate();
+			shader->activate();
 
-		// view/projection transformations
-		glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
-		                                           static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
-		                                           ZNEAR, ZFAR);
-		shader->setMat4("projection", projectionMat);
-		shader->setMat4("view", camera->viewMatrix());
+			// view/projection transformations
+			glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
+			                                           static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+			                                           ZNEAR, ZFAR);
+			shader->setMat4("projection", projectionMat);
+			shader->setMat4("view", camera->viewMatrix());
 
-		auto modelMat = glm::mat4(1.0f);
-		modelMat = glm::translate(modelMat, tc.position);
-		modelMat = glm::scale(modelMat, glm::vec3(tc.scale));
+			auto modelMat = glm::mat4(1.0f);
+			modelMat = glm::translate(modelMat, tc.position);
+			modelMat = glm::scale(modelMat, glm::vec3(tc.scale));
 
-		if (tc.rotation != 0.0f) {
-			static float angle = 0.0f;
+			if (tc.rotation != 0.0f) {
+				static float angle = 0.0f;
 
-			angle += tc.rotation;
-			modelMat = glm::rotate(modelMat, glm::radians(angle), glm::vec3(0, 1, 0)); //rotation y = 0.0 degrees
+				angle += tc.rotation;
+				modelMat = glm::rotate(modelMat, glm::radians(angle), glm::vec3(0, 1, 0)); //rotation y = 0.0 degrees
+			}
+			shader->setMat4("model", modelMat);
+
+
+			shader->setVec3("pointLight.position", glm::vec3(2.2f, 1.0f, 2.0f));
+			shader->setVec3("pointLight.ambient", 0.2f, 0.2f, 0.2f);
+			shader->setVec3("pointLight.diffuse", 0.5f, 0.5f, 0.5f);
+			shader->setFloat("pointLight.Kc", 1.0f);
+			shader->setFloat("pointLight.Kl", 0.09f);
+			shader->setFloat("pointLight.Kq", 0.032f);
+
+			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
+			shader->setMat3("normalMatrix", normalMatrix);
+
+			const auto& mc = entity.getComponent<ModelComponent>();
+			mc.model->draw(shader.get());
 		}
-		shader->setMat4("model", modelMat);
-
-
-		shader->setVec3("pointLight.position", glm::vec3(2.2f, 1.0f, 2.0f));
-		shader->setVec3("pointLight.ambient", 0.2f, 0.2f, 0.2f);
-		shader->setVec3("pointLight.diffuse", 0.5f, 0.5f, 0.5f);
-		shader->setFloat("pointLight.Kc", 1.0f);
-		shader->setFloat("pointLight.Kl", 0.09f);
-		shader->setFloat("pointLight.Kq", 0.032f);
-
-		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
-		shader->setMat3("normalMatrix", normalMatrix);
-
-		const auto& mc = entity.getComponent<ModelComponent>();
-		mc.model->draw(shader);
 	}
-
 #ifdef DEBUG
 	mGui->render();
 #endif
