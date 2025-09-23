@@ -1,10 +1,11 @@
 #include "core/engine.h"
 #include "core/camera.h"
-#include "scene/scene.h"
 #include "model/model.h"
 #include "io/filesystem.hpp"
 #include "config/config.hpp"
-#include "light/light.h"
+#include "ECS/registry.h"
+#include "ECS/components/model.hpp"
+#include "ECS/components/transform.hpp"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 2
@@ -15,27 +16,37 @@
 #define VERSION STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
 
 int main() {
-    XEngine xngn;
-    const auto scene = std::make_unique<Scene>();
+	XEngine xngn;
+	Registry registry;
 
-    xngn.init(scene.get());
+	xngn.init(&registry);
 
-    std::unique_ptr<Entity> model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
-                                                            fs::path(SHADER_DIR + "model.vert"),
-                                                            fs::path(SHADER_DIR + "model.frag"));
-    model->position = glm::vec3(0.0f);
-    model->scale = 1.0f;
-    model->rotation = 0.1f;
+	auto backpack = registry.createEntity();
+	backpack.addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(1.0f), 0.1f);
+	auto model = std::make_shared<Model>(
+			fs::path(ASSET_DIR + "backpack/backpack.obj"),
+			fs::path(SHADER_DIR + "model.vert"),
+			fs::path(SHADER_DIR + "model_lit.frag"));
+	backpack.addComponent<ModelComponent>(model);
 
-    scene->addEntity(model);
 
-    std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(3.2f, 1.0f, 2.0f),
-                                                            fs::path(SHADER_DIR + "light.vert"),
-                                                            fs::path(SHADER_DIR + "light.frag"));
-    light->scale = 0.2f;
-    scene->addEntity(light);
+	// std::unique_ptr<Entity> model = std::make_unique<Model>(fs::path(ASSET_DIR + "backpack/backpack.obj"),
+	//                                                         fs::path(SHADER_DIR + "model.vert"),
+	//                                                         fs::path(SHADER_DIR + "model_lit.frag"));
+	// model->position = glm::vec3(0.0f);
+	// model->scale = 1.0f;
+	// model->rotation = 0.0f;
+	//
+	// scene->addEntity(model);
 
-    xngn.run();
+	// std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(3.2f, 1.0f, 2.0f),
+	//                                                         fs::path(SHADER_DIR + "light.vert"),
+	//                                                         fs::path(SHADER_DIR + "light.frag"));
+	// light->scale = 0.2f;
+	// scene->addEntity(light);
 
-    return 0;
+	registry.update();
+	xngn.run();
+
+	return 0;
 }

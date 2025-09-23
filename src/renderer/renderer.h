@@ -1,24 +1,23 @@
 #pragma once
 
 #include <memory>
+#include "../ECS/system.hpp"
 
-class Entity;
 class Window;
+class Camera;
 class Gui;
-class Scene;
 
-class Renderer {
+class Renderer final : public System {
 public:
-    explicit Renderer(Scene* scene);
+    explicit Renderer();
 
     [[nodiscard]] Window* window() const { return mWindow.get(); }
 
     [[nodiscard]] Gui* gui() const { return mGui.get(); }
 
-    void render() const;
+    void render(const Camera* camera) const;
 
 private:
-    Scene* mScene;
     std::unique_ptr<Window> mWindow;
     std::unique_ptr<Gui> mGui;
 };

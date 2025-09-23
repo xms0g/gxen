@@ -3,7 +3,6 @@
 #include "glm/ext/matrix_transform.hpp"
 
 Light::Light(const glm::vec3 pos, const std::string& vertexPath, const std::string& fragmentPath) {
-	position = pos;
 	mShader = std::make_unique<Shader>(vertexPath, fragmentPath);
 
 	constexpr float vertices[] = {

@@ -2,9 +2,9 @@
 
 #include <memory>
 
-class Scene;
+class Registry;
 class Input;
-class Renderer;
+class Camera;
 
 class XEngine {
 public:
@@ -12,7 +12,7 @@ public:
 
     ~XEngine();
 
-    void init(Scene* scene);
+    void init(Registry* registry);
 
     void run();
 
@@ -22,7 +22,7 @@ private:
     // Engine
     bool isRunning{true};
 
-    Scene* mScene{};
+    Registry* mRegistry{};
+	std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;
-    std::unique_ptr<Renderer> mRenderer;
 };

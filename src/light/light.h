@@ -6,15 +6,14 @@
 #include "../entity/entity.hpp"
 
 class Shader;
-class Light final : public Entity {
+class Light {
 public:
     Light(glm::vec3 pos, const std::string& vertexPath, const std::string& fragmentPath);
 
-    [[nodiscard]] glm::vec3 pos() const { return position; }
 
-    void draw() const override;
+    void draw() const ;
 
-    [[nodiscard]] Shader* shader() const override { return mShader.get(); }
+    [[nodiscard]] Shader* shader() const  { return mShader.get(); }
 
 private:
     unsigned int mVAO{};
