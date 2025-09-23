@@ -4,23 +4,38 @@ in vec2 vTexcoord;
 in vec3 vNormal;
 in vec3 vFragPos;
 
+struct PointLight {
+    vec3 position;
+
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+
+    float Kc;
+    float Kl;
+    float Kq;
+};
+
 uniform sampler2D texture_diffuse1;
-uniform vec3 uLightDir;
+uniform PointLight pointLight;
 
 out vec4 fragColor;
 
-vec3 lightColor = vec3(1.0, 1.0, 1.0);
-
 void main() {
     // ambient
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * lightColor;
+    vec3 ambient = pointLight.ambient;
 
     // diffuse
     vec3 norm = normalize(vNormal);
-    vec3 lightDir = normalize(uLightDir - vFragPos);
+    vec3 lightDir = normalize(pointLight.position - vFragPos);
     float diff = max(dot(norm, lightDir), 0.0);
-    vec3 diffuse = diff * lightColor;
+    vec3 diffuse = diff * pointLight.diffuse;
+
+    float distance = length(pointLight.position - vFragPos);
+    float attenuation = 1.0 / (pointLight.Kc + pointLight.Kl * distance + pointLight.Kq * (distance * distance));
+
+    ambient *= attenuation;
+    diffuse *= attenuation;
 
     vec3 texColor = texture(texture_diffuse1, vTexcoord).rgb;
     vec3 result = (ambient + diffuse) * texColor;
