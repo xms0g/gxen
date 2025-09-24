@@ -100,14 +100,13 @@ vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
     return (ambient + diffuse + specular);
 }
 
-// calculates the color when using a point light.
 vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir) {
     vec3 lightDir = normalize(light.position - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = max(dot(viewDir, reflectDir), 0.0);
+    float spec =  pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.Kc + light.Kl * distance + light.Kq * (distance * distance));
@@ -130,7 +129,7 @@ vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir
     float diff = max(dot(normal, lightDir), 0.0);
     // specular shading
     vec3 reflectDir = reflect(-lightDir, normal);
-    float spec = max(dot(viewDir, reflectDir), 0.0);
+    float spec =  pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
     // attenuation
     float distance = length(light.position - fragPos);
     float attenuation = 1.0 / (light.Kc + light.Kl * distance + light.Kq * (distance * distance));

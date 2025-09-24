@@ -44,15 +44,15 @@ int main() {
 		glm::vec3(0.4f, 0.4f, 0.4f),
 		glm::vec3(0.5f, 0.5f, 0.5f));
 
-	// auto pointLight = registry.createEntity();
-	// pointLight.addComponent<PointLightComponent>(
-	// 	glm::vec3(3.2f, 1.0f, 2.0f),
-	// 	glm::vec3(0.05f, 0.05f, 0.05f),
-	// 	glm::vec3(0.8f, 0.8f, 0.8f),
-	// 	glm::vec3(1.0f, 1.0f, 1.0f),
-	// 	1.0f,
-	// 	0.09f,
-	// 	0.032f);
+	auto pointLight = registry.createEntity();
+	pointLight.addComponent<PointLightComponent>(
+		glm::vec3(3.2f, 1.0f, 2.0f),
+		glm::vec3(0.05f, 0.05f, 0.05f),
+		glm::vec3(0.8f, 0.8f, 0.8f),
+		glm::vec3(1.0f, 1.0f, 1.0f),
+		1.0f,
+		0.09f,
+		0.032f);
 
 	registry.update();
 
