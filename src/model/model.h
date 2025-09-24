@@ -14,6 +14,13 @@ class Model {
 public:
     explicit Model(std::string const& path);
 
+	Model(const Model&) = delete;
+	Model& operator=(const Model&) = delete;
+	Model(Model&&) noexcept = default;
+	Model& operator=(Model&&) noexcept = default;
+
+	~Model() = default;
+
     void draw(const Shader* shader) const;
 
 private:
