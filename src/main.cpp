@@ -5,8 +5,11 @@
 #include "io/filesystem.hpp"
 #include "config/config.hpp"
 #include "ECS/registry.h"
+#include "ECS/components/directionalLight.hpp"
 #include "ECS/components/model.hpp"
-#include "ECS/components/shaderComponent.hpp"
+#include "ECS/components/pointLight.hpp"
+#include "ECS/components/shader.hpp"
+#include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
 
 #define VERSION_MAJOR 0
@@ -32,12 +35,24 @@ int main() {
 	backpack.addComponent<ShaderComponent>(
 		std::make_shared<Shader>(
 			fs::path(SHADER_DIR + "model.vert"),
-			fs::path(SHADER_DIR + "model_lit.frag")));
-	// std::unique_ptr<Entity> light = std::make_unique<Light>(glm::vec3(3.2f, 1.0f, 2.0f),
-	//                                                         fs::path(SHADER_DIR + "light.vert"),
-	//                                                         fs::path(SHADER_DIR + "light.frag"));
-	// light->scale = 0.2f;
-	// scene->addEntity(light);
+			fs::path(SHADER_DIR + "model.frag")));
+
+	auto dirLight = registry.createEntity();
+	dirLight.addComponent<DirectionalLightComponent>(
+		glm::vec3(-0.2f, -1.0f, -0.3f),
+		glm::vec3(0.05f, 0.05f, 0.05f),
+		glm::vec3(0.4f, 0.4f, 0.4f),
+		glm::vec3(0.5f, 0.5f, 0.5f));
+
+	// auto pointLight = registry.createEntity();
+	// pointLight.addComponent<PointLightComponent>(
+	// 	glm::vec3(3.2f, 1.0f, 2.0f),
+	// 	glm::vec3(0.05f, 0.05f, 0.05f),
+	// 	glm::vec3(0.8f, 0.8f, 0.8f),
+	// 	glm::vec3(1.0f, 1.0f, 1.0f),
+	// 	1.0f,
+	// 	0.09f,
+	// 	0.032f);
 
 	registry.update();
 

@@ -12,13 +12,13 @@
 #include "../ECS/registry.h"
 #include "../ECS/components/model.hpp"
 #include "../ECS/components/transform.hpp"
-#include "../ECS/components/shaderComponent.hpp"
+#include "../ECS/components/shader.hpp"
+#include "../ECS/components/directionalLight.hpp"
+#include "../ECS/components/pointLight.hpp"
+#include "../ECS/components/spotLight.hpp"
+
 
 Renderer::Renderer() {
-	RequireComponent<TransformComponent>();
-	RequireComponent<ModelComponent>();
-	RequireComponent<ShaderComponent>();
-
 	mWindow = std::make_unique<Window>();
 	mWindow->init("XEngine");
 
@@ -44,12 +44,31 @@ Renderer::Renderer() {
 void Renderer::render(const Camera* camera) const {
 	mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
+	std::vector<PointLightComponent*> pointLights;
+	std::vector<DirectionalLightComponent*> dirLights;
+	std::vector<SpotLightComponent*> spotLights;
+
+	for (auto& entity: getSystemEntities()) {
+		if (entity.hasComponent<DirectionalLightComponent>()) {
+			auto& light = entity.getComponent<DirectionalLightComponent>();
+			dirLights.push_back(&light);
+		} else if (entity.hasComponent<PointLightComponent>()) {
+			auto& light = entity.getComponent<PointLightComponent>();
+			pointLights.push_back(&light);
+		} else if (entity.hasComponent<SpotLightComponent>()) {
+			auto& light = entity.getComponent<SpotLightComponent>();
+			spotLights.push_back(&light);
+		}
+	}
+
 	for (const auto& entity: getSystemEntities()) {
 		if (entity.hasComponent<ModelComponent>() && entity.hasComponent<ShaderComponent>()) {
 			const auto& tc = entity.getComponent<TransformComponent>();
 			const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 			shader->activate();
+			shader->setVec3("viewPos", camera->position());
+			shader->setFloat("material.shininess", 32.0f);
 
 			// view/projection transformations
 			glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
@@ -70,16 +89,44 @@ void Renderer::render(const Camera* camera) const {
 			}
 			shader->setMat4("model", modelMat);
 
-
-			shader->setVec3("pointLight.position", glm::vec3(2.2f, 1.0f, 2.0f));
-			shader->setVec3("pointLight.ambient", 0.2f, 0.2f, 0.2f);
-			shader->setVec3("pointLight.diffuse", 0.5f, 0.5f, 0.5f);
-			shader->setFloat("pointLight.Kc", 1.0f);
-			shader->setFloat("pointLight.Kl", 0.09f);
-			shader->setFloat("pointLight.Kq", 0.032f);
-
 			glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
 			shader->setMat3("normalMatrix", normalMatrix);
+
+			// Directional lights
+			shader->setInt("numDirLights", dirLights.size());
+			for (int i = 0; i < dirLights.size(); i++) {
+				shader->setVec3("dirLights[" + std::to_string(i) + "].direction", dirLights[i]->direction);
+				shader->setVec3("dirLights[" + std::to_string(i) + "].ambient", dirLights[i]->ambient);
+				shader->setVec3("dirLights[" + std::to_string(i) + "].diffuse", dirLights[i]->diffuse);
+				shader->setVec3("dirLights[" + std::to_string(i) + "].specular", dirLights[i]->specular);
+			}
+			// Point lights
+			shader->setInt("numPointLights", pointLights.size());
+			for (int i = 0; i < pointLights.size(); i++) {
+				shader->setVec3("pointLights[" + std::to_string(i) + "].position", pointLights[i]->position);
+				shader->setVec3("pointLights[" + std::to_string(i) + "].ambient", pointLights[i]->ambient);
+				shader->setVec3("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i]->diffuse);
+				shader->setVec3("pointLights[" + std::to_string(i) + "].specular", pointLights[i]->specular);
+				shader->setFloat("pointLights[" + std::to_string(i) + "].Kc", pointLights[i]->Kc);
+				shader->setFloat("pointLights[" + std::to_string(i) + "].Kl", pointLights[i]->Kl);
+				shader->setFloat("pointLights[" + std::to_string(i) + "].Kq", pointLights[i]->Kq);
+			}
+			// Spot Lights
+			shader->setInt("numSpotLights", spotLights.size());
+			for (int i = 0; i < spotLights.size(); i++) {
+				shader->setVec3("spotLights[" + std::to_string(i) + "].position", spotLights[i]->position);
+				shader->setVec3("spotLights[" + std::to_string(i) + "].direction", spotLights[i]->direction);
+				shader->setFloat("spotLights[" + std::to_string(i) + "].cutOff",
+				                 glm::cos(glm::radians(spotLights[i]->cutOff)));
+				shader->setFloat("spotLights[" + std::to_string(i) + "].outerCutOff",
+				                 glm::cos(glm::radians(spotLights[i]->outerCutOff)));
+				shader->setVec3("spotLights[" + std::to_string(i) + "].ambient", spotLights[i]->ambient);
+				shader->setVec3("spotLights[" + std::to_string(i) + "].diffuse", spotLights[i]->diffuse);
+				shader->setVec3("spotLights[" + std::to_string(i) + "].specular", spotLights[i]->specular);
+				shader->setFloat("spotLights[" + std::to_string(i) + "].Kc", spotLights[i]->Kc);
+				shader->setFloat("spotLights[" + std::to_string(i) + "].Kl", spotLights[i]->Kl);
+				shader->setFloat("spotLights[" + std::to_string(i) + "].Kq", spotLights[i]->Kq);
+			}
 
 			const auto& mc = entity.getComponent<ModelComponent>();
 			mc.model->draw(shader.get());
