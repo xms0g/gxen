@@ -15,6 +15,7 @@
 #include "../ECS/components/transform.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/directionalLight.hpp"
+#include "../ECS/components/material.hpp"
 #include "../ECS/components/pointLight.hpp"
 #include "../ECS/components/spotLight.hpp"
 
@@ -51,11 +52,12 @@ void Renderer::update(const Camera* camera) const {
 
 	for (const auto& entity: getSystemEntities()) {
 		const auto& tc = entity.getComponent<TransformComponent>();
+		const auto& mtc = entity.getComponent<MaterialComponent>();
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
 		shader->setVec3("viewPos", camera->position());
-		shader->setFloat("material.shininess", 32.0f);
+		shader->setFloat("material.shininess", mtc.shininess);
 
 		// view/projection transformations
 		glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),

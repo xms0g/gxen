@@ -6,6 +6,7 @@
 #include "config/config.hpp"
 #include "ECS/registry.h"
 #include "ECS/components/directionalLight.hpp"
+#include "ECS/components/material.hpp"
 #include "ECS/components/model.hpp"
 #include "ECS/components/pointLight.hpp"
 #include "ECS/components/shader.hpp"
@@ -37,6 +38,8 @@ int main() {
 			fs::path(SHADER_DIR + "model.vert"),
 			fs::path(SHADER_DIR + "model.frag")));
 
+	backpack.addComponent<MaterialComponent>(32.0f);
+
 	auto dirLight = registry.createEntity();
 	dirLight.addComponent<DirectionalLightComponent>(
 		glm::vec3(-0.2f, -1.0f, -0.3f),
@@ -44,15 +47,15 @@ int main() {
 		glm::vec3(0.4f, 0.4f, 0.4f),
 		glm::vec3(0.5f, 0.5f, 0.5f));
 
-	auto pointLight = registry.createEntity();
-	pointLight.addComponent<PointLightComponent>(
-		glm::vec3(3.2f, 1.0f, 2.0f),
-		glm::vec3(0.05f, 0.05f, 0.05f),
-		glm::vec3(0.8f, 0.8f, 0.8f),
-		glm::vec3(1.0f, 1.0f, 1.0f),
-		1.0f,
-		0.09f,
-		0.032f);
+	// auto pointLight = registry.createEntity();
+	// pointLight.addComponent<PointLightComponent>(
+	// 	glm::vec3(3.2f, 1.0f, 2.0f),
+	// 	glm::vec3(0.05f, 0.05f, 0.05f),
+	// 	glm::vec3(0.8f, 0.8f, 0.8f),
+	// 	glm::vec3(1.0f, 1.0f, 1.0f),
+	// 	1.0f,
+	// 	0.09f,
+	// 	0.032f);
 
 	registry.update();
 

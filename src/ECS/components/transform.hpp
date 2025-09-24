@@ -8,9 +8,12 @@ struct TransformComponent {
 	float rotation{};
 
 	TransformComponent() = default;
-	explicit TransformComponent(const glm::vec3 position, const glm::vec3 scale,
-	                            const float rotation) : position(position),
-	                                                     scale(scale),
-	                                                     rotation(rotation) {
+
+	explicit TransformComponent(
+		const glm::vec3 position,
+		const glm::vec3 scale,
+		const float rotation) : position(position),
+		                        scale(scale),
+		                        rotation(rotation) {
 	}
 };
