@@ -8,6 +8,7 @@
 #include "../ECS/registry.h"
 #include "../renderer/gui.h"
 #include "../renderer/renderer.h"
+#include "../renderer/lightSystem.h"
 
 XEngine::XEngine() = default;
 
@@ -18,6 +19,9 @@ void XEngine::init(Registry* registry) {
 
 	try {
 		registry->addSystem<Renderer>();
+		registry->addSystem<LightSystem>();
+		mRegistry->getSystem<Renderer>().setLightSystem(&mRegistry->getSystem<LightSystem>());
+
 		mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 8.0f));
 		mInput = std::make_unique<Input>();
 	} catch (std::runtime_error& e) {
@@ -37,7 +41,8 @@ void XEngine::run() {
 		mRegistry->getSystem<Renderer>().gui()->updateFpsCounter(mDeltaTime);
 #endif
 		mCamera->update();
+		mRegistry->getSystem<LightSystem>().update();
 
-		mRegistry->getSystem<Renderer>().render(mCamera.get());
+		mRegistry->getSystem<Renderer>().update(mCamera.get());
 	}
 }

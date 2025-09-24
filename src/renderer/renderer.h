@@ -3,6 +3,7 @@
 #include <memory>
 #include "../ECS/system.hpp"
 
+class LightSystem;
 class Window;
 class Camera;
 class Gui;
@@ -15,9 +16,12 @@ public:
 
     [[nodiscard]] Gui* gui() const { return mGui.get(); }
 
-    void render(const Camera* camera) const;
+	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
+
+    void update(const Camera* camera) const;
 
 private:
+	LightSystem* mLightSystem{};
     std::unique_ptr<Window> mWindow;
     std::unique_ptr<Gui> mGui;
 };
