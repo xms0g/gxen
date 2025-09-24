@@ -16,16 +16,20 @@ public:
 
 	[[nodiscard]] const Signature& getComponentSignature() const { return componentSignature; }
 
+	[[nodiscard]] bool useOrLogic() const { return mUseOrLogic; }
+
 	template<typename T>
-	void RequireComponent();
+	void RequireComponent(bool orLogic = false);
 
 private:
+	bool mUseOrLogic{};
 	Signature componentSignature;
 	std::vector<Entity> entities;
 };
 
 template<typename T>
-void System::RequireComponent() {
+void System::RequireComponent(const bool orLogic) {
 	const auto componentID = Component<T>::getID();
 	componentSignature.set(componentID);
+	mUseOrLogic = orLogic;
 }

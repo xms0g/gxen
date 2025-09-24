@@ -24,8 +24,16 @@ void Registry::update() {
 void Registry::addEntityToSystems(const Entity entity) {
 	const auto& entityComponentSignature = entityComponentSignatures[entity.id()];
 
-	for (auto& [index, system]: systems) {
+	for (auto& [tidx, system]: systems) {
 		const auto& systemComponentSignature = system->getComponentSignature();
+
+		if (system->useOrLogic()) {
+			// OR match: at least one bit must match
+			if ((entityComponentSignature & systemComponentSignature).any()) {
+				system->addEntityToSystem(entity);
+				continue;
+			}
+		}
 
 		if ((entityComponentSignature & systemComponentSignature) == systemComponentSignature) {
 			system->addEntityToSystem(entity);
