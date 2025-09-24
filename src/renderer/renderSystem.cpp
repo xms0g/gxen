@@ -1,4 +1,4 @@
-#include "renderer.h"
+#include "renderSystem.h"
 #include <SDL.h>
 #include <iostream>
 #include "image/stb_image.h"
@@ -20,7 +20,7 @@
 #include "../ECS/components/spotLight.hpp"
 
 
-Renderer::Renderer() {
+RenderSystem::RenderSystem() {
 	RequireComponent<ModelComponent>();
 	RequireComponent<ShaderComponent>();
 	RequireComponent<TransformComponent>();
@@ -47,7 +47,7 @@ Renderer::Renderer() {
 	glFrontFace(GL_CCW);
 }
 
-void Renderer::update(const Camera* camera) const {
+void RenderSystem::update(const Camera* camera) const {
 	mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
 	for (const auto& entity: getSystemEntities()) {

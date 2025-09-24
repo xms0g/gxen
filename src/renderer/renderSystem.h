@@ -8,9 +8,9 @@ class Window;
 class Camera;
 class Gui;
 
-class Renderer final : public System {
+class RenderSystem final : public System {
 public:
-    explicit Renderer();
+    explicit RenderSystem();
 
     [[nodiscard]] Window* window() const { return mWindow.get(); }
 
