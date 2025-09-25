@@ -81,7 +81,10 @@ void main() {
         result += calculateSpotLight(spotLights[i], norm, vFragPos, viewDir);
     }
 
-    fragColor = vec4(result, 1.0);
+    vec4 texColor = texture(material.texture_diffuse1, vTexcoord);
+    // Create a mask: 0.0 if no lights, 1.0 if at least one light
+    float hasLights = float(numDirLights + numPointLights + numSpotLights > 0);
+    fragColor = mix(texColor, vec4(result, 1.0), hasLights);
 }
 
 vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir) {
