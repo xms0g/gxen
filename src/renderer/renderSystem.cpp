@@ -3,6 +3,7 @@
 #include <iostream>
 #include "image/stb_image.h"
 #include "glad/glad.h"
+#include "glm/gtx/quaternion.hpp"
 #include "window.h"
 #include "gui.h"
 #include "lightSystem.h"
@@ -18,6 +19,7 @@
 #include "../ECS/components/material.hpp"
 #include "../ECS/components/pointLight.hpp"
 #include "../ECS/components/spotLight.hpp"
+
 
 RenderSystem::RenderSystem() {
 	RequireComponent<ModelComponent>();
@@ -47,7 +49,7 @@ RenderSystem::RenderSystem() {
 	glFrontFace(GL_CCW);
 }
 
-void RenderSystem::update(const Camera* camera) const {
+void RenderSystem::render(const Camera* camera) const {
 	mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
 	for (const auto& entity: getSystemEntities()) {
@@ -68,14 +70,8 @@ void RenderSystem::update(const Camera* camera) const {
 
 		auto modelMat = glm::mat4(1.0f);
 		modelMat = glm::translate(modelMat, tc.position);
-		modelMat = glm::scale(modelMat, glm::vec3(tc.scale));
-
-		if (tc.rotation != 0.0f) {
-			static float angle = 0.0f;
-
-			angle += tc.rotation;
-			modelMat = glm::rotate(modelMat, glm::radians(angle), glm::vec3(0, 1, 0)); //rotation y = 0.0 degrees
-		}
+		modelMat *= glm::toMat4(glm::quat(glm::radians(tc.rotation)));
+		modelMat *= glm::scale(glm::mat4(1.0f), tc.scale);
 		shader->setMat4("model", modelMat);
 
 		glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));

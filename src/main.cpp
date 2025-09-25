@@ -28,7 +28,11 @@ int main() {
 	xngn.init(&registry);
 
 	auto backpack = registry.createEntity();
-	backpack.addComponent<TransformComponent>(glm::vec3(0.0f), glm::vec3(1.0f), 0.1f);
+	backpack.addComponent<TransformComponent>(
+		glm::vec3(0.0f),
+		glm::vec3(0.0f, 45.0f, 0.0f),
+		glm::vec3(1.0f));
+
 	backpack.addComponent<ModelComponent>(
 		std::make_shared<Model>(
 			fs::path(ASSET_DIR + "backpack/backpack.obj")));

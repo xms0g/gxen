@@ -18,7 +18,7 @@ public:
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
-    void update(const Camera* camera) const;
+    void render(const Camera* camera) const;
 
 private:
 	LightSystem* mLightSystem{};

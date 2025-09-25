@@ -43,6 +43,6 @@ void XEngine::run() {
 		mCamera->update();
 		mRegistry->getSystem<LightSystem>().update();
 
-		mRegistry->getSystem<RenderSystem>().update(mCamera.get());
+		mRegistry->getSystem<RenderSystem>().render(mCamera.get());
 	}
 }
