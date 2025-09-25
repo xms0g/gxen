@@ -29,6 +29,7 @@ void ResourceManager::loadModel(const int entityID, std::string const& path) {
 	mEntityTextures.emplace(entityID, mTextures);
 	mMeshes.clear();
 	mTextures.clear();
+	mTexturesLoaded.clear();
 }
 
 void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
