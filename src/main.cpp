@@ -24,21 +24,19 @@
 int main() {
 	XEngine xngn;
 	Registry registry;
-	ResourceManager& rm = ResourceManager::instance();
 
 	xngn.init(&registry);
 
 	auto backpack = registry.createEntity();
 	backpack.addComponent<TransformComponent>(
 		glm::vec3(0.0f),
-		glm::vec3(0.0f, 45.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f));
 
-	rm.loadModel(backpack.id(), fs::path(ASSET_DIR + "backpack/backpack.obj"));
+	ResourceManager::instance().loadModel(backpack.id(), fs::path(ASSET_DIR + "backpack/backpack.obj"));
 
-	backpack.addComponent<MeshComponent>(rm.getMeshes(backpack.id()));
-
-	backpack.addComponent<MaterialComponent>(rm.getTextures(backpack.id()), 32.0f);
+	backpack.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(backpack.id()));
+	backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
 
 	backpack.addComponent<ShaderComponent>(
 		std::make_shared<Shader>(
