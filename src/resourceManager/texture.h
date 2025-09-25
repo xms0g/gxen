@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include "glad/glad.h"
 
 struct Texture {
     unsigned int id;

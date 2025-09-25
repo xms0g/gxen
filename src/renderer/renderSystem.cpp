@@ -8,21 +8,21 @@
 #include "gui.h"
 #include "lightSystem.h"
 #include "shader.h"
+#include "../mesh/mesh.h"
 #include "../config/config.hpp"
 #include "../core/camera.h"
-#include "../model/model.h"
 #include "../ECS/registry.h"
-#include "../ECS/components/model.hpp"
 #include "../ECS/components/transform.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/directionalLight.hpp"
 #include "../ECS/components/material.hpp"
+#include "../ECS/components/mesh.hpp"
 #include "../ECS/components/pointLight.hpp"
 #include "../ECS/components/spotLight.hpp"
-
+#include "../resourceManager/texture.h"
 
 RenderSystem::RenderSystem() {
-	RequireComponent<ModelComponent>();
+	RequireComponent<MeshComponent>();
 	RequireComponent<ShaderComponent>();
 	RequireComponent<TransformComponent>();
 	RequireComponent<MaterialComponent>();
@@ -60,7 +60,7 @@ void RenderSystem::render(const Camera* camera) const {
 		geometryPass(entity, camera, shader);
 		materialPass(entity, shader);
 		lightingPass(shader);
-		drawPass(entity, shader);
+		drawPass(entity);
 	}
 #ifdef DEBUG
 	mGui->render();
@@ -93,13 +93,37 @@ void RenderSystem::geometryPass(const Entity& entity, const Camera* camera,
 }
 
 void RenderSystem::materialPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const {
+	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
 	const auto& mtc = entity.getComponent<MaterialComponent>();
+	const auto textures = *mtc.textures;
+
 	shader->setFloat("material.shininess", mtc.shininess);
+
+	for (unsigned int i = 0; i < textures.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+		// retrieve texture number (the N in diffuse_textureN)
+		std::string number;
+		std::string name = textures[i].type;
+		if (name == "texture_diffuse")
+			number = std::to_string(diffuseNr++);
+		else if (name == "texture_specular")
+			number = std::to_string(specularNr++); // transfer unsigned int to string
+		else if (name == "texture_normal")
+			number = std::to_string(normalNr++); // transfer unsigned int to string
+		else if (name == "texture_height")
+			number = std::to_string(heightNr++); // transfer unsigned int to string
+
+		// now set the sampler to the correct texture unit
+		shader->setInt(std::string("material.") + name + number, i);
+		// and finally bind the texture
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
+	}
+	glActiveTexture(GL_TEXTURE0);
 }
 
 void RenderSystem::lightingPass(const std::shared_ptr<Shader>& shader) const {
 	// Directional lights
-	auto& dirLights = mLightSystem->getDirLights();
+	const auto& dirLights = mLightSystem->getDirLights();
 	shader->setInt("numDirLights", dirLights.size());
 	for (int i = 0; i < dirLights.size(); i++) {
 		shader->setVec3("dirLights[" + std::to_string(i) + "].direction", dirLights[i]->direction);
@@ -108,7 +132,7 @@ void RenderSystem::lightingPass(const std::shared_ptr<Shader>& shader) const {
 		shader->setVec3("dirLights[" + std::to_string(i) + "].specular", dirLights[i]->specular);
 	}
 	// Point lights
-	auto& pointLights = mLightSystem->getPointLights();
+	const auto& pointLights = mLightSystem->getPointLights();
 	shader->setInt("numPointLights", pointLights.size());
 	for (int i = 0; i < pointLights.size(); i++) {
 		shader->setVec3("pointLights[" + std::to_string(i) + "].position", pointLights[i]->position);
@@ -120,7 +144,7 @@ void RenderSystem::lightingPass(const std::shared_ptr<Shader>& shader) const {
 		shader->setFloat("pointLights[" + std::to_string(i) + "].Kq", pointLights[i]->Kq);
 	}
 	// Spot Lights
-	auto& spotLights = mLightSystem->getSpotLights();
+	const auto& spotLights = mLightSystem->getSpotLights();
 	shader->setInt("numSpotLights", spotLights.size());
 	for (int i = 0; i < spotLights.size(); i++) {
 		shader->setVec3("spotLights[" + std::to_string(i) + "].position", spotLights[i]->position);
@@ -138,7 +162,12 @@ void RenderSystem::lightingPass(const std::shared_ptr<Shader>& shader) const {
 	}
 }
 
-void RenderSystem::drawPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const {
-	const auto& mc = entity.getComponent<ModelComponent>();
-	mc.model->draw(shader.get());
+void RenderSystem::drawPass(const Entity& entity) const {
+	const auto& mc = entity.getComponent<MeshComponent>();
+
+	for (auto mesh: *mc.meshes) {
+		glBindVertexArray(mesh.VAO());
+		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+		glBindVertexArray(0);
+	}
 }

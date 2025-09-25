@@ -25,7 +25,7 @@ private:
 	void geometryPass(const Entity& entity, const Camera* camera, const std::shared_ptr<Shader>& shader) const;
 	void materialPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const;
 	void lightingPass(const std::shared_ptr<Shader>& shader) const;
-	void drawPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const;
+	void drawPass(const Entity& entity) const;
 
 	LightSystem* mLightSystem{};
     std::unique_ptr<Window> mWindow;
