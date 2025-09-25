@@ -72,7 +72,9 @@ void RenderSystem::render(const Camera* camera) const {
 
 void RenderSystem::geometryPass(const Entity& entity, const Camera* camera,
                                 const std::shared_ptr<Shader>& shader) const {
-	const auto& tc = entity.getComponent<TransformComponent>();
+	auto& tc = entity.getComponent<TransformComponent>();
+
+	mGui->updateTransform(tc.position, tc.rotation, tc.scale);
 
 	shader->setVec3("viewPos", camera->position());
 
