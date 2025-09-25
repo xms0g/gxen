@@ -31,11 +31,11 @@ void Registry::addEntityToSystems(const Entity entity) {
 			// OR match: at least one bit must match
 			if ((entityComponentSignature & systemComponentSignature).any()) {
 				system->addEntityToSystem(entity);
-				continue;
 			}
+			continue;
 		}
 
-		if ((entityComponentSignature & systemComponentSignature) == systemComponentSignature) {
+		if (entityComponentSignature == systemComponentSignature) {
 			system->addEntityToSystem(entity);
 		}
 	}

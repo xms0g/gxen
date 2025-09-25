@@ -19,11 +19,11 @@
 #include "../ECS/components/pointLight.hpp"
 #include "../ECS/components/spotLight.hpp"
 
-
 RenderSystem::RenderSystem() {
 	RequireComponent<ModelComponent>();
 	RequireComponent<ShaderComponent>();
 	RequireComponent<TransformComponent>();
+	RequireComponent<MaterialComponent>();
 
 	mWindow = std::make_unique<Window>();
 	mWindow->init("XEngine");
