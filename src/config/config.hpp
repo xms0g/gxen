@@ -9,6 +9,7 @@
 const std::string SHADER_DIR = "shaders/";
 const std::string ASSET_DIR = "assets/";
 
+// Window Settings
 constexpr unsigned int SCR_WIDTH = 1600;
 constexpr unsigned int SCR_HEIGHT = 900;
 constexpr float ASPECT = static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT);
