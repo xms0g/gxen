@@ -45,16 +45,15 @@ void XEngine::run() {
 		mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
 		mMillisecsPreviousFrame = SDL_GetTicks();
 
-#ifdef DEBUG
-		mRegistry->getSystem<GuiSystem>().update(mDeltaTime);
-#endif
 		mCamera->update();
 		mRegistry->getSystem<LightSystem>().update();
 		mRegistry->getSystem<RenderSystem>().render(mCamera.get());
 
 #ifdef DEBUG
+		mRegistry->getSystem<GuiSystem>().update(mDeltaTime);
 		mRegistry->getSystem<GuiSystem>().render();
 #endif
+
 		// SDL swap buffers
 		mWindow->swapBuffer();
 	}
