@@ -8,7 +8,7 @@ ResourceManager& ResourceManager::instance() {
 	return instance;
 }
 
-void ResourceManager::loadModel(const int entityID, std::string const& path) {
+void ResourceManager::loadModel(const size_t entityID, std::string const& path) {
 	// read file via ASSIMP
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(
