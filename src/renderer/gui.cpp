@@ -81,7 +81,7 @@ void Gui::renderTransform() {
 		ImGui::DragFloat3("p", &_position.x, 0.01f);
 
 		ImGui::Text("Rotation");
-		ImGui::DragFloat3("r", &_rotation.x);
+		ImGui::DragFloat3("r", &_rotation.x, 1.0f, -360.0f, 360.0f);
 
 		ImGui::Text("Scale");
 		ImGui::DragFloat3("s", &_scale.x);
