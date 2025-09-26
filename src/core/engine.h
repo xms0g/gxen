@@ -2,6 +2,7 @@
 
 #include <memory>
 
+class Window;
 class Registry;
 class Input;
 class Camera;
@@ -23,6 +24,7 @@ private:
     bool isRunning{true};
 
     Registry* mRegistry{};
+	std::unique_ptr<Window> mWindow;
 	std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;
 };

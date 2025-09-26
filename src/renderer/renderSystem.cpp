@@ -4,8 +4,6 @@
 #include "image/stb_image.h"
 #include "glad/glad.h"
 #include "glm/gtx/quaternion.hpp"
-#include "window.h"
-#include "gui.h"
 #include "lightSystem.h"
 #include "shader.h"
 #include "../mesh/mesh.h"
@@ -27,17 +25,12 @@ RenderSystem::RenderSystem() {
 	RequireComponent<TransformComponent>();
 	RequireComponent<MaterialComponent>();
 
-	mWindow = std::make_unique<Window>();
-	mWindow->init("XEngine");
-
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
 		std::cerr << "Failed to initialize GLAD" << std::endl;
 		return;
 	}
-
-	mGui = std::make_unique<Gui>(mWindow->nativeHandle(), mWindow->glContext());
 
 	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
 	stbi_set_flip_vertically_on_load(true);
@@ -50,8 +43,6 @@ RenderSystem::RenderSystem() {
 }
 
 void RenderSystem::render(const Camera* camera) const {
-	mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
-
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
@@ -62,20 +53,11 @@ void RenderSystem::render(const Camera* camera) const {
 		lightingPass(shader);
 		drawPass(entity);
 	}
-#ifdef DEBUG
-	mGui->render();
-#endif
-
-	// SDL swap buffers
-	mWindow->swapBuffer();
 }
 
 void RenderSystem::geometryPass(const Entity& entity, const Camera* camera,
                                 const std::shared_ptr<Shader>& shader) const {
 	auto& tc = entity.getComponent<TransformComponent>();
-#ifdef DEBUG
-	mGui->updateTransform(tc.position, tc.rotation, tc.scale);
-#endif
 
 	shader->setVec3("viewPos", camera->position());
 
@@ -96,13 +78,13 @@ void RenderSystem::geometryPass(const Entity& entity, const Camera* camera,
 }
 
 void RenderSystem::materialPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const {
-	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
 	const auto& mtc = entity.getComponent<MaterialComponent>();
 	const auto textures = *mtc.textures;
 
 	shader->setFloat("material.shininess", mtc.shininess);
 
-	for (unsigned int i = 0; i < textures.size(); i++) {
+	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
+	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number;
@@ -117,7 +99,7 @@ void RenderSystem::materialPass(const Entity& entity, const std::shared_ptr<Shad
 			number = std::to_string(heightNr++); // transfer unsigned int to string
 
 		// now set the sampler to the correct texture unit
-		shader->setInt(std::string("material.") + name + number, i);
+		shader->setInt(std::string("material.").append(name).append(number), i);
 		// and finally bind the texture
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}

@@ -6,16 +6,12 @@
 class LightSystem;
 class Window;
 class Camera;
-class Gui;
+class guiSystem;
 class Shader;
 
 class RenderSystem final : public System {
 public:
     explicit RenderSystem();
-
-    [[nodiscard]] Window* window() const { return mWindow.get(); }
-
-    [[nodiscard]] Gui* gui() const { return mGui.get(); }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
@@ -28,6 +24,4 @@ private:
 	void drawPass(const Entity& entity) const;
 
 	LightSystem* mLightSystem{};
-    std::unique_ptr<Window> mWindow;
-    std::unique_ptr<Gui> mGui;
 };

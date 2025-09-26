@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "guiSystem.h"
 #include <string>
 #include "glad/glad.h"
 #include "glm/glm.hpp"
@@ -6,8 +6,10 @@
 #include "../../libs/imgui/imgui_impl_sdl.h"
 #include "../../libs/imgui/imgui_impl_opengl3.h"
 #include "../../libs/imgui/imgui_internal.h"
+#include "../ECS/components/transform.hpp"
 
-Gui::Gui(SDL_Window* window, SDL_GLContext gl_context) {
+GuiSystem::GuiSystem(SDL_Window* window, SDL_GLContext gl_context) {
+	RequireComponent<TransformComponent>(true);
 	// Initialize the ImGui context
 	const char* glsl_version = "#version 410";
 	IMGUI_CHECKVERSION();
@@ -19,14 +21,24 @@ Gui::Gui(SDL_Window* window, SDL_GLContext gl_context) {
 	ImGui_ImplOpenGL3_Init(glsl_version);
 }
 
-Gui::~Gui() {
+GuiSystem::~GuiSystem() {
 	// Clean up ImGui
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplSDL2_Shutdown();
 	ImGui::DestroyContext();
 }
 
-void Gui::render() {
+void GuiSystem::update(const float dt) {
+	updateFpsCounter(dt);
+
+	for (auto entity: getSystemEntities()) {
+		auto& tc = entity.getComponent<TransformComponent>();
+
+		updateTransform(tc);
+	}
+}
+
+void GuiSystem::render() {
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -43,7 +55,7 @@ void Gui::render() {
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
 
-void Gui::updateFpsCounter(const float dt) {
+void GuiSystem::updateFpsCounter(const float dt) {
 	mCurrentFrameCount++;
 
 	mCurrentSeconds += dt;
@@ -56,13 +68,13 @@ void Gui::updateFpsCounter(const float dt) {
 	}
 }
 
-void Gui::updateTransform(glm::vec3& position, glm::vec3& rotation, glm::vec3& scale) const {
-	position = mPosition;
-	rotation = mRotation;
-	scale = mScale;
+void GuiSystem::updateTransform(TransformComponent& tc) const {
+	tc.position = transform.position;
+	tc.rotation = transform.rotation;
+	tc.scale = transform.scale;
 }
 
-void Gui::renderGraphicsInfo() const {
+void GuiSystem::renderGraphicsInfo() const {
 	if (ImGui::Begin("Graphics")) {
 		ImGui::Text("%s FPS", std::to_string(mFPS).c_str());
 		ImGui::Text("OpenGL version: %s", glGetString(GL_VERSION));
@@ -73,21 +85,21 @@ void Gui::renderGraphicsInfo() const {
 	ImGui::End();
 }
 
-void Gui::renderTransform() {
-	static glm::vec3 _position{0.0}, _rotation{0.0}, _scale{1.0};
+void GuiSystem::renderTransform() {
+	static glm::vec3 position{0.0}, rotation{0.0}, scale{1.0};
 
 	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
 		ImGui::Text("Position");
-		ImGui::DragFloat3("p", &_position.x, 0.01f);
+		ImGui::DragFloat3("p", &position.x, 0.01f);
 
 		ImGui::Text("Rotation");
-		ImGui::DragFloat3("r", &_rotation.x, 1.0f, -360.0f, 360.0f);
+		ImGui::DragFloat3("r", &rotation.x, 1.0f, -360.0f, 360.0f);
 
 		ImGui::Text("Scale");
-		ImGui::DragFloat3("s", &_scale.x);
+		ImGui::DragFloat3("s", &scale.x);
 
-		mPosition = _position;
-		mRotation = _rotation;
-		mScale = _scale;
+		transform.position = position;
+		transform.rotation = rotation;
+		transform.scale = scale;
 	}
 }
