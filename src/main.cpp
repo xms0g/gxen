@@ -12,6 +12,8 @@
 #include "ECS/components/shader.hpp"
 #include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
+#include "mesh/mesh.h"
+#include "models/plane.h"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 2
@@ -29,7 +31,7 @@ int main() {
 
 	auto backpack = registry.createEntity();
 	backpack.addComponent<TransformComponent>(
-		glm::vec3(0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f));
 
@@ -39,9 +41,20 @@ int main() {
 	backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
 
 	backpack.addComponent<ShaderComponent>(
-		std::make_shared<Shader>(
-			fs::path(SHADER_DIR + "model.vert"),
-			fs::path(SHADER_DIR + "model.frag")));
+		std::make_shared<Shader>("model.vert", "model.frag"));
+
+	Plane planeModel{"textures/metal.png"};
+	auto plane = registry.createEntity();
+	plane.addComponent<TransformComponent>(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(2.0f));
+
+	plane.addComponent<MeshComponent>(planeModel.getMeshes());
+	plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f);
+
+	plane.addComponent<ShaderComponent>(
+		std::make_shared<Shader>("plane.vert", "plane.frag"));
 
 	auto dirLight = registry.createEntity();
 	dirLight.addComponent<DirectionalLightComponent>(

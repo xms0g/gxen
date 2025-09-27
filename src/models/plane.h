@@ -8,7 +8,7 @@ struct Texture;
 
 class Plane {
 public:
-	Plane();
+	Plane(const char* texture);
 
 	std::vector<Mesh>* getMeshes() { return &meshes; }
 	std::vector<Texture>* getTextures() { return &textures; }

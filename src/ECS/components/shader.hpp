@@ -7,5 +7,5 @@ struct ShaderComponent {
 	std::shared_ptr<Shader> shader;
 
 	ShaderComponent() = default;
-	explicit ShaderComponent(const std::shared_ptr<Shader>& s) : shader(s) {}
+	explicit ShaderComponent(std::shared_ptr<Shader> s) : shader(std::move(s)) {}
 };

@@ -4,7 +4,7 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-Plane::Plane() {
+Plane::Plane(const char* texture) {
 	float v[] = {
 		 // positions         // Normals		   // texture Coords
 		 5.0f, -0.5f,  5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // top right
@@ -32,7 +32,7 @@ Plane::Plane() {
 	meshes.emplace_back(vertices, indices);
 
 	textures.emplace_back(
-		texture::load(fs::path(ASSET_DIR + "textures/metal.png").c_str()),
+		texture::load(fs::path(ASSET_DIR + texture).c_str()),
 		"texture_diffuse",
 		"textures/metal.png");
 }
