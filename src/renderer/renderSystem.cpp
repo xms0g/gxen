@@ -23,7 +23,6 @@ RenderSystem::RenderSystem() {
 	RequireComponent<MeshComponent>();
 	RequireComponent<ShaderComponent>();
 	RequireComponent<TransformComponent>();
-	RequireComponent<MaterialComponent>();
 
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
@@ -79,8 +78,16 @@ void RenderSystem::geometryPass(const Entity& entity, const Camera* camera,
 
 void RenderSystem::materialPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const {
 	const auto& mtc = entity.getComponent<MaterialComponent>();
+
+	if (!mtc.textures) {
+		shader->setBool("useTexture", false);
+		shader->setVec3("color", mtc.color);
+		return;
+	}
+
 	const auto textures = *mtc.textures;
 
+	shader->setBool("useTexture", true);
 	shader->setFloat("material.shininess", mtc.shininess);
 
 	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
