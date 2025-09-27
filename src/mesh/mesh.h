@@ -30,7 +30,7 @@ public:
 
 	std::vector<unsigned int>& indices() { return mIndices; }
 
-	unsigned int VAO() const { return mVAO; }
+	[[nodiscard]] unsigned int VAO() const { return mVAO; }
 
 private:
 	// mesh Data
