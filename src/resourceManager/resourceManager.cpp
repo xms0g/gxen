@@ -133,11 +133,11 @@ void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextur
 		if (mTexturesLoaded.contains(str.C_Str()))
 			continue;
 
-		Texture texture;
-		texture.id = texture::load((mDirectory + str.C_Str()).c_str());
-		texture.type = typeName;
-		texture.path = str.C_Str();
-		mTextures.push_back(texture);
+
+		mTextures.emplace_back(
+			texture::load((mDirectory + str.C_Str()).c_str()),
+			typeName,
+			str.C_Str());
 		// store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate mTextures.
 		mTexturesLoaded.emplace(str.C_Str());
 	}

@@ -27,7 +27,7 @@ void XEngine::init(Registry* registry) {
 		mRegistry->getSystem<RenderSystem>().setLightSystem(&mRegistry->getSystem<LightSystem>());
 
 
-		mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 0.0f, 8.0f));
+		mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
 		mInput = std::make_unique<Input>();
 
 	} catch (std::runtime_error& e) {
