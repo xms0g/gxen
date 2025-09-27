@@ -2,8 +2,6 @@
 #include "core/camera.h"
 #include "renderer/shader.h"
 #include "resourceManager/resourceManager.h"
-#include "io/filesystem.hpp"
-#include "config/config.hpp"
 #include "ECS/registry.h"
 #include "ECS/components/directionalLight.hpp"
 #include "ECS/components/material.hpp"
@@ -35,7 +33,7 @@ int main() {
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(1.0f));
 
-	ResourceManager::instance().loadModel(backpack.id(), fs::path(ASSET_DIR + "backpack/backpack.obj"));
+	ResourceManager::instance().loadModel(backpack.id(), "backpack/backpack.obj");
 
 	backpack.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(backpack.id()));
 	backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);

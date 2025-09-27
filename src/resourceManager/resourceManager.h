@@ -16,7 +16,7 @@ public:
 
     static ResourceManager& instance();
 
-	void loadModel(size_t entityID, std::string const& path);
+	void loadModel(size_t entityID, const char* file);
 
 	std::vector<Mesh>* getMeshes(const size_t entityID) { return &mEntityMeshes.at(entityID); }
 

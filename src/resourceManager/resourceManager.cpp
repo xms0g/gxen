@@ -2,15 +2,19 @@
 #include <iostream>
 #include "image/stb_image.h"
 #include "../mesh/mesh.h"
+#include "../io/filesystem.hpp"
+#include "../config/config.hpp"
 
 ResourceManager& ResourceManager::instance() {
 	static ResourceManager instance;
 	return instance;
 }
 
-void ResourceManager::loadModel(const size_t entityID, std::string const& path) {
+void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	// read file via ASSIMP
 	Assimp::Importer importer;
+
+	const std::string path = fs::path(ASSET_DIR + file);
 	const aiScene* scene = importer.ReadFile(
 		path,
 		aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
