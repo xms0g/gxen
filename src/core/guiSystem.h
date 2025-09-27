@@ -20,17 +20,9 @@ public:
 private:
 	void updateFpsCounter(float dt);
 
-	void updateTransform(TransformComponent& tc) const;
-
 	void renderGraphicsInfo() const;
 
 	void renderTransform();
-
-	struct {
-		glm::vec3 position;
-		glm::vec3 rotation;
-		glm::vec3 scale;
-	} transform;
 
 	// Frame
 	double mPreviousSeconds{0.0};

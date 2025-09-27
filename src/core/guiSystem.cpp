@@ -2,6 +2,7 @@
 #include <string>
 #include "glad/glad.h"
 #include "glm/glm.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "../../libs/imgui/imgui.h"
 #include "../../libs/imgui/imgui_impl_sdl.h"
 #include "../../libs/imgui/imgui_impl_opengl3.h"
@@ -30,12 +31,6 @@ GuiSystem::~GuiSystem() {
 
 void GuiSystem::update(const float dt) {
 	updateFpsCounter(dt);
-
-	for (auto entity: getSystemEntities()) {
-		auto& tc = entity.getComponent<TransformComponent>();
-
-		updateTransform(tc);
-	}
 }
 
 void GuiSystem::render() {
@@ -68,12 +63,6 @@ void GuiSystem::updateFpsCounter(const float dt) {
 	}
 }
 
-void GuiSystem::updateTransform(TransformComponent& tc) const {
-	tc.position = transform.position;
-	tc.rotation = transform.rotation;
-	tc.scale = transform.scale;
-}
-
 void GuiSystem::renderGraphicsInfo() const {
 	if (ImGui::Begin("Graphics")) {
 		ImGui::Text("%s FPS", std::to_string(mFPS).c_str());
@@ -86,20 +75,24 @@ void GuiSystem::renderGraphicsInfo() const {
 }
 
 void GuiSystem::renderTransform() {
-	static glm::vec3 position{0.0}, rotation{0.0}, scale{1.0};
+	for (auto entity: getSystemEntities()) {
+		auto& tc = entity.getComponent<TransformComponent>();
 
-	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-		ImGui::Text("Position");
-		ImGui::DragFloat3("p", &position.x, 0.01f);
+		ImGui::PushID(static_cast<int>(entity.id()));
 
-		ImGui::Text("Rotation");
-		ImGui::DragFloat3("r", &rotation.x, 1.0f, -360.0f, 360.0f);
+		ImGui::Text("Entity %lu", entity.id());
+		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ImGui::Text("Position");ImGui::SameLine(80);
+			ImGui::DragFloat3("##pos", glm::value_ptr(tc.position), 0.01f);
 
-		ImGui::Text("Scale");
-		ImGui::DragFloat3("s", &scale.x);
+			ImGui::Text("Rotation");ImGui::SameLine(80);
+			ImGui::DragFloat3("##rot", glm::value_ptr(tc.rotation), 1.0f, -360.0f, 360.0f);
 
-		transform.position = position;
-		transform.rotation = rotation;
-		transform.scale = scale;
+			ImGui::Text("Scale");ImGui::SameLine(80);
+			ImGui::DragFloat3("##scale", glm::value_ptr(tc.scale));
+
+			ImGui::Separator();
+		}
+		ImGui::PopID();
 	}
 }
