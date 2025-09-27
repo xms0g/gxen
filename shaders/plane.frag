@@ -1,5 +1,4 @@
 #version 410 core
-
 in vec2 vTexcoord;
 
 struct Material {
