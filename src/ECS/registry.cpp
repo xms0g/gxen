@@ -35,7 +35,7 @@ void Registry::addEntityToSystems(const Entity entity) {
 			continue;
 		}
 
-		if (entityComponentSignature == systemComponentSignature) {
+		if ((entityComponentSignature & systemComponentSignature) == systemComponentSignature) {
 			system->addEntityToSystem(entity);
 		}
 	}
