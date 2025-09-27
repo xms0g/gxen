@@ -5,8 +5,8 @@
 #include "../resourceManager/texture.h"
 
 Plane::Plane(const char* texture) {
-	float v[] = {
-		 // positions         // Normals		   // texture Coords
+	constexpr float v[] = {
+		 // Positions         // Normals		   // Texture Coords
 		 5.0f, -0.5f,  5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // top right
 		-5.0f, -0.5f,  5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // top left
 		-5.0f, -0.5f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, // bottom left
@@ -20,7 +20,7 @@ Plane::Plane(const char* texture) {
 
 	std::vector<Vertex> vertices;
 
-	for (int i = 0; i < 40; i += 8) {
+	for (int i = 0; i < 8*4; i += 8) {
 		Vertex vertex;
 		vertex.position = glm::vec3(v[i], v[i + 1], v[i + 2]);
 		vertex.normal = glm::vec3(v[i + 3], v[i + 4], v[i + 5]);
@@ -31,8 +31,10 @@ Plane::Plane(const char* texture) {
 
 	meshes.emplace_back(vertices, indices);
 
-	textures.emplace_back(
+	if (texture) {
+		textures.emplace_back(
 		texture::load(fs::path(ASSET_DIR + texture).c_str()),
 		"texture_diffuse",
-		"textures/metal.png");
+		texture);
+	}
 }

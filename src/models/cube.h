@@ -1,14 +1,12 @@
 #pragma once
-
 #include <vector>
 
-class Mesh;
-struct Vertex;
 struct Texture;
+class Mesh;
 
-class Plane {
+class Cube {
 public:
-	explicit Plane(const char* texture = nullptr);
+	explicit Cube(const char* texture = nullptr);
 
 	std::vector<Mesh>* getMeshes() { return &meshes; }
 	std::vector<Texture>* getTextures() { return &textures; }
