@@ -2,8 +2,10 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include "../io/filesystem.hpp"
+#include "../config/config.hpp"
 
-Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
+Shader::Shader(const char* vs, const char* fs) {
     // 1. retrieve the vertex/fragment source code from filePath
     std::string vertexCode;
     std::string fragmentCode;
@@ -16,8 +18,8 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 
     try {
         // open files
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
+        vShaderFile.open(fs::path(SHADER_DIR + vs));
+        fShaderFile.open(fs::path(SHADER_DIR + fs));
         std::stringstream vShaderStream, fShaderStream;
         // read file's buffer contents into streams
         vShaderStream << vShaderFile.rdbuf();
