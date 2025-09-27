@@ -15,9 +15,6 @@ uniform vec3 color;
 out vec4 fragColor;
 
 void main() {
-    if (useTexture) {
-        fragColor = texture(material.texture_diffuse1, vTexcoord);
-    } else {
-        fragColor = vec4(color, 1.0);
-    }
+    vec3 color = useTexture ? texture(material.texture_diffuse1, vTexcoord).rgb : color;
+    fragColor = vec4(color, 1.0);
 }
