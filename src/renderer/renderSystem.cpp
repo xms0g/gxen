@@ -123,7 +123,7 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 
 	if (!mtc.textures) {
 		shader.setBool("useTexture", false);
-		shader.setVec3("color", mtc.color);
+		shader.setVec3("material.color", mtc.color);
 		return;
 	}
 
