@@ -10,9 +10,9 @@ class LightSystem final : public System {
 public:
 	LightSystem();
 
-	std::vector<PointLightComponent*>& getPointLights() { return pointLights; }
-	std::vector<DirectionalLightComponent*>& getDirLights() { return dirLights; }
-	std::vector<SpotLightComponent*>& getSpotLights() { return spotLights; }
+	[[nodiscard]] const std::vector<PointLightComponent*>& getPointLights() const  { return pointLights; }
+	[[nodiscard]] const std::vector<DirectionalLightComponent*>& getDirLights() const { return dirLights; }
+	[[nodiscard]] const std::vector<SpotLightComponent*>& getSpotLights() const { return spotLights; }
 
 	void update();
 

@@ -9,18 +9,24 @@
 #include "texture.h"
 
 class Mesh;
+
 class ResourceManager {
 public:
 	ResourceManager(const ResourceManager&) = delete;
+
 	ResourceManager& operator=(const ResourceManager&) = delete;
 
-    static ResourceManager& instance();
+	static ResourceManager& instance();
 
 	void loadModel(size_t entityID, const char* file);
 
-	std::vector<Mesh>* getMeshes(const size_t entityID) { return &mEntityMeshes.at(entityID); }
+	[[nodiscard]] const std::vector<Mesh>* getMeshes(const size_t entityID) const {
+		return &mEntityMeshes.at(entityID);
+	}
 
-	std::vector<Texture>* getTextures(const size_t entityID) { return &mEntityTextures.at(entityID); }
+	[[nodiscard]] const std::vector<Texture>* getTextures(const size_t entityID) const {
+		return &mEntityTextures.at(entityID);
+	}
 
 private:
 	explicit ResourceManager() = default;
@@ -36,8 +42,7 @@ private:
 	std::string mDirectory;
 	std::vector<Mesh> mMeshes;
 	std::vector<Texture> mTextures;
-	std::unordered_map<size_t, std::vector<Mesh>> mEntityMeshes;
-	std::unordered_map<size_t, std::vector<Texture>> mEntityTextures;
+	std::unordered_map<size_t, std::vector<Mesh> > mEntityMeshes;
+	std::unordered_map<size_t, std::vector<Texture> > mEntityTextures;
 	std::unordered_set<std::string> mTexturesLoaded;
 };
-

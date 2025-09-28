@@ -11,8 +11,8 @@ class Window {
 public:
 	explicit Window(const char* texture = nullptr);
 
-	const std::vector<Mesh>* getMeshes() const { return &meshes; }
-	const std::vector<Texture>* getTextures() const { return &textures; }
+	[[nodiscard]] const std::vector<Mesh>* getMeshes() const { return &meshes; }
+	[[nodiscard]] const std::vector<Texture>* getTextures() const { return &textures; }
 
 private:
 	std::vector<Mesh> meshes;
