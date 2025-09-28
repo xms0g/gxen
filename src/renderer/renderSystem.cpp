@@ -1,6 +1,7 @@
 #include "renderSystem.h"
-#include <SDL.h>
+#include <algorithm>
 #include <iostream>
+#include <SDL.h>
 #include "image/stb_image.h"
 #include "glad/glad.h"
 #include "glm/gtx/quaternion.hpp"
@@ -36,59 +37,98 @@ RenderSystem::RenderSystem() {
 
 	// configure global opengl state
 	glEnable(GL_DEPTH_TEST);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 }
 
-void RenderSystem::render(const Camera* camera) const {
+void RenderSystem::render(const Camera* camera) {
+	std::vector<std::pair<float, Entity> > transparentEntities;
+
 	for (const auto& entity: getSystemEntities()) {
+		if (collectTransparentEntities(entity, camera, transparentEntities))
+			continue;
+
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
-
-		geometryPass(entity, camera, shader);
-		materialPass(entity, shader);
-		lightingPass(shader);
-		drawPass(entity);
+		opaquePass(entity, camera, *shader);
 	}
+
+	transparentPass(camera, transparentEntities);
 }
 
-void RenderSystem::geometryPass(const Entity& entity, const Camera* camera,
-                                const std::shared_ptr<Shader>& shader) const {
-	auto& tc = entity.getComponent<TransformComponent>();
+bool RenderSystem::collectTransparentEntities(const Entity& entity, const Camera* camera, TransEntityBucket& bucket) {
+	const auto& tc = entity.getComponent<TransformComponent>();
+	const auto& mtc = entity.getComponent<MaterialComponent>();
 
-	shader->setVec3("viewPos", camera->position());
+	if (mtc.isTransparent) {
+		float distance = glm::length(camera->position() - tc.position);
+		bucket.emplace_back(distance, entity);
+		return true;
+	}
+	return false;
+}
+
+void RenderSystem::opaquePass(const Entity& entity, const Camera* camera, const Shader& shader) const {
+	geometryPass(entity, camera, shader);
+	materialPass(entity, shader);
+	lightingPass(shader);
+	drawPass(entity);
+}
+
+void RenderSystem::transparentPass(const Camera* camera, TransEntityBucket& bucket) {
+	std::sort(bucket.begin(), bucket.end(),
+					  [](const auto& a, const auto& b) { return a.first > b.first; });
+
+	glDepthMask(GL_FALSE);
+	for (auto& [dist, entity] : bucket) {
+		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+
+		shader->activate();
+		opaquePass(entity, camera, *shader);
+	}
+	glDepthMask(GL_TRUE);
+}
+
+void RenderSystem::geometryPass(const Entity& entity, const Camera* camera, const Shader& shader) const {
+	const auto& tc = entity.getComponent<TransformComponent>();
+
+	shader.setVec3("viewPos", camera->position());
 
 	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
 	                                                 static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
 	                                                 ZNEAR, ZFAR);
-	shader->setMat4("projection", projectionMat);
-	shader->setMat4("view", camera->viewMatrix());
+	shader.setMat4("projection", projectionMat);
+	shader.setMat4("view", camera->viewMatrix());
 
 	auto modelMat = glm::mat4(1.0f);
 	modelMat = glm::translate(modelMat, tc.position);
 	modelMat *= glm::toMat4(glm::quat(glm::radians(tc.rotation)));
 	modelMat *= glm::scale(glm::mat4(1.0f), tc.scale);
-	shader->setMat4("model", modelMat);
+	shader.setMat4("model", modelMat);
 
 	const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
-	shader->setMat3("normalMatrix", normalMatrix);
+	shader.setMat3("normalMatrix", normalMatrix);
 }
 
-void RenderSystem::materialPass(const Entity& entity, const std::shared_ptr<Shader>& shader) const {
+void RenderSystem::materialPass(const Entity& entity, const Shader& shader) const {
 	const auto& mtc = entity.getComponent<MaterialComponent>();
 
+	shader.setFloat("material.shininess", mtc.shininess);
+
 	if (!mtc.textures) {
-		shader->setBool("useTexture", false);
-		shader->setVec3("color", mtc.color);
+		shader.setBool("useTexture", false);
+		shader.setVec3("color", mtc.color);
 		return;
 	}
 
+	shader.setBool("useTexture", true);
 	const auto textures = *mtc.textures;
-
-	shader->setBool("useTexture", true);
-	shader->setFloat("material.shininess", mtc.shininess);
 
 	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
 	for (int i = 0; i < textures.size(); i++) {
@@ -106,63 +146,62 @@ void RenderSystem::materialPass(const Entity& entity, const std::shared_ptr<Shad
 			number = std::to_string(heightNr++); // transfer unsigned int to string
 
 		// now set the sampler to the correct texture unit
-		shader->setInt(std::string("material.").append(name).append(number), i);
+		shader.setInt(std::string("material.").append(name).append(number), i);
 		// and finally bind the texture
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void RenderSystem::lightingPass(const std::shared_ptr<Shader>& shader) const {
+void RenderSystem::lightingPass(const Shader& shader) const {
 	// Directional lights
 	const auto& dirLights = mLightSystem->getDirLights();
-	shader->setInt("numDirLights", dirLights.size());
+	shader.setInt("numDirLights", dirLights.size());
 	for (int i = 0; i < dirLights.size(); i++) {
-		shader->setVec3("dirLights[" + std::to_string(i) + "].direction", dirLights[i]->direction);
-		shader->setVec3("dirLights[" + std::to_string(i) + "].ambient", dirLights[i]->ambient);
-		shader->setVec3("dirLights[" + std::to_string(i) + "].diffuse", dirLights[i]->diffuse);
-		shader->setVec3("dirLights[" + std::to_string(i) + "].specular", dirLights[i]->specular);
+		shader.setVec3("dirLights[" + std::to_string(i) + "].direction", dirLights[i]->direction);
+		shader.setVec3("dirLights[" + std::to_string(i) + "].ambient", dirLights[i]->ambient);
+		shader.setVec3("dirLights[" + std::to_string(i) + "].diffuse", dirLights[i]->diffuse);
+		shader.setVec3("dirLights[" + std::to_string(i) + "].specular", dirLights[i]->specular);
 	}
 	// Point lights
 	const auto& pointLights = mLightSystem->getPointLights();
-	shader->setInt("numPointLights", pointLights.size());
+	shader.setInt("numPointLights", pointLights.size());
 	for (int i = 0; i < pointLights.size(); i++) {
-		shader->setVec3("pointLights[" + std::to_string(i) + "].position", pointLights[i]->position);
-		shader->setVec3("pointLights[" + std::to_string(i) + "].ambient", pointLights[i]->ambient);
-		shader->setVec3("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i]->diffuse);
-		shader->setVec3("pointLights[" + std::to_string(i) + "].specular", pointLights[i]->specular);
-		shader->setFloat("pointLights[" + std::to_string(i) + "].Kc", pointLights[i]->Kc);
-		shader->setFloat("pointLights[" + std::to_string(i) + "].Kl", pointLights[i]->Kl);
-		shader->setFloat("pointLights[" + std::to_string(i) + "].Kq", pointLights[i]->Kq);
+		shader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLights[i]->position);
+		shader.setVec3("pointLights[" + std::to_string(i) + "].ambient", pointLights[i]->ambient);
+		shader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i]->diffuse);
+		shader.setVec3("pointLights[" + std::to_string(i) + "].specular", pointLights[i]->specular);
+		shader.setFloat("pointLights[" + std::to_string(i) + "].Kc", pointLights[i]->Kc);
+		shader.setFloat("pointLights[" + std::to_string(i) + "].Kl", pointLights[i]->Kl);
+		shader.setFloat("pointLights[" + std::to_string(i) + "].Kq", pointLights[i]->Kq);
 	}
 	// Spot Lights
 	const auto& spotLights = mLightSystem->getSpotLights();
-	shader->setInt("numSpotLights", spotLights.size());
+	shader.setInt("numSpotLights", spotLights.size());
 	for (int i = 0; i < spotLights.size(); i++) {
-		shader->setVec3("spotLights[" + std::to_string(i) + "].position", spotLights[i]->position);
-		shader->setVec3("spotLights[" + std::to_string(i) + "].direction", spotLights[i]->direction);
-		shader->setFloat("spotLights[" + std::to_string(i) + "].cutOff",
+		shader.setVec3("spotLights[" + std::to_string(i) + "].position", spotLights[i]->position);
+		shader.setVec3("spotLights[" + std::to_string(i) + "].direction", spotLights[i]->direction);
+		shader.setFloat("spotLights[" + std::to_string(i) + "].cutOff",
 		                 glm::cos(glm::radians(spotLights[i]->cutOff)));
-		shader->setFloat("spotLights[" + std::to_string(i) + "].outerCutOff",
+		shader.setFloat("spotLights[" + std::to_string(i) + "].outerCutOff",
 		                 glm::cos(glm::radians(spotLights[i]->outerCutOff)));
-		shader->setVec3("spotLights[" + std::to_string(i) + "].ambient", spotLights[i]->ambient);
-		shader->setVec3("spotLights[" + std::to_string(i) + "].diffuse", spotLights[i]->diffuse);
-		shader->setVec3("spotLights[" + std::to_string(i) + "].specular", spotLights[i]->specular);
-		shader->setFloat("spotLights[" + std::to_string(i) + "].Kc", spotLights[i]->Kc);
-		shader->setFloat("spotLights[" + std::to_string(i) + "].Kl", spotLights[i]->Kl);
-		shader->setFloat("spotLights[" + std::to_string(i) + "].Kq", spotLights[i]->Kq);
+		shader.setVec3("spotLights[" + std::to_string(i) + "].ambient", spotLights[i]->ambient);
+		shader.setVec3("spotLights[" + std::to_string(i) + "].diffuse", spotLights[i]->diffuse);
+		shader.setVec3("spotLights[" + std::to_string(i) + "].specular", spotLights[i]->specular);
+		shader.setFloat("spotLights[" + std::to_string(i) + "].Kc", spotLights[i]->Kc);
+		shader.setFloat("spotLights[" + std::to_string(i) + "].Kl", spotLights[i]->Kl);
+		shader.setFloat("spotLights[" + std::to_string(i) + "].Kq", spotLights[i]->Kq);
 	}
 }
 
 void RenderSystem::drawPass(const Entity& entity) const {
+	const bool isCulling = glIsEnabled(GL_CULL_FACE);
 	const auto& mc = entity.getComponent<MeshComponent>();
 
-
-	if (mc.isTwoSided) glDisable(GL_CULL_FACE);
-	for (auto mesh: *mc.meshes) {
+	if (mc.isTwoSided && isCulling) glDisable(GL_CULL_FACE);
+	for (const auto& mesh: *mc.meshes) {
 		glBindVertexArray(mesh.VAO());
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
-		glBindVertexArray(0);
 	}
-	if (mc.isTwoSided) glEnable(GL_CULL_FACE);
+	if (mc.isTwoSided && isCulling) glEnable(GL_CULL_FACE);
 }

@@ -7,11 +7,13 @@ using Signature = std::bitset<MAX_COMPONENTS>;
 
 class Entity {
 public:
+	Entity() = default;
+
 	explicit Entity(const size_t id): mID(id) {}
 
 	Entity(const Entity& other) = default;
 
-	size_t id() const { return mID; }
+	[[nodiscard]] size_t id() const { return mID; }
 
 	class Registry* registry{};
 

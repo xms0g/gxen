@@ -11,7 +11,9 @@
 #include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
 #include "mesh/mesh.h"
+#include "models/cube.h"
 #include "models/plane.h"
+#include "models/window.h"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 2
@@ -27,19 +29,19 @@ int main() {
 
 	xngn.init(&registry);
 
-	auto backpack = registry.createEntity();
-	backpack.addComponent<TransformComponent>(
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(1.0f));
-
-	ResourceManager::instance().loadModel(backpack.id(), "backpack/backpack.obj");
-
-	backpack.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(backpack.id()));
-	backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
-
-	backpack.addComponent<ShaderComponent>(
-		std::make_shared<Shader>("model.vert", "model.frag"));
+	// auto backpack = registry.createEntity();
+	// backpack.addComponent<TransformComponent>(
+	// 	glm::vec3(0.0f, 0.0f, 0.0f),
+	// 	glm::vec3(0.0f, 0.0f, 0.0f),
+	// 	glm::vec3(1.0f));
+	//
+	// ResourceManager::instance().loadModel(backpack.id(), "backpack/backpack.obj");
+	//
+	// backpack.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(backpack.id()));
+	// backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
+	//
+	// backpack.addComponent<ShaderComponent>(
+	// 	std::make_shared<Shader>("model.vert", "model.frag"));
 
 	Plane planeModel{"textures/metal.png"};
 	auto plane = registry.createEntity();
@@ -48,28 +50,63 @@ int main() {
 		glm::vec3(0.0f, 0.0f, 0.0f),
 		glm::vec3(2.0f));
 
-	plane.addComponent<MeshComponent>(planeModel.getMeshes());
+	plane.addComponent<MeshComponent>(planeModel.getMeshes(), true);
 	plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f);
 
 	plane.addComponent<ShaderComponent>(
 		std::make_shared<Shader>("plane.vert", "plane.frag"));
 
-	auto dirLight = registry.createEntity();
-	dirLight.addComponent<DirectionalLightComponent>(
-		glm::vec3(-0.2f, -1.0f, -0.3f),
-		glm::vec3(0.05f, 0.05f, 0.05f),
-		glm::vec3(0.4f, 0.4f, 0.4f),
-		glm::vec3(0.5f, 0.5f, 0.5f));
+	Cube cubeModel{"textures/wall.jpg"};
+	auto cube = registry.createEntity();
+	cube.addComponent<TransformComponent>(
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(0.0f, 0.0f, 0.0f),
+		glm::vec3(2.0f));
 
-	auto pointLight = registry.createEntity();
-	pointLight.addComponent<PointLightComponent>(
-		glm::vec3(3.2f, 1.0f, 2.0f),
-		glm::vec3(0.05f, 0.05f, 0.05f),
-		glm::vec3(0.8f, 0.8f, 0.8f),
-		glm::vec3(1.0f, 1.0f, 1.0f),
-		1.0f,
-		0.09f,
-		0.032f);
+	cube.addComponent<MeshComponent>(cubeModel.getMeshes());
+	cube.addComponent<MaterialComponent>(cubeModel.getTextures(), 32.0f);
+
+	cube.addComponent<ShaderComponent>(
+		std::make_shared<Shader>("cube.vert", "cube.frag"));
+
+	std::vector<glm::vec3> windows{
+   		glm::vec3(-1.5f, 0.0f, -0.48f),
+		glm::vec3( 1.5f, 0.0f, 0.51f),
+   };
+
+
+	WindowModel windowModel{"textures/window.png"};
+	auto windowShader = std::make_shared<Shader>("blend.vert", "blend.frag");
+
+	for (auto& pos: windows) {
+
+		auto w = registry.createEntity();
+		w.addComponent<TransformComponent>(
+			pos,
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(2.0f));
+
+		w.addComponent<MeshComponent>(windowModel.getMeshes(), true);
+		w.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, true);
+		w.addComponent<ShaderComponent>(windowShader);
+	}
+
+	// auto dirLight = registry.createEntity();
+	// dirLight.addComponent<DirectionalLightComponent>(
+	// 	glm::vec3(-0.2f, -1.0f, -0.3f),
+	// 	glm::vec3(0.05f, 0.05f, 0.05f),
+	// 	glm::vec3(0.4f, 0.4f, 0.4f),
+	// 	glm::vec3(0.5f, 0.5f, 0.5f));
+	//
+	// auto pointLight = registry.createEntity();
+	// pointLight.addComponent<PointLightComponent>(
+	// 	glm::vec3(3.2f, 1.0f, 2.0f),
+	// 	glm::vec3(0.05f, 0.05f, 0.05f),
+	// 	glm::vec3(0.8f, 0.8f, 0.8f),
+	// 	glm::vec3(1.0f, 1.0f, 1.0f),
+	// 	1.0f,
+	// 	0.09f,
+	// 	0.032f);
 
 	registry.update();
 
