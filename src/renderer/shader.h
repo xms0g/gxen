@@ -1,6 +1,8 @@
 #pragma once
 
 #include <string>
+#include <unordered_set>
+
 #include "glm/glm.hpp"
 #include "glad/glad.h"
 
@@ -41,10 +43,11 @@ public:
     void setMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
+	std::string preprocess(std::string& source, std::unordered_set<std::string>& includedFiles);
+
     GLuint createShader(const char** source, GLuint type);
 
     GLuint linkShader(GLuint vertex, GLuint fragment);
-
     // the program ID
     GLuint mID{};
 };

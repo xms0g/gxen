@@ -6,50 +6,52 @@
 #include "../config/config.hpp"
 
 Shader::Shader(const char* vs, const char* fs) {
-    // 1. retrieve the vertex/fragment source code from filePath
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
+	// 1. retrieve the vertex/fragment source code from filePath
+	std::string vertexCode;
+	std::string fragmentCode;
+	std::ifstream vShaderFile;
+	std::ifstream fShaderFile;
 
-    // ensure ifstream objects can throw exceptions:
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	// ensure ifstream objects can throw exceptions:
+	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
-    try {
-        // open files
-        vShaderFile.open(fs::path(SHADER_DIR + vs));
-        fShaderFile.open(fs::path(SHADER_DIR + fs));
-        std::stringstream vShaderStream, fShaderStream;
-        // read file's buffer contents into streams
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
-        // close file handlers
-        vShaderFile.close();
-        fShaderFile.close();
-        // convert stream into string
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    }
-    catch (std::ifstream::failure& e) {
-        throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + e.what());
-    }
+	try {
+		// open files
+		vShaderFile.open(fs::path(SHADER_DIR + vs));
+		fShaderFile.open(fs::path(SHADER_DIR + fs));
+		std::stringstream vShaderStream, fShaderStream;
+		// read file's buffer contents into streams
+		vShaderStream << vShaderFile.rdbuf();
+		fShaderStream << fShaderFile.rdbuf();
+		// close file handlers
+		vShaderFile.close();
+		fShaderFile.close();
+		// convert stream into string
+		vertexCode = vShaderStream.str();
+		fragmentCode = fShaderStream.str();
+	} catch (std::ifstream::failure& e) {
+		throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + e.what());
+	}
 
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
+	std::unordered_set<std::string> includedFiles{};
+	vertexCode = preprocess(vertexCode, includedFiles);
+	fragmentCode = preprocess(fragmentCode, includedFiles);
+	const char* vs_str = vertexCode.c_str();
+	const char* fs_str = fragmentCode.c_str();
 
-    GLuint vertex, fragment;
-    // vertex shader
-    vertex = createShader(&vShaderCode, GL_VERTEX_SHADER);
+	GLuint vertex, fragment;
+	// vertex shader
+	vertex = createShader(&vs_str, GL_VERTEX_SHADER);
 
-    // fragment Shader
-    fragment = createShader(&fShaderCode, GL_FRAGMENT_SHADER);
+	// fragment Shader
+	fragment = createShader(&fs_str, GL_FRAGMENT_SHADER);
 
-    linkShader(vertex, fragment);
+	linkShader(vertex, fragment);
 
-    // delete the shaders as they're linked into our program now and no longer necessary
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+	// delete the shaders as they're linked into our program now and no longer necessary
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
 }
 
 Shader::~Shader() {
@@ -106,6 +108,47 @@ void Shader::setMat3(const std::string& name, const glm::mat3& mat) const {
 
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+std::string Shader::preprocess(std::string& source, std::unordered_set<std::string>& includedFiles) {
+	std::stringstream result;
+	std::istringstream stream(source);
+	std::string line;
+
+	while (std::getline(stream, line)) {
+		if (line.find("#include") == 0) {
+			// Parse the include (e.g., #include "lighting.glsl")
+			size_t start = line.find('"');
+			size_t end = line.rfind('"');
+
+			if (start != std::string::npos && end != std::string::npos && start != end) {
+				std::string includeFile = line.substr(start + 1, end - start - 1);
+				std::string fullPath = fs::path(SHADER_DIR + includeFile);
+
+				// Prevent cyclic includes
+				if (includedFiles.contains(fullPath)) {
+					continue;  // Or throw error
+				}
+				includedFiles.insert(fullPath);
+
+				// Load included file
+				std::ifstream file(fullPath);
+				if (file.is_open()) {
+					std::stringstream includeSource;
+					includeSource << file.rdbuf();
+					auto includeSourceStr = includeSource.str();
+					// Recurse
+					result << preprocess(includeSourceStr, includedFiles);
+				} else {
+					// Handle error: file not found
+					throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + "\n" + fullPath);
+				}
+			}
+		} else {
+			result << line << "\n";
+		}
+	}
+	return result.str();
 }
 
 GLuint Shader::createShader(const char** source, const GLuint type) {
