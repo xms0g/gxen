@@ -1,14 +1,9 @@
 #version 410 core
 in vec2 vTexcoord;
 
-struct Material {
-    sampler2D texture_diffuse1;
-    sampler2D texture_specular1;
-    float shininess;
-};
+#include "material.glsl"
 
 uniform bool useTexture;
-uniform Material material;
 uniform vec3 color;
 
 out vec4 fragColor;
