@@ -34,24 +34,27 @@ Shader::Shader(const char* vs, const char* fs) {
 		throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + e.what());
 	}
 
-	std::unordered_set<std::string> includedFiles{};
-	vertexCode = preprocess(vertexCode, includedFiles);
-	fragmentCode = preprocess(fragmentCode, includedFiles);
-	const char* vs_str = vertexCode.c_str();
-	const char* fs_str = fragmentCode.c_str();
+	try {
+		std::unordered_set<std::string> includedFiles{};
+		vertexCode = preprocess(vertexCode, includedFiles);
+		fragmentCode = preprocess(fragmentCode, includedFiles);
+		const char* vs_str = vertexCode.c_str();
+		const char* fs_str = fragmentCode.c_str();
 
-	GLuint vertex, fragment;
-	// vertex shader
-	vertex = createShader(&vs_str, GL_VERTEX_SHADER);
+		GLuint vertex, fragment;
+		// vertex shader
+		vertex = createShader(&vs_str, GL_VERTEX_SHADER);
 
-	// fragment Shader
-	fragment = createShader(&fs_str, GL_FRAGMENT_SHADER);
+		// fragment Shader
+		fragment = createShader(&fs_str, GL_FRAGMENT_SHADER);
 
-	linkShader(vertex, fragment);
+		linkShader(vertex, fragment);
 
-	// delete the shaders as they're linked into our program now and no longer necessary
-	glDeleteShader(vertex);
-	glDeleteShader(fragment);
+		glDeleteShader(vertex);
+		glDeleteShader(fragment);
+	} catch (std::runtime_error& e) {
+		throw std::runtime_error(std::string("ERROR::SHADER::") + e.what());
+	}
 }
 
 Shader::~Shader() {
@@ -127,7 +130,7 @@ std::string Shader::preprocess(std::string& source, std::unordered_set<std::stri
 
 				// Prevent cyclic includes
 				if (includedFiles.contains(fullPath)) {
-					continue;  // Or throw error
+					throw std::runtime_error(std::string("FILE_ALREADY_INCLUDED: ") + "\n" + fullPath);
 				}
 				includedFiles.insert(fullPath);
 
@@ -141,7 +144,7 @@ std::string Shader::preprocess(std::string& source, std::unordered_set<std::stri
 					result << preprocess(includeSourceStr, includedFiles);
 				} else {
 					// Handle error: file not found
-					throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + "\n" + fullPath);
+					throw std::runtime_error(std::string("FILE_NOT_OPEN: ") + "\n" + fullPath);
 				}
 			}
 		} else {
@@ -173,7 +176,7 @@ GLuint Shader::createShader(const char** source, const GLuint type) {
         // The program is useless now. So delete it.
         glDeleteShader(shader);
 
-        throw std::runtime_error(std::string("ERROR::SHADER_COMPILATION_ERROR:") + "\n" + infoLog);
+        throw std::runtime_error(std::string("COMPILATION_ERROR:") + "\n" + infoLog);
     }
 
     return shader;
@@ -203,7 +206,7 @@ GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment) {
         // The program is useless now. So delete it.
         glDeleteShader(mID);
 
-        throw std::runtime_error(std::string("ERROR::PROGRAM_LINKING_ERROR:") + "\n" + infoLog);
+        throw std::runtime_error(std::string("PROGRAM_LINKING_ERROR:") + "\n" + infoLog);
     }
 
     return mID;

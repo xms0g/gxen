@@ -17,22 +17,16 @@ XEngine::~XEngine() = default;
 void XEngine::init(Registry* registry) {
 	mRegistry = registry;
 
-	try {
-		mWindow = std::make_unique<Window>();
-		mWindow->init("XEngine");
+	mWindow = std::make_unique<Window>();
+	mWindow->init("XEngine");
 
-		registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
-		registry->addSystem<RenderSystem>();
-		registry->addSystem<LightSystem>();
-		mRegistry->getSystem<RenderSystem>().setLightSystem(&mRegistry->getSystem<LightSystem>());
+	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
+	registry->addSystem<RenderSystem>();
+	registry->addSystem<LightSystem>();
+	mRegistry->getSystem<RenderSystem>().setLightSystem(&mRegistry->getSystem<LightSystem>());
 
-
-		mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
-		mInput = std::make_unique<Input>();
-
-	} catch (std::runtime_error& e) {
-		std::cerr << e.what() << '\n';
-	}
+	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
+	mInput = std::make_unique<Input>();
 }
 
 void XEngine::run() {
