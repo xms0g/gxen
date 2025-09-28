@@ -4,7 +4,7 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-Cube::Cube(const char* texture) {
+Models::Cube::Cube(const char* texture) {
 	constexpr float v[] = {
 		// Back face (-Z)
 		-0.5f,-0.5f,-0.5f,   0,0,-1, 0,0,

@@ -4,7 +4,7 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-Plane::Plane(const char* texture) {
+Models::Plane::Plane(const char* texture) {
 	constexpr float v[] = {
 		 // Positions         // Normals		   // Texture Coords
 		 5.0f, -0.5f,  5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // top right

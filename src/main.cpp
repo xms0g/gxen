@@ -43,7 +43,7 @@ int main() {
 	// backpack.addComponent<ShaderComponent>(
 	// 	std::make_shared<Shader>("model.vert", "model.frag"));
 
-	Plane planeModel{"textures/metal.png"};
+	Models::Plane planeModel{"textures/metal.png"};
 	auto plane = registry.createEntity();
 	plane.addComponent<TransformComponent>(
 		glm::vec3(0.0f, 0.0f, 0.0f),
@@ -56,7 +56,7 @@ int main() {
 	plane.addComponent<ShaderComponent>(
 		std::make_shared<Shader>("plane.vert", "plane.frag"));
 
-	Cube cubeModel{"textures/wall.jpg"};
+	Models::Cube cubeModel{"textures/wall.jpg"};
 	auto cube = registry.createEntity();
 	cube.addComponent<TransformComponent>(
 		glm::vec3(0.0f, 0.0f, 0.0f),
@@ -75,7 +75,7 @@ int main() {
    };
 
 
-	WindowModel windowModel{"textures/window.png"};
+	Models::Window windowModel{"textures/window.png"};
 	auto windowShader = std::make_shared<Shader>("blend.vert", "blend.frag");
 
 	for (auto& pos: windows) {

@@ -4,7 +4,7 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-WindowModel::WindowModel(const char* texture) {
+Models::Window::Window(const char* texture) {
 	constexpr float v[] = {
 		// Positions       // Normals      // TexCoords
 		0.0f,  0.5f, 0.0f, 0.0f,0.0f,1.0f, 0.0f,0.0f,  // 0

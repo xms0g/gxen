@@ -6,6 +6,7 @@ class Mesh;
 struct Vertex;
 struct Texture;
 
+namespace Models {
 class Plane {
 public:
 	explicit Plane(const char* texture = nullptr);
@@ -17,3 +18,4 @@ private:
 	std::vector<Mesh> meshes;
 	std::vector<Texture> textures;
 };
+}

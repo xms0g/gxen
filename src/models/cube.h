@@ -4,6 +4,7 @@
 struct Texture;
 class Mesh;
 
+namespace Models {
 class Cube {
 public:
 	explicit Cube(const char* texture = nullptr);
@@ -15,3 +16,4 @@ private:
 	std::vector<Mesh> meshes;
 	std::vector<Texture> textures;
 };
+}
