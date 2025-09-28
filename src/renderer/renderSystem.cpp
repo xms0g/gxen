@@ -157,9 +157,12 @@ void RenderSystem::lightingPass(const std::shared_ptr<Shader>& shader) const {
 void RenderSystem::drawPass(const Entity& entity) const {
 	const auto& mc = entity.getComponent<MeshComponent>();
 
+
+	if (mc.isTwoSided) glDisable(GL_CULL_FACE);
 	for (auto mesh: *mc.meshes) {
 		glBindVertexArray(mesh.VAO());
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 		glBindVertexArray(0);
 	}
+	if (mc.isTwoSided) glEnable(GL_CULL_FACE);
 }
