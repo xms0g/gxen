@@ -26,9 +26,9 @@ class Mesh {
 public:
 	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
 
-	std::vector<Vertex>& vertices() { return mVertices; }
+	const std::vector<Vertex>& vertices() const { return mVertices; }
 
-	std::vector<unsigned int>& indices() { return mIndices; }
+	const std::vector<unsigned int>& indices() const { return mIndices; }
 
 	[[nodiscard]] unsigned int VAO() const { return mVAO; }
 
