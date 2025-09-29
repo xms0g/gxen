@@ -9,7 +9,7 @@ struct Texture;
 namespace Models {
 class Plane {
 public:
-	explicit Plane(const char* texture = nullptr);
+	explicit Plane(const char* diffuseTexture = nullptr, const char* specularTexture = nullptr);
 
 	[[nodiscard]] const std::vector<Mesh>* getMeshes() const { return &meshes; }
 	[[nodiscard]] const std::vector<Texture>* getTextures() const { return &textures; }

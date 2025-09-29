@@ -4,9 +4,9 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-Models::Plane::Plane(const char* texture) {
+Models::Plane::Plane(const char* diffuseTexture, const char* specularTexture) {
 	constexpr float v[] = {
-		 // Positions         // Normals		   // Texture Coords
+		 // Positions        // Normals		   // Texture Coords
 		 5.0f, -0.5f,  5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // top right
 		-5.0f, -0.5f,  5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, // top left
 		-5.0f, -0.5f, -5.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, // bottom left
@@ -31,10 +31,19 @@ Models::Plane::Plane(const char* texture) {
 
 	meshes.emplace_back(vertices, indices);
 
-	if (texture) {
+	if (diffuseTexture) {
 		textures.emplace_back(
-		texture::load(fs::path(ASSET_DIR + texture).c_str()),
+		texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str(), "texture_diffuse"),
 		"texture_diffuse",
-		texture);
+		diffuseTexture);
 	}
+
+	if (specularTexture) {
+		textures.emplace_back(
+		texture::load(fs::path(ASSET_DIR + specularTexture).c_str(), "texture_specular"),
+		"texture_specular",
+		specularTexture);
+	}
+
+
 }
