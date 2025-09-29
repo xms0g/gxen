@@ -44,8 +44,6 @@ RenderSystem::RenderSystem() {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
-
-	glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 void RenderSystem::render(const Camera* camera) {
@@ -141,11 +139,11 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 		if (name == "texture_diffuse")
 			number = std::to_string(diffuseNr++);
 		else if (name == "texture_specular")
-			number = std::to_string(specularNr++); // transfer unsigned int to string
+			number = std::to_string(specularNr++);
 		else if (name == "texture_normal")
-			number = std::to_string(normalNr++); // transfer unsigned int to string
+			number = std::to_string(normalNr++);
 		else if (name == "texture_height")
-			number = std::to_string(heightNr++); // transfer unsigned int to string
+			number = std::to_string(heightNr++);
 
 		// now set the sampler to the correct texture unit
 		shader.setInt(std::string("material.").append(name).append(number), i);
@@ -200,10 +198,12 @@ void RenderSystem::drawPass(const Entity& entity) const {
 	const bool isCulling = glIsEnabled(GL_CULL_FACE);
 	const auto& mc = entity.getComponent<MeshComponent>();
 
-	if (mc.isTwoSided && isCulling) glDisable(GL_CULL_FACE);
+	if (mc.isTwoSided && isCulling)
+		glDisable(GL_CULL_FACE);
 	for (const auto& mesh: *mc.meshes) {
 		glBindVertexArray(mesh.VAO());
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 	}
-	if (mc.isTwoSided && isCulling) glEnable(GL_CULL_FACE);
+	if (mc.isTwoSided && isCulling)
+		glEnable(GL_CULL_FACE);
 }
