@@ -82,6 +82,8 @@ void RenderSystem::opaquePass(const Entity& entity, const Camera* camera, const 
 }
 
 void RenderSystem::transparentPass(const Camera* camera, TransEntityBucket& bucket) {
+	if (bucket.empty()) return;
+
 	std::sort(bucket.begin(), bucket.end(),
 					  [](const auto& a, const auto& b) { return a.first > b.first; });
 

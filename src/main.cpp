@@ -109,7 +109,7 @@ int main() {
 		pointLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
 
 		pointLight.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("cube.vert", "cube.frag"));
+			std::make_shared<Shader>("light.vert", "light.frag"));
 
 		pointLight.addComponent<PointLightComponent>(
 			glm::vec3(0.0f),
