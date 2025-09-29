@@ -2,7 +2,7 @@
 #include <iostream>
 #include "image/stb_image.h"
 
-unsigned int texture::load(const char* path) {
+unsigned int texture::load(const char* path, const std::string& type) {
     GLuint textureID;
 
     int width, height, depth;
@@ -15,22 +15,40 @@ unsigned int texture::load(const char* path) {
 
     glGenTextures(1, &textureID);
 
-    GLenum format{0};
-    if (depth == 1)
-        format = GL_RED;
-    else if (depth == 3)
-        format = GL_RGB;
-    else if (depth == 4)
-        format = GL_RGBA;
+    GLenum format{0}, internalFormat{0};
+    if (depth == 1) {
+    	format = GL_RED;
+    	internalFormat = GL_RED;
+    } else if (depth == 3) {
+    	format = GL_RGB;
+    	internalFormat = format;
+
+    	if (type == "texture_diffuse") {
+    		internalFormat = GL_SRGB;
+    	}
+    } else if (depth == 4) {
+    	format = GL_RGBA;
+    	internalFormat = format;
+
+    	if (type == "texture_diffuse") {
+    		internalFormat = GL_SRGB_ALPHA;
+    	}
+    }
+
 
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE: GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, format == GL_RGBA ? GL_CLAMP_TO_EDGE: GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	if (depth == 1) {
+		constexpr GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
+		glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
+	}
 
     stbi_image_free(data);
 
