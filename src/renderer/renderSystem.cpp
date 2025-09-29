@@ -28,8 +28,7 @@ RenderSystem::RenderSystem() {
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
-		std::cerr << "Failed to initialize GLAD" << std::endl;
-		return;
+		throw std::runtime_error(std::string("ERROR::RENDERER::FAILED_TO_INIT_GLAD"));
 	}
 
 	// tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
@@ -44,10 +43,15 @@ RenderSystem::RenderSystem() {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
+
+	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+	mSceneBuffer->withTexture().withRenderBuffer().checkStatus();
 }
 
 void RenderSystem::render(const Camera* camera) {
 	std::vector<std::pair<float, Entity> > transparentEntities;
+
+	beginSceneRender();
 
 	for (const auto& entity: getSystemEntities()) {
 		if (collectTransparentEntities(entity, camera, transparentEntities))
@@ -60,6 +64,8 @@ void RenderSystem::render(const Camera* camera) {
 	}
 
 	transparentPass(camera, transparentEntities);
+
+	endSceneRender();
 }
 
 bool RenderSystem::collectTransparentEntities(const Entity& entity, const Camera* camera, TransEntityBucket& bucket) {
@@ -208,4 +214,17 @@ void RenderSystem::drawPass(const Entity& entity) const {
 	}
 	if (mc.isTwoSided && isCulling)
 		glEnable(GL_CULL_FACE);
+}
+
+void RenderSystem::beginSceneRender() const {
+	mSceneBuffer->bind();
+	glEnable(GL_DEPTH_TEST);
+	glViewport(0, 0, mSceneBuffer->width(), mSceneBuffer->height());
+	glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void RenderSystem::endSceneRender() const {
+	mSceneBuffer->unbind();
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }

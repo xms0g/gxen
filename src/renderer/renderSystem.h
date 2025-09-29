@@ -2,17 +2,23 @@
 
 #include <memory>
 #include <vector>
-#include "../ECS/system.hpp"
 
+#include "frameBuffer.h"
+#include "../ECS/system.hpp"
+#include "../models/quad.h"
+#include "shader.h"
+
+class FrameBuffer;
 class LightSystem;
 class Window;
 class Camera;
 class guiSystem;
-class Shader;
 
 class RenderSystem final : public System {
 public:
 	explicit RenderSystem();
+
+	GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
@@ -35,5 +41,10 @@ private:
 
 	void drawPass(const Entity& entity) const;
 
+	void beginSceneRender() const;
+
+	void endSceneRender() const;
+
 	LightSystem* mLightSystem{};
+	std::unique_ptr<FrameBuffer> mSceneBuffer;
 };

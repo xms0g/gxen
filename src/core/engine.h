@@ -2,6 +2,7 @@
 
 #include <memory>
 
+class PostProcess;
 class Window;
 class Registry;
 class Input;
@@ -24,6 +25,7 @@ private:
     bool isRunning{true};
 
     Registry* mRegistry{};
+	std::unique_ptr<PostProcess> mPostProcess;
 	std::unique_ptr<Window> mWindow;
 	std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;

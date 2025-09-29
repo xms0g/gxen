@@ -9,6 +9,7 @@
 #include "../ECS/registry.h"
 #include "../renderer/renderSystem.h"
 #include "../renderer/lightSystem.h"
+#include "../renderer/postProcess.h"
 
 XEngine::XEngine() = default;
 
@@ -24,6 +25,8 @@ void XEngine::init(Registry* registry) {
 	registry->addSystem<RenderSystem>();
 	registry->addSystem<LightSystem>();
 	mRegistry->getSystem<RenderSystem>().setLightSystem(&mRegistry->getSystem<LightSystem>());
+
+	mPostProcess = std::make_unique<PostProcess>();
 
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
 	mInput = std::make_unique<Input>();
@@ -41,7 +44,9 @@ void XEngine::run() {
 
 		mCamera->update();
 		mRegistry->getSystem<LightSystem>().update();
+
 		mRegistry->getSystem<RenderSystem>().render(mCamera.get());
+		mPostProcess->render(mRegistry->getSystem<RenderSystem>().getSceneTexture());
 
 #ifdef DEBUG
 		mRegistry->getSystem<GuiSystem>().update(mDeltaTime);
