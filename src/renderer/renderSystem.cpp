@@ -44,6 +44,8 @@ RenderSystem::RenderSystem() {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
+
+	glEnable(GL_FRAMEBUFFER_SRGB);
 }
 
 void RenderSystem::render(const Camera* camera) {
