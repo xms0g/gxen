@@ -19,7 +19,7 @@ public:
 	void addEntityToSystems(Entity entity);
 
 	template<typename T, typename... Args>
-	void addComponent(const Entity e, Args&& ... args) {
+	void addComponent(const Entity& e, Args&& ... args) {
 		const auto componentID = Component<T>::getID();
 
 		if (!componentPools[componentID]) {
@@ -35,7 +35,7 @@ public:
 	}
 
 	template<typename T>
-	T& getComponent(const Entity e) {
+	T& getComponent(const Entity& e) {
 		const auto componentID = Component<T>::getID();
 		auto& pool = componentPools[componentID];
 
@@ -43,7 +43,7 @@ public:
 	}
 
 	template<typename T>
-	bool hasComponent(const Entity e) {
+	bool hasComponent(const Entity& e) {
 		const auto componentID = Component<T>::getID();
 		return entityComponentSignatures[e.id()].test(componentID);
 	}
