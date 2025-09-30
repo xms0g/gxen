@@ -10,7 +10,7 @@ public:
 
 	virtual ~System() = default;
 
-	void addEntityToSystem(Entity entity) { entities.emplace_back(entity); }
+	void addEntityToSystem(const Entity& entity) { entities.emplace_back(entity); }
 
 	[[nodiscard]] std::vector<Entity> getSystemEntities() const { return entities; }
 

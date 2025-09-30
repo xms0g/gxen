@@ -16,8 +16,6 @@ public:
 
 	void update();
 
-	void addEntityToSystems(Entity entity);
-
 	template<typename T, typename... Args>
 	void addComponent(const Entity& e, Args&& ... args) {
 		const auto componentID = Component<T>::getID();
@@ -65,6 +63,8 @@ public:
 	}
 
 private:
+	void addEntityToSystems(const Entity& entity);
+
 	struct IPool {
 		virtual ~IPool() = default;
 	};

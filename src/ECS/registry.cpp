@@ -15,13 +15,13 @@ Entity Registry::createEntity(const std::string& name) {
 }
 
 void Registry::update() {
-	for (auto& entity: entitiesToBeAdded) {
+	for (const auto& entity: entitiesToBeAdded) {
 		addEntityToSystems(entity);
 	}
 	entitiesToBeAdded.clear();
 }
 
-void Registry::addEntityToSystems(const Entity entity) {
+void Registry::addEntityToSystems(const Entity& entity) {
 	const auto& entityComponentSignature = entityComponentSignatures[entity.id()];
 
 	for (auto& [tidx, system]: systems) {
