@@ -44,6 +44,4 @@ Models::Plane::Plane(const char* diffuseTexture, const char* specularTexture) {
 		"texture_specular",
 		specularTexture);
 	}
-
-
 }
