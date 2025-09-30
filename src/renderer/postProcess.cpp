@@ -4,14 +4,13 @@
 #include "../models/quad.h"
 
 PostProcess::PostProcess() : mQuad(std::make_unique<Models::Quad>()),
-                             mInverse(std::make_unique<Shader>("quad.vert", "inverse.frag")),
-                             mGrayScale(std::make_unique<Shader>("quad.vert", "grayscale.frag")),
-                             mGamma(std::make_unique<Shader>("quad.vert", "gamma.frag")) {
+                             mInverse(std::make_unique<Shader>("models/quad.vert", "post-processing/inverse.frag")),
+                             mGrayScale(std::make_unique<Shader>("models/quad.vert", "post-processing/grayscale.frag")),
+                             mGamma(std::make_unique<Shader>("models/quad.vert", "post-processing/gamma.frag")) {
 	for (int i = 0; i < 2; i++) {
 		pingPongBuffers[i] = std::make_unique<FrameBuffer>(1600, 900);
 		pingPongBuffers[i]->withTexture().checkStatus();
 	}
-
 }
 
 void PostProcess::render(const GLuint sceneTexture) const {

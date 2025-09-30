@@ -4,7 +4,7 @@
 #include "../config/config.hpp"
 
 Models::Quad::Quad() {
-	mShader = std::make_unique<Shader>( "quad.vert", "quad.frag");
+	mShader = std::make_unique<Shader>( "models/quad.vert", "models/quad.frag");
 	mShader->activate();
 	mShader->setInt("screenTexture", 0);
 

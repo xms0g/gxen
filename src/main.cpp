@@ -58,7 +58,7 @@ int main() {
 		plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f);
 
 		plane.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("plane.vert", "plane.frag"));
+			std::make_shared<Shader>("models/plane.vert", "models/plane.frag"));
 
 		// CUbe
 		Models::Cube cubeModel{"textures/wall.jpg"};
@@ -72,7 +72,7 @@ int main() {
 		cube.addComponent<MaterialComponent>(cubeModel.getTextures(), 32.0f);
 
 		cube.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("cube.vert", "cube.frag"));
+			std::make_shared<Shader>("models/cube.vert", "models/cube.frag"));
 
 		// std::vector<glm::vec3> windows{
 		// 	glm::vec3(-4.3f, 0.0f, 1.8f),
@@ -148,7 +148,7 @@ int main() {
 		registry.update();
 
 		xngn.run();
-	} catch (std::runtime_error& e) {
+	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}
 
