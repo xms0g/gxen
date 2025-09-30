@@ -141,9 +141,11 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+
 		// retrieve texture number (the N in diffuse_textureN)
 		std::string number;
 		std::string name = textures[i].type;
+
 		if (name == "texture_diffuse")
 			number = std::to_string(diffuseNr++);
 		else if (name == "texture_specular")

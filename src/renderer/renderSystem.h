@@ -2,17 +2,14 @@
 
 #include <memory>
 #include <vector>
-
 #include "frameBuffer.h"
 #include "../ECS/system.hpp"
-#include "../models/quad.h"
-#include "shader.h"
 
-class FrameBuffer;
 class LightSystem;
 class Window;
 class Camera;
 class guiSystem;
+class Shader;
 
 class RenderSystem final : public System {
 public:

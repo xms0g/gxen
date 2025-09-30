@@ -3,15 +3,10 @@
 #include <memory>
 #include <vector>
 #include <string>
-
 #include "glad/glad.h"
+#include "../models/quad.h"
 
 class FrameBuffer;
-
-namespace Models {
-class Quad;
-}
-
 class Shader;
 
 enum EffectType { NONE = 0, BLUR = 1, SHARPEN = 2, EDGE = 3 };

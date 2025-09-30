@@ -1,7 +1,6 @@
 #include "postProcess.h"
 #include "shader.h"
 #include "frameBuffer.h"
-#include "../models/quad.h"
 
 PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_unique<Models::Quad>()) {
 	mEffects = {
