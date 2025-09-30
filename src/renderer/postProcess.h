@@ -32,10 +32,6 @@ private:
 	void draw(GLuint sceneTexture) const;
 
 	std::unique_ptr<Models::Quad> mQuad;
-	std::shared_ptr<Shader> mInverse;
-	std::shared_ptr<Shader> mGrayScale;
-	std::shared_ptr<Shader> mGamma;
-
 	std::unique_ptr<FrameBuffer> pingPongBuffers[2];
 	std::vector<PostEffect> mEffects;
 };
