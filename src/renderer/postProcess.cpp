@@ -9,14 +9,41 @@ PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_uniq
 		pingPongBuffers[i]->withTexture().checkStatus();
 	}
 
-	mEffects = {
-		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, false},
-		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), NONE, false},
-		{"Blur", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), BLUR, false},
-		{"Sharpen", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), SHARPEN, false},
-		{"Edge Detection", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), EDGE, false},
-		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true},
-	};
+	mEffects.emplace_back(
+		"Grayscale",
+		std::make_unique<Shader>("models/quad.vert", "post-processing/grayscale.frag"),
+		NONE,
+		false);
+
+	mEffects.emplace_back(
+		"Inverse",
+		std::make_unique<Shader>("models/quad.vert", "post-processing/inverse.frag"),
+		NONE,
+		false);
+
+	mEffects.emplace_back(
+		"Blur",
+		std::make_unique<Shader>("models/quad.vert", "post-processing/kernel.frag"),
+		BLUR,
+		false);
+
+	mEffects.emplace_back(
+		"Sharpen",
+		std::make_unique<Shader>("models/quad.vert", "post-processing/kernel.frag"),
+		SHARPEN,
+		false);
+
+	mEffects.emplace_back(
+		"Edge Detection",
+		std::make_unique<Shader>("models/quad.vert", "post-processing/kernel.frag"),
+		EDGE,
+		false);
+
+	mEffects.emplace_back(
+		"Gamma Correction",
+		std::make_unique<Shader>("models/quad.vert", "post-processing/gamma.frag"),
+		NONE,
+		true);
 }
 
 void PostProcess::render(const GLuint sceneTexture) const {

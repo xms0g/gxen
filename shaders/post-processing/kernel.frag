@@ -26,8 +26,8 @@ void main() {
 
     float kernel[9];
     if (type == 1) kernel = blur;
-    if (type == 2) kernel = sharpen;
-    if (type == 3) kernel = edge;
+    else if (type == 2) kernel = sharpen;
+    else if (type == 3) kernel = edge;
 
     vec3 sampleTex[9];
     for(int i = 0; i < 9; i++) {
