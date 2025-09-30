@@ -34,7 +34,7 @@ void GuiSystem::update(const float dt) {
 	updateFpsCounter(dt);
 }
 
-void GuiSystem::render(PostProcess& postProcess) {
+void GuiSystem::render(std::vector<PostEffect>& effects) {
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -45,7 +45,7 @@ void GuiSystem::render(PostProcess& postProcess) {
 
 	renderGraphicsInfo();
 	renderTransform();
-	renderPostProcess(postProcess);
+	renderPostProcess(effects);
 
 	//Render ImGui
 	ImGui::Render();
@@ -99,18 +99,11 @@ void GuiSystem::renderTransform() const {
 	}
 }
 
-void GuiSystem::renderPostProcess(PostProcess& postProcess) {
+void GuiSystem::renderPostProcess(std::vector<PostEffect>& effects) {
 	if (ImGui::Begin("Post-Processing")) {
-		ImGui::Checkbox("Grayscale", &postProcess.grayScaleEnabled());
-		ImGui::Checkbox("Inverse", &postProcess.inverseEnabled());
-		ImGui::Checkbox("Gamma", &postProcess.gammaEnabled());
-
-		// static float gammaValue = 2.2f;
-		// if (postProcess.mGammaEnabled) {
-		// 	if (ImGui::SliderFloat("Gamma Value", &gammaValue, 0.1f, 4.0f)) {
-		// 		postProcess.setGamma(gammaValue);
-		// 	}
-		// }
+		for (auto& effect : effects) {
+			ImGui::Checkbox(effect.name.c_str(), &effect.enabled);
+		}
 	}
 	ImGui::End();
 }

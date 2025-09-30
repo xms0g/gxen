@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include "../ECS/system.hpp"
 
-class PostProcess;
+struct PostEffect;
 
 class GuiSystem final : public System {
 public:
@@ -13,7 +13,7 @@ public:
 
 	void update(float dt);
 
-	void render(PostProcess& postProcess);
+	void render(std::vector<PostEffect>& effects);
 
 private:
 	void updateFpsCounter(float dt);
@@ -22,7 +22,7 @@ private:
 
 	void renderTransform() const;
 
-	void renderPostProcess(PostProcess& postProcess);
+	void renderPostProcess(std::vector<PostEffect>& effects);
 
 	// Frame
 	double mPreviousSeconds{0.0};

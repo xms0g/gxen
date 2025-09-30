@@ -56,7 +56,7 @@ void XEngine::run() {
 
 #ifdef DEBUG
 		mGuiSystem->update(mDeltaTime);
-		mGuiSystem->render(*mPostProcess);
+		mGuiSystem->render(mPostProcess->effects());
 #endif
 
 		// SDL swap buffers

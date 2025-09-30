@@ -4,43 +4,33 @@
 #include "../models/quad.h"
 
 PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_unique<Models::Quad>()),
-                             mInverse(std::make_unique<Shader>("models/quad.vert", "post-processing/inverse.frag")),
-                             mGrayScale(std::make_unique<Shader>("models/quad.vert", "post-processing/grayscale.frag")),
-                             mGamma(std::make_unique<Shader>("models/quad.vert", "post-processing/gamma.frag")) {
+                             mInverse(std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag")),
+                             mGrayScale(std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag")),
+                             mGamma(std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag")) {
 	for (int i = 0; i < 2; i++) {
 		pingPongBuffers[i] = std::make_unique<FrameBuffer>(width, height);
 		pingPongBuffers[i]->withTexture().checkStatus();
 	}
+
+	mEffects = {
+		{"Grayscale", mGrayScale, false},
+		{"Inverse", mInverse, false},
+		{"Gamma Correction", mGamma, true},
+	};
 }
 
 void PostProcess::render(const GLuint sceneTexture) const {
 	int toggle = 0;
 	GLuint inputTex = sceneTexture;
 
-	if (mGrayScaleEnabled || mInverseEnabled) {
+	for (const auto& effect : mEffects) {
+		if (!effect.enabled) continue;
+
 		pingPongBuffers[toggle]->bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		if (mGrayScaleEnabled) {
-			mGrayScale->activate();
-			mGrayScale->setInt("screenTexture", 0);
-		} else if (mInverseEnabled) {
-			mInverse->activate();
-			mInverse->setInt("screenTexture", 0);
-		}
-
-		draw(inputTex);
-		inputTex = pingPongBuffers[toggle]->texture();
-		pingPongBuffers[toggle]->unbind();
-		toggle = !toggle;
-	}
-
-	if (mGammaEnabled) {
-		pingPongBuffers[toggle]->bind();
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		mGamma->activate();
-		mGamma->setInt("screenTexture", 0);
+		effect.shader->activate();
+		effect.shader->setInt("screenTexture", 0);
 
 		draw(inputTex);
 		inputTex = pingPongBuffers[toggle]->texture();
@@ -55,6 +45,6 @@ void PostProcess::render(const GLuint sceneTexture) const {
 void PostProcess::draw(const GLuint sceneTexture) const {
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mQuad->VAO());
-	glBindTexture(GL_TEXTURE_2D, sceneTexture); // use the color attachment texture as the texture of the quad plane
+	glBindTexture(GL_TEXTURE_2D, sceneTexture);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
