@@ -10,12 +10,12 @@ PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_uniq
 	}
 
 	mEffects = {
-		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), false},
-		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), false},
-		{"Blur", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), false},
-		{"Sharpen", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), false},
-		{"Edge Detection", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), false},
-		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), true},
+		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, false},
+		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), NONE, false},
+		{"Blur", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), BLUR, false},
+		{"Sharpen", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), SHARPEN, false},
+		{"Edge Detection", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), EDGE, false},
+		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true},
 	};
 }
 
@@ -30,13 +30,7 @@ void PostProcess::render(const GLuint sceneTexture) const {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		effect.shader->activate();
-		if (effect.name == "Blur")
-			effect.shader->setBool("isBlur", true);
-		else if (effect.name == "Sharpen")
-			effect.shader->setBool("isSharpen", true);
-		if (effect.name == "Edge Detection")
-			effect.shader->setBool("isEdge", true);
-
+		effect.shader->setInt("type", effect.type);
 		effect.shader->setInt("screenTexture", 0);
 
 		draw(inputTex);

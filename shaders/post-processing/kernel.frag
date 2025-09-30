@@ -5,9 +5,7 @@ in vec2 vTexCoord;
 #include "post-processing/edgeDetect.glsl"
 
 uniform sampler2D screenTexture;
-uniform bool isSharpen;
-uniform bool isBlur;
-uniform bool isEdge;
+uniform int type;
 
 out vec4 fragColor;
 
@@ -27,9 +25,9 @@ void main() {
     );
 
     float kernel[9];
-    if (isSharpen) kernel = sharpen;
-    if (isBlur) kernel = blur;
-    if (isEdge) kernel = edge;
+    if (type == 1) kernel = blur;
+    if (type == 2) kernel = sharpen;
+    if (type == 3) kernel = edge;
 
     vec3 sampleTex[9];
     for(int i = 0; i < 9; i++) {

@@ -14,9 +14,12 @@ class Quad;
 
 class Shader;
 
+enum EffectType { NONE = 0, BLUR = 1, SHARPEN = 2, EDGE = 3 };
+
 struct PostEffect {
 	std::string name;
 	std::shared_ptr<Shader> shader;
+	EffectType type{NONE};
 	bool enabled{false};
 };
 
