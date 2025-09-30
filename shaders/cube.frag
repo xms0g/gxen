@@ -16,5 +16,5 @@ void main() {
     bool hasLights = numDirLights + numPointLights + numSpotLights > 0;
     vec3 result = mix(texColor, calculateLights(vNormal, vFragPos, viewPos), float(hasLights));
 
-    fragColor = vec4(pow(result, vec3(1.0 / 2.2)), 1.0);
+    fragColor = vec4(result, 1.0);
 }

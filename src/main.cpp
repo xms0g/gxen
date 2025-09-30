@@ -46,6 +46,7 @@ int main() {
 		backpack.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("model.vert", "model.frag"));
 
+		// Plane
 		Models::Plane planeModel{"textures/metal.png", "textures/metal_specular.png"};
 		auto plane = registry.createEntity();
 		plane.addComponent<TransformComponent>(
@@ -59,19 +60,20 @@ int main() {
 		plane.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("plane.vert", "plane.frag"));
 
+		// CUbe
 		Models::Cube cubeModel{"textures/wall.jpg"};
-		// auto cube = registry.createEntity();
-		// cube.addComponent<TransformComponent>(
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(2.0f));
-		//
-		// cube.addComponent<MeshComponent>(cubeModel.getMeshes());
-		// cube.addComponent<MaterialComponent>(cubeModel.getTextures(), 32.0f);
-		//
-		// cube.addComponent<ShaderComponent>(
-		// 	std::make_shared<Shader>("cube.vert", "cube.frag"));
-		//
+		auto cube = registry.createEntity();
+		cube.addComponent<TransformComponent>(
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(2.0f));
+
+		cube.addComponent<MeshComponent>(cubeModel.getMeshes());
+		cube.addComponent<MaterialComponent>(cubeModel.getTextures(), 32.0f);
+
+		cube.addComponent<ShaderComponent>(
+			std::make_shared<Shader>("cube.vert", "cube.frag"));
+
 		// std::vector<glm::vec3> windows{
 		// 	glm::vec3(-4.3f, 0.0f, 1.8f),
 		// 	glm::vec3(-0.45f, 0.9f, 1.9f),
@@ -99,26 +101,26 @@ int main() {
 		// 	glm::vec3(0.4f, 0.4f, 0.4f),
 		// 	glm::vec3(0.5f, 0.5f, 0.5f));
 
-		auto pointLight = registry.createEntity();
-		pointLight.addComponent<TransformComponent>(
-			glm::vec3(-3.2f, 5.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.2f));
-
-		pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		pointLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
-
-		pointLight.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("light.vert", "light.frag"));
-
-		pointLight.addComponent<PointLightComponent>(
-			glm::vec3(0.0f),
-			glm::vec3(0.5f, 0.5f, 0.5f),
-			glm::vec3(0.8f, 0.8f, 0.8f),
-			glm::vec3(1.0f, 1.0f, 1.0f),
-			1.0f,
-			0.09f,
-			0.032f);
+		// auto pointLight = registry.createEntity();
+		// pointLight.addComponent<TransformComponent>(
+		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
+		// 	glm::vec3(0.0f, 0.0f, 0.0f),
+		// 	glm::vec3(0.2f));
+		//
+		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
+		// pointLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
+		//
+		// pointLight.addComponent<ShaderComponent>(
+		// 	std::make_shared<Shader>("light.vert", "light.frag"));
+		//
+		// pointLight.addComponent<PointLightComponent>(
+		// 	glm::vec3(0.0f),
+		// 	glm::vec3(0.5f, 0.5f, 0.5f),
+		// 	glm::vec3(0.8f, 0.8f, 0.8f),
+		// 	glm::vec3(1.0f, 1.0f, 1.0f),
+		// 	1.0f,
+		// 	0.09f,
+		// 	0.032f);
 
 
 		// auto spotLight = registry.createEntity();

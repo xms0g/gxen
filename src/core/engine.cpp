@@ -50,7 +50,7 @@ void XEngine::run() {
 
 #ifdef DEBUG
 		mRegistry->getSystem<GuiSystem>().update(mDeltaTime);
-		mRegistry->getSystem<GuiSystem>().render();
+		mRegistry->getSystem<GuiSystem>().render(*mPostProcess);
 #endif
 
 		// SDL swap buffers

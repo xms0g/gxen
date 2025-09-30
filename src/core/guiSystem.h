@@ -1,11 +1,9 @@
 #pragma once
 
 #include <SDL.h>
-
-#include "glm/vec3.hpp"
 #include "../ECS/system.hpp"
 
-struct TransformComponent;
+class PostProcess;
 
 class GuiSystem final : public System {
 public:
@@ -15,14 +13,16 @@ public:
 
 	void update(float dt);
 
-	void render();
+	void render(PostProcess& postProcess);
 
 private:
 	void updateFpsCounter(float dt);
 
 	void renderGraphicsInfo() const;
 
-	void renderTransform();
+	void renderTransform() const;
+
+	void renderPostProcess(PostProcess& postProcess);
 
 	// Frame
 	double mPreviousSeconds{0.0};

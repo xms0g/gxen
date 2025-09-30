@@ -8,6 +8,7 @@
 #include "../../libs/imgui/imgui_impl_opengl3.h"
 #include "../../libs/imgui/imgui_internal.h"
 #include "../ECS/components/transform.hpp"
+#include "../renderer/postProcess.h"
 
 GuiSystem::GuiSystem(SDL_Window* window, SDL_GLContext gl_context) {
 	RequireComponent<TransformComponent>(true);
@@ -33,7 +34,7 @@ void GuiSystem::update(const float dt) {
 	updateFpsCounter(dt);
 }
 
-void GuiSystem::render() {
+void GuiSystem::render(PostProcess& postProcess) {
 	// Start the Dear ImGui frame
 	ImGui_ImplOpenGL3_NewFrame();
 	ImGui_ImplSDL2_NewFrame();
@@ -44,6 +45,7 @@ void GuiSystem::render() {
 
 	renderGraphicsInfo();
 	renderTransform();
+	renderPostProcess(postProcess);
 
 	//Render ImGui
 	ImGui::Render();
@@ -74,7 +76,7 @@ void GuiSystem::renderGraphicsInfo() const {
 	ImGui::End();
 }
 
-void GuiSystem::renderTransform() {
+void GuiSystem::renderTransform() const {
 	for (auto entity: getSystemEntities()) {
 		auto& tc = entity.getComponent<TransformComponent>();
 
@@ -95,4 +97,20 @@ void GuiSystem::renderTransform() {
 		}
 		ImGui::PopID();
 	}
+}
+
+void GuiSystem::renderPostProcess(PostProcess& postProcess) {
+	if (ImGui::Begin("Post-Processing")) {
+		ImGui::Checkbox("Grayscale", &postProcess.grayScaleEnabled());
+		ImGui::Checkbox("Inverse", &postProcess.inverseEnabled());
+		ImGui::Checkbox("Gamma", &postProcess.gammaEnabled());
+
+		// static float gammaValue = 2.2f;
+		// if (postProcess.mGammaEnabled) {
+		// 	if (ImGui::SliderFloat("Gamma Value", &gammaValue, 0.1f, 4.0f)) {
+		// 		postProcess.setGamma(gammaValue);
+		// 	}
+		// }
+	}
+	ImGui::End();
 }
