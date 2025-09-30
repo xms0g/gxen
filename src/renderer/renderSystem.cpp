@@ -49,7 +49,7 @@ RenderSystem::RenderSystem() {
 }
 
 void RenderSystem::render(const Camera* camera) {
-	std::vector<std::pair<float, Entity> > transparentEntities;
+	TransEntityBucket transparentEntities;
 
 	beginSceneRender();
 
