@@ -3,12 +3,12 @@
 #include "frameBuffer.h"
 #include "../models/quad.h"
 
-PostProcess::PostProcess() : mQuad(std::make_unique<Models::Quad>()),
+PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_unique<Models::Quad>()),
                              mInverse(std::make_unique<Shader>("models/quad.vert", "post-processing/inverse.frag")),
                              mGrayScale(std::make_unique<Shader>("models/quad.vert", "post-processing/grayscale.frag")),
                              mGamma(std::make_unique<Shader>("models/quad.vert", "post-processing/gamma.frag")) {
 	for (int i = 0; i < 2; i++) {
-		pingPongBuffers[i] = std::make_unique<FrameBuffer>(1600, 900);
+		pingPongBuffers[i] = std::make_unique<FrameBuffer>(width, height);
 		pingPongBuffers[i]->withTexture().checkStatus();
 	}
 }

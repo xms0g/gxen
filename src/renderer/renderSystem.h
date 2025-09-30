@@ -19,6 +19,8 @@ public:
 	explicit RenderSystem();
 
 	GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
+	uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
+	uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 

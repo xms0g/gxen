@@ -22,11 +22,17 @@ void XEngine::init(Registry* registry) {
 	mWindow->init("XEngine");
 
 	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
-	registry->addSystem<RenderSystem>();
-	registry->addSystem<LightSystem>();
-	mRegistry->getSystem<RenderSystem>().setLightSystem(&mRegistry->getSystem<LightSystem>());
+	mGuiSystem = &registry->getSystem<GuiSystem>();
 
-	mPostProcess = std::make_unique<PostProcess>();
+	registry->addSystem<RenderSystem>();
+	mRenderSystem = &registry->getSystem<RenderSystem>();
+
+	registry->addSystem<LightSystem>();
+	mLightSystem = &registry->getSystem<LightSystem>();
+
+	mRenderSystem->setLightSystem(mLightSystem);
+
+	mPostProcess = std::make_unique<PostProcess>(mRenderSystem->getSceneWidth(), mRenderSystem->getSceneHeight());
 
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
 	mInput = std::make_unique<Input>();
@@ -43,14 +49,14 @@ void XEngine::run() {
 		mMillisecsPreviousFrame = SDL_GetTicks();
 
 		mCamera->update();
-		mRegistry->getSystem<LightSystem>().update();
+		mLightSystem->update();
 
-		mRegistry->getSystem<RenderSystem>().render(mCamera.get());
-		mPostProcess->render(mRegistry->getSystem<RenderSystem>().getSceneTexture());
+		mRenderSystem->render(mCamera.get());
+		mPostProcess->render(mRenderSystem->getSceneTexture());
 
 #ifdef DEBUG
-		mRegistry->getSystem<GuiSystem>().update(mDeltaTime);
-		mRegistry->getSystem<GuiSystem>().render(*mPostProcess);
+		mGuiSystem->update(mDeltaTime);
+		mGuiSystem->render(*mPostProcess);
 #endif
 
 		// SDL swap buffers

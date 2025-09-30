@@ -6,7 +6,6 @@ uniform sampler2D screenTexture;
 out vec4 fragColor;
 
 void main() {
-    vec3 color = texture(screenTexture, vTexCoord).rgb;
-    vec3 mapped = pow(color, vec3(1.0 / 2.2));
-    fragColor = vec4(mapped, 1.0);
+    vec3 gammaCorrected = pow(texture(screenTexture, vTexCoord).rgb, vec3(1.0 / 2.2));
+    fragColor = vec4(gammaCorrected, 1.0);
 }

@@ -13,7 +13,7 @@ class Shader;
 
 class PostProcess {
 public:
-	PostProcess();
+	PostProcess(uint32_t width, uint32_t height);
 
 	bool& grayScaleEnabled() { return mGrayScaleEnabled; }
 	bool& inverseEnabled() { return mInverseEnabled; }
