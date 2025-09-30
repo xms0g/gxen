@@ -21,20 +21,11 @@ unsigned int texture::load(const char* path, const std::string& type) {
     	internalFormat = GL_RED;
     } else if (depth == 3) {
     	format = GL_RGB;
-    	internalFormat = format;
-
-    	if (type == "texture_diffuse") {
-    		internalFormat = GL_SRGB;
-    	}
+    	internalFormat = type == "texture_diffuse" ? GL_SRGB : GL_RGB;
     } else if (depth == 4) {
     	format = GL_RGBA;
-    	internalFormat = format;
-
-    	if (type == "texture_diffuse") {
-    		internalFormat = GL_SRGB_ALPHA;
-    	}
+    	internalFormat = type == "texture_diffuse" ? GL_SRGB_ALPHA: GL_RGBA;
     }
-
 
     glBindTexture(GL_TEXTURE_2D, textureID);
     glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
