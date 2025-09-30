@@ -82,7 +82,7 @@ void GuiSystem::renderTransform() const {
 
 		ImGui::PushID(static_cast<int>(entity.id()));
 
-		ImGui::Text("Entity %lu", entity.id());
+		ImGui::Text("%s", entity.name());
 		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
 			ImGui::Text("Position");ImGui::SameLine(80);
 			ImGui::DragFloat3("##pos", glm::value_ptr(tc.position), 0.01f);

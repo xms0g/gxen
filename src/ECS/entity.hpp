@@ -9,11 +9,12 @@ class Entity {
 public:
 	Entity() = default;
 
-	explicit Entity(const size_t id): mID(id) {}
+	explicit Entity(const size_t id, std::string name): mID(id), mName(std::move(name)) {}
 
 	Entity(const Entity& other) = default;
 
 	[[nodiscard]] size_t id() const { return mID; }
+	[[nodiscard]] const char* name() const { return mName.c_str(); }
 
 	class Registry* registry{};
 
@@ -28,6 +29,7 @@ public:
 
 private:
 	size_t mID;
+	std::string mName;
 
 public:
 	Entity& operator=(const Entity& other) = default;

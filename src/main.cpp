@@ -32,7 +32,7 @@ int main() {
 		XEngine xngn;
 		xngn.init(&registry);
 
-		auto backpack = registry.createEntity();
+		auto backpack = registry.createEntity("Backpack");
 		backpack.addComponent<TransformComponent>(
 			glm::vec3(-3.2f, 0.8f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
@@ -48,7 +48,7 @@ int main() {
 
 		// Plane
 		Models::Plane planeModel{"textures/metal.png", "textures/metal_specular.png"};
-		auto plane = registry.createEntity();
+		auto plane = registry.createEntity("Plane");
 		plane.addComponent<TransformComponent>(
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
@@ -62,7 +62,7 @@ int main() {
 
 		// CUbe
 		Models::Cube cubeModel{"textures/wall.jpg"};
-		auto cube = registry.createEntity();
+		auto cube = registry.createEntity("Cube");
 		cube.addComponent<TransformComponent>(
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f, 0.0f, 0.0f),
@@ -74,53 +74,54 @@ int main() {
 		cube.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("models/cube.vert", "models/cube.frag"));
 
-		// std::vector<glm::vec3> windows{
-		// 	glm::vec3(-4.3f, 0.0f, 1.8f),
-		// 	glm::vec3(-0.45f, 0.9f, 1.9f),
-		// };
+		// Blend
+		std::vector<glm::vec3> windows{
+			glm::vec3(-4.3f, 0.0f, 1.8f),
+			glm::vec3(-0.45f, 0.9f, 1.9f),
+		};
+
+		Models::Window windowModel{"textures/window.png"};
+		auto windowShader = std::make_shared<Shader>("models/blend.vert", "models/blend.frag");
+
+		for (int i = 0; i < windows.size(); i++) {
+			auto w = registry.createEntity("window" + std::to_string(i));
+			w.addComponent<TransformComponent>(
+				windows[i],
+				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(2.0f));
+
+			w.addComponent<MeshComponent>(windowModel.getMeshes(), true);
+			w.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, true);
+			w.addComponent<ShaderComponent>(windowShader);
+		}
+
+		auto dirLight = registry.createEntity("Directional Light");
+		dirLight.addComponent<DirectionalLightComponent>(
+			glm::vec3(-0.2f, -1.0f, -0.3f),
+			glm::vec3(0.05f, 0.05f, 0.05f),
+			glm::vec3(0.4f, 0.4f, 0.4f),
+			glm::vec3(0.5f, 0.5f, 0.5f));
+
+		// auto pointLight = registry.createEntity();
+		// pointLight.addComponent<TransformComponent>(
+		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
+		// 	glm::vec3(0.0f, 0.0f, 0.0f),
+		// 	glm::vec3(0.2f));
 		//
-		// Models::Window windowModel{"textures/window.png"};
-		// auto windowShader = std::make_shared<Shader>("blend.vert", "blend.frag");
+		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
+		// pointLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
 		//
-		// for (auto& pos: windows) {
-		// 	auto w = registry.createEntity();
-		// 	w.addComponent<TransformComponent>(
-		// 		pos,
-		// 		glm::vec3(0.0f, 0.0f, 0.0f),
-		// 		glm::vec3(2.0f));
+		// pointLight.addComponent<ShaderComponent>(
+		// 	std::make_shared<Shader>("models/light.vert", "models/light.frag"));
 		//
-		// 	w.addComponent<MeshComponent>(windowModel.getMeshes(), true);
-		// 	w.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, true);
-		// 	w.addComponent<ShaderComponent>(windowShader);
-		// }
-
-		// auto dirLight = registry.createEntity();
-		// dirLight.addComponent<DirectionalLightComponent>(
-		// 	glm::vec3(-0.2f, -1.0f, -0.3f),
-		// 	glm::vec3(0.05f, 0.05f, 0.05f),
-		// 	glm::vec3(0.4f, 0.4f, 0.4f),
-		// 	glm::vec3(0.5f, 0.5f, 0.5f));
-
-		auto pointLight = registry.createEntity();
-		pointLight.addComponent<TransformComponent>(
-			glm::vec3(-3.2f, 5.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.2f));
-
-		pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		pointLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
-
-		pointLight.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("models/light.vert", "models/light.frag"));
-
-		pointLight.addComponent<PointLightComponent>(
-			glm::vec3(0.0f),
-			glm::vec3(0.5f, 0.5f, 0.5f),  // ambient
-			glm::vec3(0.5f, 0.5f, 0.5f),  // diffuse
-			glm::vec3(0.5f, 0.5f, 0.5f),
-			1.0f,
-			0.09f,
-			0.032f);
+		// pointLight.addComponent<PointLightComponent>(
+		// 	glm::vec3(0.0f),
+		// 	glm::vec3(0.5f, 0.5f, 0.5f),  // ambient
+		// 	glm::vec3(0.5f, 0.5f, 0.5f),  // diffuse
+		// 	glm::vec3(0.5f, 0.5f, 0.5f),
+		// 	1.0f,
+		// 	0.09f,
+		// 	0.032f);
 
 
 		// auto spotLight = registry.createEntity();

@@ -1,13 +1,13 @@
 #include "registry.h"
 
-Entity Registry::createEntity() {
+Entity Registry::createEntity(const std::string& name) {
 	const size_t entityID = numEntities++;
 
 	if (entityID >= entityComponentSignatures.size()) {
 		entityComponentSignatures.resize(entityID + 1);
 	}
 
-	Entity entity{entityID};
+	Entity entity{entityID, name};
 	entity.registry = this;
 	entitiesToBeAdded.insert(entity);
 
