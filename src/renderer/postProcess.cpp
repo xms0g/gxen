@@ -12,9 +12,9 @@ PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_uniq
 		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true},
 	};
 
-	for (int i = 0; i < 2; i++) {
-		pingPongBuffers[i] = std::make_unique<FrameBuffer>(width, height);
-		pingPongBuffers[i]->withTexture().checkStatus();
+	for (auto& pingPongBuffer : pingPongBuffers) {
+		pingPongBuffer = std::make_unique<FrameBuffer>(width, height);
+		pingPongBuffer->withTexture().checkStatus();
 	}
 }
 
