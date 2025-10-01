@@ -19,9 +19,8 @@ Models::Plane::Plane(const char* diffuseTexture, const char* specularTexture) {
 	};
 
 	std::vector<Vertex> vertices;
-
 	for (int i = 0; i < 8*4; i += 8) {
-		Vertex vertex;
+		Vertex vertex{};
 		vertex.position = glm::vec3(v[i], v[i + 1], v[i + 2]);
 		vertex.normal = glm::vec3(v[i + 3], v[i + 4], v[i + 5]);
 		vertex.texcoord = glm::vec2(v[i + 6], v[i + 7]);
