@@ -10,10 +10,12 @@
 #include "ECS/components/mesh.hpp"
 #include "ECS/components/pointLight.hpp"
 #include "ECS/components/shader.hpp"
+#include "ECS/components/skyboxComponent.hpp"
 #include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
 #include "mesh/mesh.h"
 #include "models/cube.h"
+#include "models/cubemap.h"
 #include "models/plane.h"
 #include "models/window.h"
 
@@ -32,6 +34,24 @@ int main() {
 		XEngine xngn;
 		xngn.init(&registry);
 
+		const char* faces[] = {
+			"skybox/right.jpg",
+			"skybox/left.jpg",
+			"skybox/top.jpg",
+			"skybox/bottom.jpg",
+			"skybox/front.jpg",
+			"skybox/back.jpg"
+		};
+
+		Models::Cubemap skyboxModel{faces};
+		auto skybox = registry.createEntity("Skybox");
+		skybox.addComponent<SkyboxComponent>();
+		skybox.addComponent<MaterialComponent>(skyboxModel.getTextures());
+		skybox.addComponent<MeshComponent>(skyboxModel.getMeshes());
+		skybox.addComponent<ShaderComponent>(
+			std::make_shared<Shader>("skybox.vert", "skybox.frag"));
+
+		// Backpack
 		auto backpack = registry.createEntity("Backpack");
 		backpack.addComponent<TransformComponent>(
 			glm::vec3(-3.2f, 0.8f, 0.0f),

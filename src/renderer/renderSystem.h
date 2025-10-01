@@ -15,13 +15,17 @@ class RenderSystem final : public System {
 public:
 	explicit RenderSystem();
 
-	GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
-	uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
-	uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
+	[[nodiscard]] GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
+	[[nodiscard]] uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
+	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
 	void render(const Camera* camera);
+
+	void beginSceneRender() const;
+
+	void endSceneRender() const;
 
 private:
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
@@ -39,10 +43,6 @@ private:
 	void lightingPass(const Shader& shader) const;
 
 	void drawPass(const Entity& entity) const;
-
-	void beginSceneRender() const;
-
-	void endSceneRender() const;
 
 	LightSystem* mLightSystem{};
 	std::unique_ptr<FrameBuffer> mSceneBuffer;

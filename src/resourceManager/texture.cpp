@@ -5,15 +5,15 @@
 unsigned int texture::load(const char* path, const std::string& type) {
     GLuint textureID;
 
-    int width, height, depth;
+	stbi_set_flip_vertically_on_load(true);
+
+	int width, height, depth;
     unsigned char* data = stbi_load(path, &width, &height, &depth, 0);
 
     if (!data) {
         std::cerr << "Texture failed to load at path: " << path << std::endl;
         exit(1);
     }
-
-    glGenTextures(1, &textureID);
 
     GLenum format{0}, internalFormat{0};
     if (depth == 1) {
@@ -27,8 +27,10 @@ unsigned int texture::load(const char* path, const std::string& type) {
     	internalFormat = type == "texture_diffuse" ? GL_SRGB_ALPHA: GL_RGBA;
     }
 
+	glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE: GL_REPEAT);
@@ -43,6 +45,7 @@ unsigned int texture::load(const char* path, const std::string& type) {
 
     stbi_image_free(data);
 
+	glBindTexture(GL_TEXTURE_2D, 0);
     return textureID;
 }
 
@@ -52,18 +55,20 @@ unsigned int texture::loadCubemap(const std::vector<std::string>& faces) {
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
 
-    int width, height, depth;
+	stbi_set_flip_vertically_on_load(false);
+
+	int width, height, depth;
     for (unsigned int i = 0; i < faces.size(); i++) {
-        unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &depth, 0);
+    	unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &depth, 0);
 
         if (!data) {
             std::cerr << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
-            exit(1);
+        	glDeleteTextures(1, &textureID);
+        	return 0;
         }
 
-        stbi_set_flip_vertically_on_load(false);
-
-        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+    	const GLenum format = depth == 4 ? GL_RGBA : GL_RGB;
+        glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_SRGB, width, height, 0, format, GL_UNSIGNED_BYTE, data);
 
         stbi_image_free(data);
     }
@@ -74,5 +79,5 @@ unsigned int texture::loadCubemap(const std::vector<std::string>& faces) {
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-    return textureID;
+	return textureID;
 }

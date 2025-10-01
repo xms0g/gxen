@@ -10,6 +10,7 @@
 #include "../renderer/renderSystem.h"
 #include "../renderer/lightSystem.h"
 #include "../renderer/postProcess.h"
+#include "../renderer/skyboxSystem.h"
 
 XEngine::XEngine() = default;
 
@@ -32,6 +33,9 @@ void XEngine::init(Registry* registry) {
 
 	mRenderSystem->setLightSystem(mLightSystem);
 
+	registry->addSystem<SkyboxSystem>();
+	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
+
 	mPostProcess = std::make_unique<PostProcess>(mRenderSystem->getSceneWidth(), mRenderSystem->getSceneHeight());
 
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
@@ -51,9 +55,12 @@ void XEngine::run() {
 		mCamera->update();
 		mLightSystem->update();
 
+		mRenderSystem->beginSceneRender();
+		mSkyboxSystem->render(mCamera.get());
 		mRenderSystem->render(mCamera.get());
-		mPostProcess->render(mRenderSystem->getSceneTexture());
+		mRenderSystem->endSceneRender();
 
+		mPostProcess->render(mRenderSystem->getSceneTexture());
 #ifdef DEBUG
 		mGuiSystem->update(mDeltaTime);
 		mGuiSystem->render(mPostProcess->effects());

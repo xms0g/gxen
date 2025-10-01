@@ -2,6 +2,7 @@
 
 #include <memory>
 
+class SkyboxSystem;
 class LightSystem;
 class RenderSystem;
 class GuiSystem;
@@ -28,9 +29,10 @@ private:
     bool isRunning{true};
 
     Registry* mRegistry{};
-    RenderSystem* mRenderSystem;
-	GuiSystem* mGuiSystem;
-	LightSystem* mLightSystem;
+    RenderSystem* mRenderSystem{};
+	GuiSystem* mGuiSystem{};
+	LightSystem* mLightSystem{};
+	SkyboxSystem* mSkyboxSystem{};
 
 	std::unique_ptr<PostProcess> mPostProcess;
 	std::unique_ptr<Window> mWindow;

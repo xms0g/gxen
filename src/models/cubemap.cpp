@@ -1,0 +1,71 @@
+#include "cubemap.h"
+#include "../config/config.hpp"
+#include "../mesh/mesh.h"
+#include "../io/filesystem.hpp"
+#include "../resourceManager/texture.h"
+
+Models::Cubemap::Cubemap(const char* f[]) {
+	constexpr float v[]= {
+		-1.0f,  1.0f, -1.0f,
+	    -1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f, -1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
+	    -1.0f,  1.0f, -1.0f,
+
+	    -1.0f, -1.0f,  1.0f,
+	    -1.0f, -1.0f, -1.0f,
+	    -1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+	    -1.0f,  1.0f,  1.0f,
+	    -1.0f, -1.0f,  1.0f,
+
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+
+	   -1.0f, -1.0f,  1.0f,
+	   -1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f,
+	   -1.0f, -1.0f,  1.0f,
+
+	   -1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f, -1.0f,
+		1.0f,  1.0f,  1.0f,
+		1.0f,  1.0f,  1.0f,
+	   -1.0f,  1.0f,  1.0f,
+	   -1.0f,  1.0f, -1.0f,
+
+	   -1.0f, -1.0f, -1.0f,
+	   -1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f, -1.0f,
+		1.0f, -1.0f, -1.0f,
+	   -1.0f, -1.0f,  1.0f,
+		1.0f, -1.0f,  1.0f
+	};
+
+	std::vector<Vertex> vertices;
+	for (int i = 0; i < 36; i++) {
+		Vertex vertex{};
+		vertex.position = glm::vec3(v[i*3], v[i*3+1], v[i*3+2]);
+		vertices.emplace_back(vertex);
+	}
+
+	std::vector<unsigned int> indices;
+	meshes.emplace_back(vertices, indices);
+
+	std::vector<std::string> faces;
+	for (int i = 0; i < 6; i++) {
+		faces.emplace_back(fs::path(ASSET_DIR + f[i]));
+	}
+
+	textures.emplace_back(
+		texture::loadCubemap(faces),
+		"skybox",
+		"skybox.jpg");
+}
