@@ -66,7 +66,7 @@ int main() {
 		backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
 
 		backpack.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("model.vert", "model.frag"));
+			std::make_shared<Shader>("object.vert", "object.frag"));
 
 		// Plane
 		Models::Plane planeModel{"textures/metal.png", "textures/metal_specular.png"};
