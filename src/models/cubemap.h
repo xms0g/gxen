@@ -9,7 +9,7 @@ struct Texture;
 namespace Models {
 class Cubemap {
 public:
-	explicit Cubemap(const char* f[]);
+	explicit Cubemap(const char* const f[]);
 
 	[[nodiscard]] const std::vector<Mesh>* getMeshes() const { return &meshes; }
 	[[nodiscard]] const std::vector<Texture>* getTextures() const { return &textures; }

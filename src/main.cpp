@@ -27,6 +27,15 @@
 #define STRINGIFY(s) STRINGIFY0(s)
 #define VERSION STRINGIFY(VERSION_MAJOR) "." STRINGIFY(VERSION_MINOR) "." STRINGIFY(VERSION_PATCH)
 
+static constexpr const char* faces[] = {
+	"skybox/right.jpg",
+	"skybox/left.jpg",
+	"skybox/top.jpg",
+	"skybox/bottom.jpg",
+	"skybox/front.jpg",
+	"skybox/back.jpg"
+};
+
 int main() {
 	Registry registry;
 
@@ -34,14 +43,7 @@ int main() {
 		XEngine xngn;
 		xngn.init(&registry);
 
-		const char* faces[] = {
-			"skybox/right.jpg",
-			"skybox/left.jpg",
-			"skybox/top.jpg",
-			"skybox/bottom.jpg",
-			"skybox/front.jpg",
-			"skybox/back.jpg"
-		};
+
 
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");

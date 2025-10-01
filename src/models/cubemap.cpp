@@ -4,7 +4,7 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-Models::Cubemap::Cubemap(const char* f[]) {
+Models::Cubemap::Cubemap(const char* const f[]) {
 	constexpr float v[]= {
 		-1.0f,  1.0f, -1.0f,
 	    -1.0f, -1.0f, -1.0f,
