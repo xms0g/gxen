@@ -5,12 +5,12 @@
 
 class FrameBuffer {
 public:
-	FrameBuffer(uint32_t width, uint32_t height);
+	FrameBuffer(int width, int height);
 
 	~FrameBuffer();
 
-	[[nodiscard]] uint32_t width() const { return mWidth; }
-	[[nodiscard]] uint32_t height() const { return mHeight; }
+	[[nodiscard]] int width() const { return mWidth; }
+	[[nodiscard]] int height() const { return mHeight; }
 	[[nodiscard]] GLuint texture() const { return mTextureColorBuffer; }
 
 	void bind() const;
@@ -24,8 +24,8 @@ public:
 	FrameBuffer& checkStatus();
 
 private:
-	uint32_t mWidth{0};
-	uint32_t mHeight{0};
+	int mWidth{0};
+	int mHeight{0};
 	GLuint mFBO{0};
 	GLuint mRB0{0};
 	GLuint mDepthStencilTex{0};

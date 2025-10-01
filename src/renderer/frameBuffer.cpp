@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 #include "../config/config.hpp"
 
-FrameBuffer::FrameBuffer(const uint32_t width, const uint32_t height): mWidth(width), mHeight(height) {
+FrameBuffer::FrameBuffer(const int width, const int height): mWidth(width), mHeight(height) {
 	glGenFramebuffers(1, &mFBO);
 	bind();
 }
@@ -19,17 +19,19 @@ FrameBuffer::~FrameBuffer() {
 
 void FrameBuffer::bind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
+	glViewport(0, 0, mWidth, mHeight);
 }
 
 void FrameBuffer::unbind() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
 
 FrameBuffer& FrameBuffer::withTexture(const bool depthAndStencil) {
 	glGenTextures(1, &mTextureColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, mTextureColorBuffer);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -40,7 +42,7 @@ FrameBuffer& FrameBuffer::withTexture(const bool depthAndStencil) {
 		glGenTextures(1, &mDepthStencilTex);
 		glBindTexture(GL_TEXTURE_2D, mDepthStencilTex);
 		glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT, 0,
+			GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, mWidth, mHeight, 0,
 			GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mDepthStencilTex, 0);
@@ -53,7 +55,7 @@ FrameBuffer& FrameBuffer::withRenderBuffer() {
 	glGenRenderbuffers(1, &mRB0);
 	glBindRenderbuffer(GL_RENDERBUFFER, mRB0);
 
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, SCR_WIDTH, SCR_HEIGHT);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mWidth, mHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRB0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return *this;

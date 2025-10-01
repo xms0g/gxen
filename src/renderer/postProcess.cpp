@@ -2,7 +2,7 @@
 #include "shader.h"
 #include "frameBuffer.h"
 
-PostProcess::PostProcess(uint32_t width, uint32_t height) : mQuad(std::make_unique<Models::Quad>()) {
+PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	mEffects = {
 		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, false},
 		{"Edge Detection", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), EDGE, false},

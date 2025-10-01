@@ -64,14 +64,12 @@ void RenderSystem::render(const Camera* camera) {
 void RenderSystem::beginSceneRender() const {
 	mSceneBuffer->bind();
 	glEnable(GL_DEPTH_TEST);
-	glViewport(0, 0, mSceneBuffer->width(), mSceneBuffer->height());
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void RenderSystem::endSceneRender() const {
 	mSceneBuffer->unbind();
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
 
 bool RenderSystem::collectTransparentEntities(const Entity& entity, const Camera* camera, TransEntityBucket& bucket) {

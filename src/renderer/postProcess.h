@@ -20,7 +20,7 @@ struct PostEffect {
 
 class PostProcess {
 public:
-	PostProcess(uint32_t width, uint32_t height);
+	PostProcess(int width, int height);
 
 	std::vector<PostEffect>& effects() { return mEffects; }
 
