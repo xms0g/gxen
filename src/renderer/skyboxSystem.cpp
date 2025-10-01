@@ -38,12 +38,10 @@ void SkyboxSystem::render(const Camera* camera) const {
 		glBindTexture(GL_TEXTURE_CUBE_MAP, mat.textures->front().id);
 
 		// Draw
-		glDepthMask(GL_FALSE);          // Disable writing to depth buffer
 		glDepthFunc(GL_LEQUAL);
 		glBindVertexArray(mc.meshes->front().VAO());
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 		glDepthFunc(GL_LESS);
-		glDepthMask(GL_TRUE);
 	}
 }

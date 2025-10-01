@@ -10,7 +10,7 @@
 #include "../ECS/components/transform.hpp"
 #include "../renderer/postProcess.h"
 
-GuiSystem::GuiSystem(SDL_Window* window, SDL_GLContext gl_context) {
+GuiSystem::GuiSystem(SDL_Window* window, const SDL_GLContext gl_context) {
 	RequireComponent<TransformComponent>(true);
 	// Initialize the ImGui context
 	const char* glsl_version = "#version 410";
