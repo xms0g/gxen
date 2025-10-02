@@ -8,14 +8,17 @@ layout (location = 2) in vec2 aTexCoord;
 uniform mat4 model;
 uniform mat3 normalMatrix;
 
-out vec2 vTexCoord;
-out vec3 vNormal;
-out vec3 vFragPos;
+out VS_OUT
+{
+    vec2 TexCoord;
+    vec3 Normal;
+    vec3 FragPos;
+} vs_out;
 
 void main() {
-    vTexCoord = aTexCoord;
-    vFragPos = vec3(model * vec4(aPos, 1.0));
-    vNormal = normalMatrix * aNormal;
+    vs_out.TexCoord = aTexCoord;
+    vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
+    vs_out.Normal = normalMatrix * aNormal;
 
     gl_Position = projection * view  * model * vec4(aPos, 1.0);
 }
