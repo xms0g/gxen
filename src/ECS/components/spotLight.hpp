@@ -2,41 +2,30 @@
 
 #include "glm/glm.hpp"
 
-struct SpotLightComponent {
-	glm::vec3 position;
-	glm::vec3 direction;
-	float cutOff;
-	float outerCutOff;
-
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
-
-	float Kc;
-	float Kl;
-	float Kq;
+struct alignas(16) SpotLightComponent {
+	glm::vec4 position;
+	glm::vec4 direction;
+	glm::vec4 ambient;
+	glm::vec4 diffuse;
+	glm::vec4 specular;
+	glm::vec4 cutOff; // (cutOff, outerCutOff, Kc, Kl)
+	glm::vec4 attenuation; // (Kq, padding, padding, padding)
 
 	SpotLightComponent() = default;
 
 	explicit SpotLightComponent(
-		const glm::vec3 pos,
-		const glm::vec3 dir,
-		const float coff,
-		const float ocoff,
-		const glm::vec3 a,
-		const glm::vec3 dif,
-		const glm::vec3 s,
-		const float c,
-		const float l,
-		const float q) : position(pos),
-		           direction(dir),
-		           cutOff(coff),
-		           outerCutOff(ocoff),
-		           ambient(a),
-		           diffuse(dif),
-		           specular(s),
-		           Kc(c),
-		           Kl(l),
-		           Kq(q) {
+		const glm::vec4 pos,
+		const glm::vec4 dir,
+		const glm::vec4 a,
+		const glm::vec4 dif,
+		const glm::vec4 s,
+		const glm::vec4 cut,
+		const glm::vec4 att) : position(pos),
+		                       direction(dir),
+		                       ambient(a),
+		                       diffuse(dif),
+		                       specular(s),
+		                       cutOff(cut),
+		                       attenuation(att) {
 	}
 };
