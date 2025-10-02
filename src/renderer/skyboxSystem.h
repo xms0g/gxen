@@ -8,5 +8,5 @@ class SkyboxSystem final : public System {
 public:
 	SkyboxSystem();
 
-	void render(const Camera* camera) const;
+	void render(const Camera& camera) const;
 };

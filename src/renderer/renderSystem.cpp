@@ -58,7 +58,7 @@ RenderSystem::RenderSystem() {
 	mLightUBO = std::make_unique<UniformBuffer>(totalLightBufferSize, 1);
 }
 
-void RenderSystem::configureUB(const Camera* camera) const {
+void RenderSystem::configureUB(const Camera& camera) const {
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
@@ -66,7 +66,7 @@ void RenderSystem::configureUB(const Camera* camera) const {
 		mLightUBO->configure(shader->ID(), 1, "LightBlock");
 	}
 
-	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
+	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera.zoom()),
 	                                                 static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
 	                                                 ZNEAR, ZFAR);
 
@@ -75,7 +75,7 @@ void RenderSystem::configureUB(const Camera* camera) const {
 	mCameraUBO->unbind();
 }
 
-void RenderSystem::render(const Camera* camera) {
+void RenderSystem::render(const Camera& camera) {
 	updateCameraUBO(camera);
 	updateLightUBO();
 
@@ -87,10 +87,10 @@ void RenderSystem::render(const Camera* camera) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
-		opaquePass(entity, camera, *shader);
+		opaquePass(entity, *shader);
 	}
 
-	transparentPass(camera, transparentEntities);
+	transparentPass(transparentEntities);
 }
 
 void RenderSystem::beginSceneRender() const {
@@ -104,25 +104,25 @@ void RenderSystem::endSceneRender() const {
 	mSceneBuffer->unbind();
 }
 
-bool RenderSystem::collectTransparentEntities(const Entity& entity, const Camera* camera, TransEntityBucket& bucket) {
+bool RenderSystem::collectTransparentEntities(const Entity& entity, const Camera& camera, TransEntityBucket& bucket) {
 	const auto& tc = entity.getComponent<TransformComponent>();
 	const auto& mtc = entity.getComponent<MaterialComponent>();
 
 	if (mtc.isTransparent) {
-		float distance = glm::length(camera->position() - tc.position);
+		float distance = glm::length(camera.position() - tc.position);
 		bucket.emplace_back(distance, entity);
 		return true;
 	}
 	return false;
 }
 
-void RenderSystem::opaquePass(const Entity& entity, const Camera* camera, const Shader& shader) const {
-	geometryPass(entity, camera, shader);
+void RenderSystem::opaquePass(const Entity& entity, const Shader& shader) const {
+	geometryPass(entity, shader);
 	materialPass(entity, shader);
 	drawPass(entity);
 }
 
-void RenderSystem::transparentPass(const Camera* camera, TransEntityBucket& bucket) {
+void RenderSystem::transparentPass(TransEntityBucket& bucket) {
 	if (bucket.empty()) return;
 
 	std::sort(bucket.begin(), bucket.end(),
@@ -133,12 +133,12 @@ void RenderSystem::transparentPass(const Camera* camera, TransEntityBucket& buck
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
-		opaquePass(entity, camera, *shader);
+		opaquePass(entity, *shader);
 	}
 	glDepthMask(GL_TRUE);
 }
 
-void RenderSystem::geometryPass(const Entity& entity, const Camera* camera, const Shader& shader) const {
+void RenderSystem::geometryPass(const Entity& entity, const Shader& shader) const {
 	const auto& tc = entity.getComponent<TransformComponent>();
 
 	auto modelMat = glm::mat4(1.0f);
@@ -204,9 +204,9 @@ void RenderSystem::drawPass(const Entity& entity) const {
 		glEnable(GL_CULL_FACE);
 }
 
-void RenderSystem::updateCameraUBO(const Camera* camera) const {
-	auto view = camera->viewMatrix();
-	auto viewPos = glm::vec4(camera->position(), 1.0);
+void RenderSystem::updateCameraUBO(const Camera& camera) const {
+	auto view = camera.viewMatrix();
+	auto viewPos = glm::vec4(camera.position(), 1.0);
 
 	mCameraUBO->bind();
 	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);

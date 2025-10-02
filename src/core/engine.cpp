@@ -43,14 +43,14 @@ void XEngine::init(Registry* registry) {
 }
 
 void XEngine::configure() const {
-	mRenderSystem->configureUB(mCamera.get());
+	mRenderSystem->configureUB(*mCamera);
 }
 
 void XEngine::run() {
 	while (isRunning) {
 		mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 
-		mInput->process(mCamera.get(), mWindow->nativeHandle(), mDeltaTime,
+		mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime,
 		                isRunning);
 
 		mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
@@ -60,8 +60,8 @@ void XEngine::run() {
 		mLightSystem->update();
 
 		mRenderSystem->beginSceneRender();
-		mSkyboxSystem->render(mCamera.get());
-		mRenderSystem->render(mCamera.get());
+		mSkyboxSystem->render(*mCamera);
+		mRenderSystem->render(*mCamera);
 		mRenderSystem->endSceneRender();
 
 		mPostProcess->render(mRenderSystem->getSceneTexture());

@@ -3,7 +3,7 @@
 #include "camera.h"
 #include "../../libs/imgui/imgui_impl_sdl.h"
 
-void Input::process(Camera* camera, SDL_Window* window, const float dt, bool& isRunning) {
+void Input::process(Camera& camera, SDL_Window* window, const float dt, bool& isRunning) {
     SDL_Event event;
 
     SDL_PollEvent(&event);
@@ -22,23 +22,23 @@ void Input::process(Camera* camera, SDL_Window* window, const float dt, bool& is
 
 }
 
-void Input::processKeyboard(Camera* camera, const float dt, bool& isRunning) {
+void Input::processKeyboard(Camera& camera, const float dt, bool& isRunning) {
     auto* keystate = SDL_GetKeyboardState(nullptr);
 
     if (keystate[SDL_SCANCODE_ESCAPE]) {
         isRunning = false;
     } else if (keystate[SDL_SCANCODE_W]) {
-        camera->processKeyboard(FORWARD, dt);
+        camera.processKeyboard(FORWARD, dt);
     } else if (keystate[SDL_SCANCODE_S]) {
-        camera->processKeyboard(BACKWARD, dt);
+        camera.processKeyboard(BACKWARD, dt);
     } else if (keystate[SDL_SCANCODE_A]) {
-        camera->processKeyboard(LEFT, dt);
+        camera.processKeyboard(LEFT, dt);
     } else if (keystate[SDL_SCANCODE_D]) {
-        camera->processKeyboard(RIGHT, dt);
+        camera.processKeyboard(RIGHT, dt);
     }
 }
 
-void Input::processMouse(Camera* camera) {
+void Input::processMouse(Camera& camera) {
     int x, y;
 
     const int buttons = SDL_GetMouseState(&x, &y);
@@ -68,5 +68,5 @@ void Input::processMouse(Camera* camera) {
     mLastY = ypos;
 
     if (isClickedRight)
-        camera->processMouseMovement(xoffset, yoffset);
+        camera.processMouseMovement(xoffset, yoffset);
 }

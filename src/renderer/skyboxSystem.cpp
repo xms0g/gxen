@@ -15,14 +15,14 @@ SkyboxSystem::SkyboxSystem() {
 	RequireComponent<SkyboxComponent>();
 }
 
-void SkyboxSystem::render(const Camera* camera) const {
+void SkyboxSystem::render(const Camera& camera) const {
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& mc = entity.getComponent<MeshComponent>();
 		const auto& mat = entity.getComponent<MaterialComponent>();
 
 		const glm::mat4 projectionMat = glm::perspective(
-			glm::radians(camera->zoom()),
+			glm::radians(camera.zoom()),
 			static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
 			ZNEAR, ZFAR);
 
@@ -30,7 +30,7 @@ void SkyboxSystem::render(const Camera* camera) const {
 		shader->setInt(mat.textures->front().type, 0);
 		shader->setMat4("projection", projectionMat);
 
-		auto view = glm::mat4(glm::mat3(camera->viewMatrix()));
+		auto view = glm::mat4(glm::mat3(camera.viewMatrix()));
 		shader->setMat4("view", view);
 
 		glActiveTexture(GL_TEXTURE0); // active proper texture unit before binding

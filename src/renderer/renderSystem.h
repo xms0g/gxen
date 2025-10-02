@@ -22,9 +22,9 @@ public:
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
-	void configureUB(const Camera* camera) const;
+	void configureUB(const Camera& camera) const;
 
-	void render(const Camera* camera);
+	void render(const Camera& camera);
 
 	void beginSceneRender() const;
 
@@ -33,19 +33,19 @@ public:
 private:
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
 
-	bool collectTransparentEntities(const Entity& entity, const Camera* camera, TransEntityBucket& bucket);
+	bool collectTransparentEntities(const Entity& entity, const Camera& camera, TransEntityBucket& bucket);
 
-	void opaquePass(const Entity& entity, const Camera* camera, const Shader& shader) const;
+	void opaquePass(const Entity& entity, const Shader& shader) const;
 
-	void transparentPass(const Camera* camera, TransEntityBucket& bucket);
+	void transparentPass(TransEntityBucket& bucket);
 
-	void geometryPass(const Entity& entity, const Camera* camera, const Shader& shader) const;
+	void geometryPass(const Entity& entity, const Shader& shader) const;
 
 	void materialPass(const Entity& entity, const Shader& shader) const;
 
 	void drawPass(const Entity& entity) const;
 
-	void updateCameraUBO(const Camera* camera) const;
+	void updateCameraUBO(const Camera& camera) const;
 
 	void updateLightUBO() const;
 
