@@ -12,7 +12,7 @@ public:
 
     ~Shader();
 
-    [[nodiscard]] GLuint getId() const { return mID; }
+    [[nodiscard]] GLuint ID() const { return mID; }
 
     // use/activate the shader
     void activate() const;
