@@ -45,14 +45,14 @@ RenderSystem::RenderSystem() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTexture().withRenderBuffer().checkStatus();
 
-	mUniformBuffer = std::make_unique<UniformBuffer>( 2 * sizeof(glm::mat4));
+	mUniformBuffer = std::make_unique<UniformBuffer>( 2 * sizeof(glm::mat4) + sizeof(glm::vec4));
 }
 
 void RenderSystem::configureUB(const Camera* camera) const {
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
-		unsigned int ubidx = glGetUniformBlockIndex(shader->ID(), "MatrixBlock");
+		unsigned int ubidx = glGetUniformBlockIndex(shader->ID(), "CameraBlock");
 		glUniformBlockBinding(shader->ID(), ubidx, 0);
 	}
 
@@ -67,8 +67,11 @@ void RenderSystem::configureUB(const Camera* camera) const {
 
 void RenderSystem::render(const Camera* camera) {
 	auto view = camera->viewMatrix();
+	auto viewPos = glm::vec4(camera->position(), 1.0);
+
 	mUniformBuffer->bind();
 	mUniformBuffer->setData(glm::value_ptr(view), sizeof(glm::mat4));
+	mUniformBuffer->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
 	mUniformBuffer->unbind();
 
 	TransEntityBucket transparentEntities;
@@ -133,8 +136,6 @@ void RenderSystem::transparentPass(const Camera* camera, TransEntityBucket& buck
 
 void RenderSystem::geometryPass(const Entity& entity, const Camera* camera, const Shader& shader) const {
 	const auto& tc = entity.getComponent<TransformComponent>();
-
-	shader.setVec3("viewPos", camera->position());
 
 	auto modelMat = glm::mat4(1.0f);
 	modelMat = glm::translate(modelMat, tc.position);

@@ -7,6 +7,7 @@ layout (std140) uniform MatrixBlock
 {
     mat4 view;
     mat4 projection;
+    vec3 viewPos;
 };
 uniform mat4 model;
 uniform mat3 normalMatrix;

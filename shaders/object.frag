@@ -4,8 +4,7 @@ in vec3 vNormal;
 in vec3 vFragPos;
 
 #include "phong.glsl"
-
-uniform vec3 viewPos;
+#include "cameraUBO.glsl"
 
 out vec4 fragColor;
 
