@@ -76,45 +76,8 @@ void RenderSystem::configureUB(const Camera* camera) const {
 }
 
 void RenderSystem::render(const Camera* camera) {
-	auto view = camera->viewMatrix();
-	auto viewPos = glm::vec4(camera->position(), 1.0);
-
-	mCameraUBO->bind();
-	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
-	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
-	mCameraUBO->unbind();
-
-	mLightUBO->bind();
-	int offset = 0;
-	// Directional lights
-	const auto& dirLights = mLightSystem->getDirLights();
-	for (size_t i = 0; i < dirLights.size(); i++) {
-		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
-			offset + i * sizeof(DirectionalLightComponent));
-	}
-
-	offset += MAX_DIR_LIGHTS * sizeof(DirectionalLightComponent);
-
-	// Point lights
-	const auto& pointLights = mLightSystem->getPointLights();
-	for (size_t i = 0; i < pointLights.size(); i++) {
-		mLightUBO->setData(pointLights[i], sizeof(PointLightComponent), offset + i * sizeof(PointLightComponent));
-	}
-
-	offset += MAX_POINT_LIGHTS * sizeof(PointLightComponent);
-
-	// Spot Lights
-	const auto& spotLights = mLightSystem->getSpotLights();
-	for (size_t i = 0; i < spotLights.size(); i++) {
-		mLightUBO->setData(spotLights[i], sizeof(SpotLightComponent), offset + i * sizeof(SpotLightComponent));
-	}
-
-	offset += MAX_SPOT_LIGHTS * sizeof(SpotLightComponent);
-
-	auto lightCount = glm::ivec4(dirLights.size(), pointLights.size(), spotLights.size(), 0);
-	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
-
-	mLightUBO->unbind();
+	updateCameraUBO(camera);
+	updateLightUBO();
 
 	TransEntityBucket transparentEntities;
 	for (const auto& entity: getSystemEntities()) {
@@ -227,47 +190,6 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 	glActiveTexture(GL_TEXTURE0);
 }
 
-void RenderSystem::lightingPass(const Shader& shader) const {
-	// // Directional lights
-	// const auto& dirLights = mLightSystem->getDirLights();
-	// shader.setInt("numDirLights", dirLights.size());
-	// for (int i = 0; i < dirLights.size(); i++) {
-	// 	shader.setVec3("dirLights[" + std::to_string(i) + "].direction", dirLights[i]->direction);
-	// 	shader.setVec3("dirLights[" + std::to_string(i) + "].ambient", dirLights[i]->ambient);
-	// 	shader.setVec3("dirLights[" + std::to_string(i) + "].diffuse", dirLights[i]->diffuse);
-	// 	shader.setVec3("dirLights[" + std::to_string(i) + "].specular", dirLights[i]->specular);
-	// }
-	// // Point lights
-	// const auto& pointLights = mLightSystem->getPointLights();
-	// shader.setInt("numPointLights", pointLights.size());
-	// for (int i = 0; i < pointLights.size(); i++) {
-	// 	shader.setVec3("pointLights[" + std::to_string(i) + "].position", pointLights[i]->position);
-	// 	shader.setVec3("pointLights[" + std::to_string(i) + "].ambient", pointLights[i]->ambient);
-	// 	shader.setVec3("pointLights[" + std::to_string(i) + "].diffuse", pointLights[i]->diffuse);
-	// 	shader.setVec3("pointLights[" + std::to_string(i) + "].specular", pointLights[i]->specular);
-	// 	shader.setFloat("pointLights[" + std::to_string(i) + "].Kc", pointLights[i]->Kc);
-	// 	shader.setFloat("pointLights[" + std::to_string(i) + "].Kl", pointLights[i]->Kl);
-	// 	shader.setFloat("pointLights[" + std::to_string(i) + "].Kq", pointLights[i]->Kq);
-	// }
-	// // Spot Lights
-	// const auto& spotLights = mLightSystem->getSpotLights();
-	// shader.setInt("numSpotLights", spotLights.size());
-	// for (int i = 0; i < spotLights.size(); i++) {
-	// 	shader.setVec3("spotLights[" + std::to_string(i) + "].position", spotLights[i]->position);
-	// 	shader.setVec3("spotLights[" + std::to_string(i) + "].direction", spotLights[i]->direction);
-	// 	shader.setFloat("spotLights[" + std::to_string(i) + "].cutOff",
-	// 	                glm::cos(glm::radians(spotLights[i]->cutOff)));
-	// 	shader.setFloat("spotLights[" + std::to_string(i) + "].outerCutOff",
-	// 	                glm::cos(glm::radians(spotLights[i]->outerCutOff)));
-	// 	shader.setVec3("spotLights[" + std::to_string(i) + "].ambient", spotLights[i]->ambient);
-	// 	shader.setVec3("spotLights[" + std::to_string(i) + "].diffuse", spotLights[i]->diffuse);
-	// 	shader.setVec3("spotLights[" + std::to_string(i) + "].specular", spotLights[i]->specular);
-	// 	shader.setFloat("spotLights[" + std::to_string(i) + "].Kc", spotLights[i]->Kc);
-	// 	shader.setFloat("spotLights[" + std::to_string(i) + "].Kl", spotLights[i]->Kl);
-	// 	shader.setFloat("spotLights[" + std::to_string(i) + "].Kq", spotLights[i]->Kq);
-	// }
-}
-
 void RenderSystem::drawPass(const Entity& entity) const {
 	const bool isCulling = glIsEnabled(GL_CULL_FACE);
 	const auto& mc = entity.getComponent<MeshComponent>();
@@ -280,4 +202,48 @@ void RenderSystem::drawPass(const Entity& entity) const {
 	}
 	if (mc.isTwoSided && isCulling)
 		glEnable(GL_CULL_FACE);
+}
+
+void RenderSystem::updateCameraUBO(const Camera* camera) const {
+	auto view = camera->viewMatrix();
+	auto viewPos = glm::vec4(camera->position(), 1.0);
+
+	mCameraUBO->bind();
+	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
+	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
+	mCameraUBO->unbind();
+}
+
+void RenderSystem::updateLightUBO() const {
+	mLightUBO->bind();
+	int offset = 0;
+	// Directional lights
+	const auto& dirLights = mLightSystem->getDirLights();
+	for (size_t i = 0; i < dirLights.size(); i++) {
+		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
+			offset + i * sizeof(DirectionalLightComponent));
+	}
+
+	offset += MAX_DIR_LIGHTS * sizeof(DirectionalLightComponent);
+
+	// Point lights
+	const auto& pointLights = mLightSystem->getPointLights();
+	for (size_t i = 0; i < pointLights.size(); i++) {
+		mLightUBO->setData(pointLights[i], sizeof(PointLightComponent), offset + i * sizeof(PointLightComponent));
+	}
+
+	offset += MAX_POINT_LIGHTS * sizeof(PointLightComponent);
+
+	// Spot Lights
+	const auto& spotLights = mLightSystem->getSpotLights();
+	for (size_t i = 0; i < spotLights.size(); i++) {
+		mLightUBO->setData(spotLights[i], sizeof(SpotLightComponent), offset + i * sizeof(SpotLightComponent));
+	}
+
+	offset += MAX_SPOT_LIGHTS * sizeof(SpotLightComponent);
+
+	auto lightCount = glm::ivec4(dirLights.size(), pointLights.size(), spotLights.size(), 0);
+	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
+
+	mLightUBO->unbind();
 }

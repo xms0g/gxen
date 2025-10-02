@@ -43,9 +43,11 @@ private:
 
 	void materialPass(const Entity& entity, const Shader& shader) const;
 
-	void lightingPass(const Shader& shader) const;
-
 	void drawPass(const Entity& entity) const;
+
+	void updateCameraUBO(const Camera* camera) const;
+
+	void updateLightUBO() const;
 
 	LightSystem* mLightSystem{};
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
