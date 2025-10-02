@@ -20,6 +20,8 @@ public:
 
     void init(Registry* registry);
 
+	void configure() const;
+
     void run();
 
 private:

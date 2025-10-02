@@ -42,6 +42,10 @@ void XEngine::init(Registry* registry) {
 	mInput = std::make_unique<Input>();
 }
 
+void XEngine::configure() const {
+	mRenderSystem->configureUB(mCamera.get());
+}
+
 void XEngine::run() {
 	while (isRunning) {
 		mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
