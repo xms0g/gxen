@@ -52,8 +52,7 @@ void RenderSystem::configureUB(const Camera* camera) const {
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
-		unsigned int ubidx = glGetUniformBlockIndex(shader->ID(), "CameraBlock");
-		glUniformBlockBinding(shader->ID(), ubidx, 0);
+		mUniformBuffer->configure(shader->ID(), 0, "CameraBlock");
 	}
 
 	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),

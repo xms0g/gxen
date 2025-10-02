@@ -10,6 +10,7 @@ UniformBuffer::UniformBuffer(const size_t size) {
 }
 
 UniformBuffer::~UniformBuffer() {
+	glDeleteBuffers(1, &mUBO);
 }
 
 void UniformBuffer::bind() const {
@@ -23,4 +24,9 @@ void UniformBuffer::unbind() const {
 
 void UniformBuffer::setData(const void* data, const size_t size, const size_t offset) {
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+}
+
+void UniformBuffer::configure(const unsigned int program, const unsigned int uniformBlockBinding, const char* uniformBlockName) {
+	const unsigned int ubidx = glGetUniformBlockIndex(program, uniformBlockName);
+	glUniformBlockBinding(program, ubidx, uniformBlockBinding);
 }
