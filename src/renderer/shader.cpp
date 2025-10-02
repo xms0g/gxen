@@ -38,6 +38,7 @@ Shader::Shader(const char* vs, const char* fs) {
 		std::unordered_set<std::string> includedFiles{};
 
 		vertexCode = preprocess(vertexCode, includedFiles);
+		includedFiles.clear();
 		fragmentCode = preprocess(fragmentCode, includedFiles);
 
 		const char* vs_str = vertexCode.c_str();
@@ -143,7 +144,7 @@ std::string Shader::preprocess(std::string& source, std::unordered_set<std::stri
 					includeSource << file.rdbuf();
 					auto includeSourceStr = includeSource.str();
 					// Recurse
-					result << preprocess(includeSourceStr, includedFiles);
+					result << preprocess(includeSourceStr, includedFiles) << "\n";
 				} else {
 					// Handle error: file not found
 					throw std::runtime_error(std::string("FILE_NOT_OPEN:\n") + fullPath);
