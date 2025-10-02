@@ -43,8 +43,6 @@ int main() {
 		XEngine xngn;
 		xngn.init(&registry);
 
-
-
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
 		skybox.addComponent<SkyboxComponent>();
@@ -66,6 +64,21 @@ int main() {
 		backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
 
 		backpack.addComponent<ShaderComponent>(
+			std::make_shared<Shader>("object.vert", "object.frag"));
+
+		// Suzanne
+		auto suzanne = registry.createEntity("Suzanne");
+		suzanne.addComponent<TransformComponent>(
+			glm::vec3(3.2f, 0.8f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(1.0f));
+
+		ResourceManager::instance().loadModel(suzanne.id(), "suzanne/suzanne.obj");
+
+		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(suzanne.id()), 32.0f);
+
+		suzanne.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("object.vert", "object.frag"));
 
 		// Plane
@@ -169,6 +182,8 @@ int main() {
 		// 	 1.0f, 0.045f, 0.0075f);
 
 		registry.update();
+
+		xngn.configure();
 
 		xngn.run();
 	} catch (std::exception& e) {

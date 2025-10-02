@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include "frameBuffer.h"
+#include "uniformBuffer.h"
 #include "../ECS/system.hpp"
 
 class LightSystem;
@@ -20,6 +21,8 @@ public:
 	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
+
+	void configureUB(const Camera* camera) const;
 
 	void render(const Camera* camera);
 
@@ -46,4 +49,5 @@ private:
 
 	LightSystem* mLightSystem{};
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
+	std::unique_ptr<UniformBuffer> mUniformBuffer;
 };

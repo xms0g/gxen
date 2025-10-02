@@ -5,6 +5,7 @@
 #include "image/stb_image.h"
 #include "glad/glad.h"
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtc/type_ptr.hpp"
 #include "lightSystem.h"
 #include "shader.h"
 #include "../mesh/mesh.h"
@@ -43,11 +44,34 @@ RenderSystem::RenderSystem() {
 
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTexture().withRenderBuffer().checkStatus();
+
+	mUniformBuffer = std::make_unique<UniformBuffer>( 2 * sizeof(glm::mat4));
+}
+
+void RenderSystem::configureUB(const Camera* camera) const {
+	for (const auto& entity: getSystemEntities()) {
+		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+
+		unsigned int ubidx = glGetUniformBlockIndex(shader->getId(), "MatrixBlock");
+		glUniformBlockBinding(shader->getId(), ubidx, 0);
+	}
+
+	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
+													 static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+													 ZNEAR, ZFAR);
+
+	mUniformBuffer->bind();
+	mUniformBuffer->setData(glm::value_ptr(projectionMat), sizeof(glm::mat4), sizeof(glm::mat4));
+	mUniformBuffer->unbind();
 }
 
 void RenderSystem::render(const Camera* camera) {
-	TransEntityBucket transparentEntities;
+	auto view = camera->viewMatrix();
+	mUniformBuffer->bind();
+	mUniformBuffer->setData(glm::value_ptr(view), sizeof(glm::mat4));
+	mUniformBuffer->unbind();
 
+	TransEntityBucket transparentEntities;
 	for (const auto& entity: getSystemEntities()) {
 		if (collectTransparentEntities(entity, camera, transparentEntities))
 			continue;
@@ -111,12 +135,6 @@ void RenderSystem::geometryPass(const Entity& entity, const Camera* camera, cons
 	const auto& tc = entity.getComponent<TransformComponent>();
 
 	shader.setVec3("viewPos", camera->position());
-
-	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera->zoom()),
-	                                                 static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
-	                                                 ZNEAR, ZFAR);
-	shader.setMat4("projection", projectionMat);
-	shader.setMat4("view", camera->viewMatrix());
 
 	auto modelMat = glm::mat4(1.0f);
 	modelMat = glm::translate(modelMat, tc.position);
