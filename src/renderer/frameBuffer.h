@@ -22,7 +22,7 @@ public:
 
 	FrameBuffer& withRenderBufferDepthStencil();
 
-	FrameBuffer& checkStatus();
+	void checkStatus();
 
 private:
 	int mWidth{0};

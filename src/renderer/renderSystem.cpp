@@ -44,6 +44,7 @@ RenderSystem::RenderSystem() {
 
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTexture().withRenderBufferDepthStencil().checkStatus();
+	mSceneBuffer->unbind();
 
 	mUniformBuffer = std::make_unique<UniformBuffer>( 2 * sizeof(glm::mat4) + sizeof(glm::vec4));
 }

@@ -3,9 +3,9 @@
 
 UniformBuffer::UniformBuffer(const size_t size) {
 	glGenBuffers(1, &mUBO);
-	glBindBuffer(GL_UNIFORM_BUFFER, mUBO);
+	bind();
 	glBufferData(GL_UNIFORM_BUFFER, size, nullptr, GL_STATIC_DRAW);
-	glBindBuffer(GL_UNIFORM_BUFFER, 0);
+	unbind();
 	glBindBufferRange(GL_UNIFORM_BUFFER, 0, mUBO, 0, size);
 }
 

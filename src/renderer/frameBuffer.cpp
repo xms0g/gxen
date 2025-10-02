@@ -64,10 +64,8 @@ FrameBuffer& FrameBuffer::withRenderBufferDepthStencil() {
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::checkStatus() {
+void FrameBuffer::checkStatus() {
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		throw std::runtime_error("ERROR::FRAMEBUFFER::NOT_COMPLETE!\n");
 	}
-	unbind();
-	return *this;
 }
