@@ -28,11 +28,11 @@ void LightSystem::update() {
 			dirLights.push_back(&light);
 		} else if (entity.hasComponent<PointLightComponent>()) {
 			auto& light = entity.getComponent<PointLightComponent>();
-			light.position = tc.position;
+			light.position = glm::vec4(tc.position, 1.0f);
 			pointLights.push_back(&light);
 		} else if (entity.hasComponent<SpotLightComponent>()) {
 			auto& light = entity.getComponent<SpotLightComponent>();
-			light.position = tc.position;
+			light.position = glm::vec4(tc.position, 1.0f);
 			spotLights.push_back(&light);
 		}
 	}

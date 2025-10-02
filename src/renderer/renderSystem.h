@@ -49,5 +49,6 @@ private:
 
 	LightSystem* mLightSystem{};
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
-	std::unique_ptr<UniformBuffer> mUniformBuffer;
+	std::unique_ptr<UniformBuffer> mCameraUBO;
+	std::unique_ptr<UniformBuffer> mLightUBO;
 };
