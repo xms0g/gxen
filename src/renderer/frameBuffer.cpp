@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 #include "../config/config.hpp"
 
-FrameBuffer::FrameBuffer(const int width, const int height): mWidth(width), mHeight(height) {
+FrameBuffer::FrameBuffer(const int width, const int height) : mWidth(width), mHeight(height) {
 	glGenFramebuffers(1, &mFBO);
 	bind();
 }
@@ -27,7 +27,7 @@ void FrameBuffer::unbind() {
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
 
-FrameBuffer& FrameBuffer::withTexture(const bool depthAndStencil) {
+FrameBuffer& FrameBuffer::withTexture() {
 	glGenTextures(1, &mTextureColorBuffer);
 	glBindTexture(GL_TEXTURE_2D, mTextureColorBuffer);
 
@@ -37,21 +37,24 @@ FrameBuffer& FrameBuffer::withTexture(const bool depthAndStencil) {
 
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTextureColorBuffer, 0);
 
-	if (depthAndStencil) {
-		// depth and stencil texture
-		glGenTextures(1, &mDepthStencilTex);
-		glBindTexture(GL_TEXTURE_2D, mDepthStencilTex);
-		glTexImage2D(
-			GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, mWidth, mHeight, 0,
-			GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mDepthStencilTex, 0);
-	}
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::withRenderBuffer() {
+FrameBuffer& FrameBuffer::withTextureDepthStencil() {
+	glGenTextures(1, &mDepthStencilTex);
+	glBindTexture(GL_TEXTURE_2D, mDepthStencilTex);
+	glTexImage2D(
+		GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, mWidth, mHeight, 0,
+		GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
+
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mDepthStencilTex, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return *this;
+}
+
+FrameBuffer& FrameBuffer::withRenderBufferDepthStencil() {
 	glGenRenderbuffers(1, &mRB0);
 	glBindRenderbuffer(GL_RENDERBUFFER, mRB0);
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <cstdint>
 #include "glad/glad.h"
 
 class FrameBuffer {
@@ -17,9 +16,11 @@ public:
 
 	void unbind();
 
-	FrameBuffer& withTexture(bool depthAndStencil = false);
+	FrameBuffer& withTexture();
 
-	FrameBuffer& withRenderBuffer();
+	FrameBuffer& withTextureDepthStencil();
+
+	FrameBuffer& withRenderBufferDepthStencil();
 
 	FrameBuffer& checkStatus();
 
