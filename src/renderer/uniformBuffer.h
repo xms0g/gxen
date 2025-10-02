@@ -4,7 +4,7 @@
 
 class UniformBuffer {
 public:
-	explicit UniformBuffer(size_t size);
+	explicit UniformBuffer(int size, int binding);
 
 	~UniformBuffer();
 
@@ -17,5 +17,5 @@ public:
 	void configure(unsigned int program, unsigned int uniformBlockBinding,  const char* uniformBlockName);
 
 private:
-	unsigned int mUBO;
+	unsigned int mUBO{};
 };
