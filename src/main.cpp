@@ -55,7 +55,7 @@ int main() {
 		auto backpack = registry.createEntity("Backpack");
 		backpack.addComponent<TransformComponent>(
 			glm::vec3(-3.2f, 0.8f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f),
 			glm::vec3(1.0f));
 
 		ResourceManager::instance().loadModel(backpack.id(), "backpack/backpack.obj");
@@ -70,7 +70,7 @@ int main() {
 		auto suzanne = registry.createEntity("Suzanne");
 		suzanne.addComponent<TransformComponent>(
 			glm::vec3(3.2f, 0.8f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f),
 			glm::vec3(1.0f));
 
 		ResourceManager::instance().loadModel(suzanne.id(), "suzanne/suzanne.obj");
@@ -85,8 +85,8 @@ int main() {
 		Models::Plane planeModel{"textures/metal.png", "textures/metal_specular.png"};
 		auto plane = registry.createEntity("Plane");
 		plane.addComponent<TransformComponent>(
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f),
 			glm::vec3(2.0f));
 
 		plane.addComponent<MeshComponent>(planeModel.getMeshes(), true);
@@ -99,8 +99,8 @@ int main() {
 		Models::Cube cubeModel{"textures/wall.jpg"};
 		auto cube = registry.createEntity("Cube");
 		cube.addComponent<TransformComponent>(
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f),
 			glm::vec3(2.0f));
 
 		cube.addComponent<MeshComponent>(cubeModel.getMeshes());
@@ -122,7 +122,7 @@ int main() {
 			auto w = registry.createEntity("window" + std::to_string(i));
 			w.addComponent<TransformComponent>(
 				windows[i],
-				glm::vec3(0.0f, 0.0f, 0.0f),
+				glm::vec3(0.0f),
 				glm::vec3(2.0f));
 
 			w.addComponent<MeshComponent>(windowModel.getMeshes(), true);
@@ -132,28 +132,28 @@ int main() {
 
 		auto dirLight = registry.createEntity("Directional Light");
 		dirLight.addComponent<DirectionalLightComponent>(
-			glm::vec3(-0.2f, -1.0f, -0.3f),
-			glm::vec3(0.05f, 0.05f, 0.05f),
-			glm::vec3(0.4f, 0.4f, 0.4f),
-			glm::vec3(0.5f, 0.5f, 0.5f));
+			glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
+			glm::vec4(0.05f, 0.05f, 0.05f, 0.0f),
+			glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
+			glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
 
 		// auto pointLight = registry.createEntity();
 		// pointLight.addComponent<TransformComponent>(
-		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.2f));
+		// 	glm::vec4(-3.2f, 5.0f, 0.0f),
+		// 	glm::vec4(0.0f, 0.0f, 0.0f),
+		// 	glm::vec4(0.2f));
 		//
 		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		// pointLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
+		// pointLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
 		//
 		// pointLight.addComponent<ShaderComponent>(
 		// 	std::make_shared<Shader>("models/light.vert", "models/light.frag"));
 		//
 		// pointLight.addComponent<PointLightComponent>(
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(0.5f, 0.5f, 0.5f),  // ambient
-		// 	glm::vec3(0.5f, 0.5f, 0.5f),  // diffuse
-		// 	glm::vec3(0.5f, 0.5f, 0.5f),
+		// 	glm::vec4(0.0f),
+		// 	glm::vec4(0.5f, 0.5f, 0.5f),  // ambient
+		// 	glm::vec4(0.5f, 0.5f, 0.5f),  // diffuse
+		// 	glm::vec4(0.5f, 0.5f, 0.5f),
 		// 	1.0f,
 		// 	0.09f,
 		// 	0.032f);
@@ -161,24 +161,24 @@ int main() {
 
 		// auto spotLight = registry.createEntity();
 		// spotLight.addComponent<TransformComponent>(
-		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.2f));
+		// 	glm::vec4(-3.2f, 5.0f, 0.0f),
+		// 	glm::vec4(0.0f, 0.0f, 0.0f),
+		// 	glm::vec4(0.2f));
 		//
 		// spotLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		// spotLight.addComponent<MaterialComponent>(glm::vec3(1.0f), 32.0f);
+		// spotLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
 		//
 		// spotLight.addComponent<ShaderComponent>(
 		// 	std::make_shared<Shader>("cube.vert", "cube.frag"));
 		//
 		// spotLight.addComponent<SpotLightComponent>(
-		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
-		// 	glm::vec3(0.0f, -1.0f, 0.0f),
+		// 	glm::vec4(-3.2f, 5.0f, 0.0f),
+		// 	glm::vec4(0.0f, -1.0f, 0.0f),
 		// 	glm::cos(glm::radians(20.5f)),
 		// 	glm::cos(glm::radians(25.0f)),
-		// 	glm::vec3(0.1f, 0.1f, 0.1f),
-		// 	glm::vec3(1.0f, 1.0f, 1.0f),
-		// 	glm::vec3(1.0f, 1.0f, 1.0f),
+		// 	glm::vec4(0.1f, 0.1f, 0.1f),
+		// 	glm::vec4(1.0f, 1.0f, 1.0f),
+		// 	glm::vec4(1.0f, 1.0f, 1.0f),
 		// 	 1.0f, 0.045f, 0.0075f);
 
 		registry.update();
