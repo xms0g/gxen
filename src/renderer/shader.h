@@ -43,7 +43,7 @@ public:
     void setMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
-	std::string preprocess(std::string& source, std::unordered_set<std::string>& includedFiles);
+	std::string preprocess(std::string& source, const char* fileName, std::unordered_set<std::string>& includedFiles);
 
     GLuint createShader(const char** source, GLuint type);
 

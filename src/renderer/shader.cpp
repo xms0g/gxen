@@ -37,9 +37,9 @@ Shader::Shader(const char* vs, const char* fs) {
 	try {
 		std::unordered_set<std::string> includedFiles{};
 
-		vertexCode = preprocess(vertexCode, includedFiles);
+		vertexCode = preprocess(vertexCode, vs, includedFiles);
 		includedFiles.clear();
-		fragmentCode = preprocess(fragmentCode, includedFiles);
+		fragmentCode = preprocess(fragmentCode, fs, includedFiles);
 
 		const char* vs_str = vertexCode.c_str();
 		const char* fs_str = fragmentCode.c_str();
@@ -61,62 +61,63 @@ Shader::Shader(const char* vs, const char* fs) {
 }
 
 Shader::~Shader() {
-    glDeleteProgram(mID);
+	glDeleteProgram(mID);
 }
 
 void Shader::activate() const {
-    glUseProgram(mID);
+	glUseProgram(mID);
 }
 
 void Shader::setBool(const std::string& name, const bool value) const {
-    glUniform1i(glGetUniformLocation(mID, name.c_str()), static_cast<int>(value));
+	glUniform1i(glGetUniformLocation(mID, name.c_str()), static_cast<int>(value));
 }
 
 void Shader::setInt(const std::string& name, const int value) const {
-    glUniform1i(glGetUniformLocation(mID, name.c_str()), value);
+	glUniform1i(glGetUniformLocation(mID, name.c_str()), value);
 }
 
 void Shader::setFloat(const std::string& name, const float value) const {
-    glUniform1f(glGetUniformLocation(mID, name.c_str()), value);
+	glUniform1f(glGetUniformLocation(mID, name.c_str()), value);
 }
 
 void Shader::setVec2(const std::string& name, const glm::vec2& value) const {
-    glUniform2fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
+	glUniform2fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
 }
 
 void Shader::setVec2(const std::string& name, const float x, const float y) const {
-    glUniform2f(glGetUniformLocation(mID, name.c_str()), x, y);
+	glUniform2f(glGetUniformLocation(mID, name.c_str()), x, y);
 }
 
 void Shader::setVec3(const std::string& name, const glm::vec3& value) const {
-    glUniform3fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
+	glUniform3fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
 }
 
 void Shader::setVec3(const std::string& name, const float x, const float y, const float z) const {
-    glUniform3f(glGetUniformLocation(mID, name.c_str()), x, y, z);
+	glUniform3f(glGetUniformLocation(mID, name.c_str()), x, y, z);
 }
 
 void Shader::setVec4(const std::string& name, const glm::vec4& value) const {
-    glUniform4fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
+	glUniform4fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
 }
 
 void Shader::setVec4(const std::string& name, const float x, const float y, const float z, const float w) const {
-    glUniform4f(glGetUniformLocation(mID, name.c_str()), x, y, z, w);
+	glUniform4f(glGetUniformLocation(mID, name.c_str()), x, y, z, w);
 }
 
 void Shader::setMat2(const std::string& name, const glm::mat2& mat) const {
-    glUniformMatrix2fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	glUniformMatrix2fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::setMat3(const std::string& name, const glm::mat3& mat) const {
-    glUniformMatrix3fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	glUniformMatrix3fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
-    glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+	glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
-std::string Shader::preprocess(std::string& source, std::unordered_set<std::string>& includedFiles) {
+std::string Shader::preprocess(std::string& source, const char* fileName,
+                               std::unordered_set<std::string>& includedFiles) {
 	std::stringstream result;
 	std::istringstream stream(source);
 	std::string line;
@@ -133,7 +134,7 @@ std::string Shader::preprocess(std::string& source, std::unordered_set<std::stri
 
 				// Prevent cyclic includes
 				if (includedFiles.contains(fullPath)) {
-					throw std::runtime_error(std::string("FILE_ALREADY_INCLUDED:\n") + fullPath);
+					throw std::runtime_error(std::string("FILE_ALREADY_INCLUDED: ") + includeFile + "\nin " + fileName);
 				}
 				includedFiles.insert(fullPath);
 
@@ -144,7 +145,7 @@ std::string Shader::preprocess(std::string& source, std::unordered_set<std::stri
 					includeSource << file.rdbuf();
 					auto includeSourceStr = includeSource.str();
 					// Recurse
-					result << preprocess(includeSourceStr, includedFiles) << "\n";
+					result << preprocess(includeSourceStr, fileName, includedFiles) << "\n";
 				} else {
 					// Handle error: file not found
 					throw std::runtime_error(std::string("FILE_NOT_OPEN:\n") + fullPath);
@@ -158,59 +159,59 @@ std::string Shader::preprocess(std::string& source, std::unordered_set<std::stri
 }
 
 GLuint Shader::createShader(const char** source, const GLuint type) {
-    const GLuint shader = glCreateShader(type);
+	const GLuint shader = glCreateShader(type);
 
-    glShaderSource(shader, 1, source, nullptr);
-    glCompileShader(shader);
+	glShaderSource(shader, 1, source, nullptr);
+	glCompileShader(shader);
 
-    // Check compile errors
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+	// Check compile errors
+	GLint success;
+	glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-    if (!success) {
-        std::string infoLog;
-        GLint maxLength = 0;
+	if (!success) {
+		std::string infoLog;
+		GLint maxLength = 0;
 
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-        infoLog.resize(maxLength);
+		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+		infoLog.resize(maxLength);
 
-        glGetShaderInfoLog(shader, maxLength, nullptr, infoLog.data());
+		glGetShaderInfoLog(shader, maxLength, nullptr, infoLog.data());
 
-        // The program is useless now. So delete it.
-        glDeleteShader(shader);
+		// The program is useless now. So delete it.
+		glDeleteShader(shader);
 
-        throw std::runtime_error(std::string("COMPILATION_ERROR:") + "\n" + infoLog);
-    }
+		throw std::runtime_error(std::string("COMPILATION_ERROR:") + "\n" + infoLog);
+	}
 
-    return shader;
+	return shader;
 }
 
 GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment) {
-    mID = glCreateProgram();
+	mID = glCreateProgram();
 
-    glAttachShader(mID, vertex);
-    glAttachShader(mID, fragment);
+	glAttachShader(mID, vertex);
+	glAttachShader(mID, fragment);
 
-    glLinkProgram(mID);
+	glLinkProgram(mID);
 
-    // Check linking errors
-    GLint success;
-    glGetProgramiv(mID, GL_LINK_STATUS, &success);
+	// Check linking errors
+	GLint success;
+	glGetProgramiv(mID, GL_LINK_STATUS, &success);
 
-    if (!success) {
-        std::string infoLog;
-        GLint maxLength = 0;
+	if (!success) {
+		std::string infoLog;
+		GLint maxLength = 0;
 
-        glGetProgramiv(mID, GL_INFO_LOG_LENGTH, &maxLength);
-        infoLog.resize(maxLength);
+		glGetProgramiv(mID, GL_INFO_LOG_LENGTH, &maxLength);
+		infoLog.resize(maxLength);
 
-        glGetProgramInfoLog(mID, maxLength, nullptr, infoLog.data());
+		glGetProgramInfoLog(mID, maxLength, nullptr, infoLog.data());
 
-        // The program is useless now. So delete it.
-        glDeleteShader(mID);
+		// The program is useless now. So delete it.
+		glDeleteShader(mID);
 
-        throw std::runtime_error(std::string("PROGRAM_LINKING_ERROR:\n") + infoLog);
-    }
+		throw std::runtime_error(std::string("PROGRAM_LINKING_ERROR:\n") + infoLog);
+	}
 
-    return mID;
+	return mID;
 }
