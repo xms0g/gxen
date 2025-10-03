@@ -8,6 +8,8 @@
 #include <assimp/postprocess.h>
 #include "texture.h"
 
+class Shader;
+enum class DebugMode;
 class Mesh;
 
 class ResourceManager {
@@ -28,8 +30,12 @@ public:
 		return &mEntityTextures.at(entityID);
 	}
 
+	const std::shared_ptr<Shader>& getDebugShader(const DebugMode mode) const {
+		return mDebugShaders.at(mode);
+	}
+
 private:
-	explicit ResourceManager() = default;
+	explicit ResourceManager();
 
 	~ResourceManager() = default;
 
@@ -45,4 +51,5 @@ private:
 	std::unordered_map<size_t, std::vector<Mesh> > mEntityMeshes;
 	std::unordered_map<size_t, std::vector<Texture> > mEntityTextures;
 	std::unordered_set<std::string> mTexturesLoaded;
+	std::unordered_map<DebugMode, std::shared_ptr<Shader>> mDebugShaders;
 };

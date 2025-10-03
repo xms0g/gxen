@@ -4,6 +4,8 @@
 #include "../mesh/mesh.h"
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
+#include "../ECS/components/debug.hpp"
+#include "../renderer/shader.h"
 
 ResourceManager& ResourceManager::instance() {
 	static ResourceManager instance;
@@ -34,6 +36,12 @@ void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	mMeshes.clear();
 	mTextures.clear();
 	mTexturesLoaded.clear();
+}
+
+ResourceManager::ResourceManager() {
+	mDebugShaders = {
+		{DebugMode::Normals, std::make_shared<Shader>("debug/normal.vert", "debug/normal.frag", "debug/normal.geom")}
+	};
 }
 
 void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
