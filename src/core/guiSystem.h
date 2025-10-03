@@ -20,7 +20,9 @@ private:
 
 	void renderGraphicsInfo() const;
 
-	void renderTransform() const;
+	void renderTransform(const Entity& entity) const;
+
+	void renderDebugViews(const Entity& entity) const;
 
 	void renderPostProcess(std::vector<PostEffect>& effects);
 

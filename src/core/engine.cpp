@@ -7,7 +7,8 @@
 #include "guiSystem.h"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
-#include "../renderer/renderSystem.h"
+#include "../renderer/forwardRenderer.h"
+#include "../renderer/debugRenderer.h"
 #include "../renderer/lightSystem.h"
 #include "../renderer/postProcess.h"
 #include "../renderer/skyboxSystem.h"
@@ -25,25 +26,29 @@ void XEngine::init(Registry* registry) {
 	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
 	mGuiSystem = &registry->getSystem<GuiSystem>();
 
-	registry->addSystem<RenderSystem>();
-	mRenderSystem = &registry->getSystem<RenderSystem>();
+	registry->addSystem<ForwardRenderer>();
+	mForwardRenderer = &registry->getSystem<ForwardRenderer>();
+
+	registry->addSystem<DebugRenderer>();
+	mDebugRenderer = &registry->getSystem<DebugRenderer>();
 
 	registry->addSystem<LightSystem>();
 	mLightSystem = &registry->getSystem<LightSystem>();
 
-	mRenderSystem->setLightSystem(mLightSystem);
+	mForwardRenderer->setLightSystem(mLightSystem);
 
 	registry->addSystem<SkyboxSystem>();
 	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
 
-	mPostProcess = std::make_unique<PostProcess>(mRenderSystem->getSceneWidth(), mRenderSystem->getSceneHeight());
+	mPostProcess = std::make_unique<PostProcess>(mForwardRenderer->getSceneWidth(), mForwardRenderer->getSceneHeight());
 
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
 	mInput = std::make_unique<Input>();
 }
 
 void XEngine::configure() const {
-	mRenderSystem->configureUB(*mCamera);
+	mForwardRenderer->configure(*mCamera);
+	mDebugRenderer->configure(mForwardRenderer->getCameraUBO());
 }
 
 void XEngine::run() {
@@ -59,12 +64,13 @@ void XEngine::run() {
 		mCamera->update();
 		mLightSystem->update();
 
-		mRenderSystem->beginSceneRender();
+		mForwardRenderer->beginSceneRender();
 		mSkyboxSystem->render(*mCamera);
-		mRenderSystem->render(*mCamera);
-		mRenderSystem->endSceneRender();
+		mForwardRenderer->render(*mCamera);
+		mDebugRenderer->render();
+		mForwardRenderer->endSceneRender();
 
-		mPostProcess->render(mRenderSystem->getSceneTexture());
+		mPostProcess->render(mForwardRenderer->getSceneTexture());
 #ifdef DEBUG
 		mGuiSystem->update(mDeltaTime);
 		mGuiSystem->render(mPostProcess->effects());

@@ -7,11 +7,14 @@
 #include "../../libs/imgui/imgui_impl_sdl.h"
 #include "../../libs/imgui/imgui_impl_opengl3.h"
 #include "../../libs/imgui/imgui_internal.h"
+#include "../ECS/registry.h"
+#include "../ECS/components/debug.hpp"
 #include "../ECS/components/transform.hpp"
 #include "../renderer/postProcess.h"
 
 GuiSystem::GuiSystem(SDL_Window* window, const SDL_GLContext gl_context) {
 	RequireComponent<TransformComponent>(true);
+	RequireComponent<DebugComponent>(true);
 	// Initialize the ImGui context
 	const char* glsl_version = "#version 410";
 	IMGUI_CHECKVERSION();
@@ -44,8 +47,12 @@ void GuiSystem::render(std::vector<PostEffect>& effects) {
 	ImGui::ShowDemoWindow(&show_demo_window);
 
 	renderGraphicsInfo();
-	renderTransform();
 	renderPostProcess(effects);
+
+	for (const auto& entity: getSystemEntities()) {
+		renderTransform(entity);
+		renderDebugViews(entity);
+	}
 
 	//Render ImGui
 	ImGui::Render();
@@ -76,32 +83,47 @@ void GuiSystem::renderGraphicsInfo() const {
 	ImGui::End();
 }
 
-void GuiSystem::renderTransform() const {
-	for (const auto& entity: getSystemEntities()) {
-		auto& tc = entity.getComponent<TransformComponent>();
+void GuiSystem::renderTransform(const Entity& entity) const {
+	auto& tc = entity.getComponent<TransformComponent>();
 
-		ImGui::PushID(static_cast<int>(entity.id()));
+	ImGui::PushID(static_cast<int>(entity.id()));
 
-		ImGui::Text("%s", entity.name());
-		if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
-			ImGui::Text("Position");ImGui::SameLine(80);
-			ImGui::DragFloat3("##pos", glm::value_ptr(tc.position), 0.01f);
+	ImGui::Text("%s", entity.name());
+	if (ImGui::CollapsingHeader("Transform", ImGuiTreeNodeFlags_DefaultOpen)) {
+		ImGui::Text("Position");
+		ImGui::SameLine(80);
+		ImGui::DragFloat3("##pos", glm::value_ptr(tc.position), 0.01f);
 
-			ImGui::Text("Rotation");ImGui::SameLine(80);
-			ImGui::DragFloat3("##rot", glm::value_ptr(tc.rotation), 1.0f, -360.0f, 360.0f);
+		ImGui::Text("Rotation");
+		ImGui::SameLine(80);
+		ImGui::DragFloat3("##rot", glm::value_ptr(tc.rotation), 1.0f, -360.0f, 360.0f);
 
-			ImGui::Text("Scale");ImGui::SameLine(80);
-			ImGui::DragFloat3("##scale", glm::value_ptr(tc.scale));
+		ImGui::Text("Scale");
+		ImGui::SameLine(80);
+		ImGui::DragFloat3("##scale", glm::value_ptr(tc.scale));
 
-			ImGui::Separator();
-		}
-		ImGui::PopID();
+		ImGui::Separator();
 	}
+	ImGui::PopID();
+}
+
+void GuiSystem::renderDebugViews(const Entity& entity) const {
+	auto& db = entity.getComponent<DebugComponent>();
+
+	ImGui::PushID(static_cast<int>(entity.id()));
+	if (ImGui::CollapsingHeader("Debug Views", ImGuiTreeNodeFlags_DefaultOpen)) {
+		const char* modes[] = {"None", "Normals"};
+		int currentMode = static_cast<int>(db.mode);
+		if (ImGui::Combo("Mode", &currentMode, modes, IM_ARRAYSIZE(modes))) {
+			db.mode = static_cast<DebugMode>(currentMode);
+		}
+	}
+	ImGui::PopID();
 }
 
 void GuiSystem::renderPostProcess(std::vector<PostEffect>& effects) {
 	if (ImGui::Begin("Post-Processing")) {
-		for (auto& effect : effects) {
+		for (auto& effect: effects) {
 			ImGui::Checkbox(effect.name.c_str(), &effect.enabled);
 		}
 	}

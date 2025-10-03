@@ -2,9 +2,10 @@
 
 #include <memory>
 
+class DebugRenderer;
 class SkyboxSystem;
 class LightSystem;
-class RenderSystem;
+class ForwardRenderer;
 class GuiSystem;
 class PostProcess;
 class Window;
@@ -31,7 +32,8 @@ private:
     bool isRunning{true};
 
     Registry* mRegistry{};
-    RenderSystem* mRenderSystem{};
+    ForwardRenderer* mForwardRenderer{};
+	DebugRenderer* mDebugRenderer{};
 	GuiSystem* mGuiSystem{};
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
