@@ -101,10 +101,9 @@ void GuiSystem::renderTransform(const Entity& entity) const {
 		ImGui::Text("Scale");
 		ImGui::SameLine(80);
 		ImGui::DragFloat3("##scale", glm::value_ptr(tc.scale));
-
-		ImGui::Separator();
 	}
 	ImGui::PopID();
+	ImGui::Separator();
 }
 
 void GuiSystem::renderDebugViews(const Entity& entity) const {
@@ -112,13 +111,16 @@ void GuiSystem::renderDebugViews(const Entity& entity) const {
 
 	ImGui::PushID(static_cast<int>(entity.id()));
 	if (ImGui::CollapsingHeader("Debug Views", ImGuiTreeNodeFlags_DefaultOpen)) {
-		const char* modes[] = {"None", "Normals"};
+		const char* modes[] = {"None", "Normals", "Wireframe"};
 		int currentMode = static_cast<int>(db.mode);
-		if (ImGui::Combo("Mode", &currentMode, modes, IM_ARRAYSIZE(modes))) {
+		ImGui::Text("Mode");
+		ImGui::SameLine(50);
+		if (ImGui::Combo("##mode", &currentMode, modes, IM_ARRAYSIZE(modes))) {
 			db.mode = static_cast<DebugMode>(currentMode);
 		}
 	}
 	ImGui::PopID();
+	ImGui::Separator();
 }
 
 void GuiSystem::renderPostProcess(std::vector<PostEffect>& effects) {
