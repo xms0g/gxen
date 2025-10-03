@@ -5,16 +5,19 @@
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
 
-Shader::Shader(const char* vs, const char* fs) {
+Shader::Shader(const char* vs, const char* fs, const char* gs) {
 	// 1. retrieve the vertex/fragment source code from filePath
 	std::string vertexCode;
 	std::string fragmentCode;
+	std::string geometryCode;
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
+	std::ifstream gShaderFile;
 
 	// ensure ifstream objects can throw exceptions:
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 
 	try {
 		// open files
@@ -30,6 +33,13 @@ Shader::Shader(const char* vs, const char* fs) {
 		// convert stream into string
 		vertexCode = vShaderStream.str();
 		fragmentCode = fShaderStream.str();
+		if (gs != nullptr) {
+			gShaderFile.open(fs::path(SHADER_DIR + gs));
+			std::stringstream gShaderStream;
+			gShaderStream << gShaderFile.rdbuf();
+			gShaderFile.close();
+			geometryCode = gShaderStream.str();
+		}
 	} catch (std::ifstream::failure& e) {
 		throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + e.what());
 	}
@@ -40,21 +50,37 @@ Shader::Shader(const char* vs, const char* fs) {
 		vertexCode = preprocess(vertexCode, vs, includedFiles);
 		includedFiles.clear();
 		fragmentCode = preprocess(fragmentCode, fs, includedFiles);
+		includedFiles.clear();
+
+		if (gs != nullptr) {
+			geometryCode = preprocess(geometryCode, gs, includedFiles);
+			includedFiles.clear();
+		}
 
 		const char* vs_str = vertexCode.c_str();
 		const char* fs_str = fragmentCode.c_str();
+		const char* gs_str = geometryCode.c_str();
 
-		GLuint vertex, fragment;
+		GLuint vertex, fragment, geometry;
 		// vertex shader
 		vertex = createShader(&vs_str, GL_VERTEX_SHADER);
 
 		// fragment Shader
 		fragment = createShader(&fs_str, GL_FRAGMENT_SHADER);
 
-		linkShader(vertex, fragment);
+		if (gs != nullptr) {
+			// geometry Shader
+			geometry = createShader(&gs_str, GL_GEOMETRY_SHADER);
+		} else {
+			geometry = 0;
+		}
+
+		linkShader(vertex, fragment, geometry);
 
 		glDeleteShader(vertex);
 		glDeleteShader(fragment);
+		if (gs != nullptr)
+			glDeleteShader(geometry);
 	} catch (std::runtime_error& e) {
 		throw std::runtime_error(std::string("ERROR::SHADER::") + e.what());
 	}
@@ -186,11 +212,14 @@ GLuint Shader::createShader(const char** source, const GLuint type) {
 	return shader;
 }
 
-GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment) {
+GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment, const GLuint geometry) {
 	mID = glCreateProgram();
 
 	glAttachShader(mID, vertex);
 	glAttachShader(mID, fragment);
+
+	if (geometry != 0)
+		glAttachShader(mID, geometry);
 
 	glLinkProgram(mID);
 

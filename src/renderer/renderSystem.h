@@ -1,56 +1,26 @@
 #pragma once
 
-#include <memory>
-#include <vector>
-#include "frameBuffer.h"
-#include "uniformBuffer.h"
 #include "../ECS/system.hpp"
 
-class LightSystem;
-class Window;
 class Camera;
-class guiSystem;
 class Shader;
 
-class RenderSystem final : public System {
+class RenderSystem: public System {
 public:
-	explicit RenderSystem();
+	RenderSystem();
 
-	[[nodiscard]] GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
-	[[nodiscard]] uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
-	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
-
-	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
-
-	void configureUB(const Camera& camera) const;
-
-	void render(const Camera& camera);
-
-	void beginSceneRender() const;
-
-	void endSceneRender() const;
-
-private:
+protected:
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
 
 	bool collectTransparentEntities(const Entity& entity, const Camera& camera, TransEntityBucket& bucket);
 
-	void opaquePass(const Entity& entity, const Shader& shader) const;
+	void transparentPass(TransEntityBucket& bucket) const;
 
-	void transparentPass(TransEntityBucket& bucket);
+	void opaquePass(const Entity& entity, const Shader& shader) const;
 
 	void geometryPass(const Entity& entity, const Shader& shader) const;
 
 	void materialPass(const Entity& entity, const Shader& shader) const;
 
 	void drawPass(const Entity& entity) const;
-
-	void updateCameraUBO(const Camera& camera) const;
-
-	void updateLightUBO() const;
-
-	LightSystem* mLightSystem{};
-	std::unique_ptr<FrameBuffer> mSceneBuffer;
-	std::unique_ptr<UniformBuffer> mCameraUBO;
-	std::unique_ptr<UniformBuffer> mLightUBO;
 };

@@ -8,7 +8,7 @@
 
 class Shader {
 public:
-    Shader(const char* vs, const char* fs);
+    Shader(const char* vs, const char* fs, const char* gs = nullptr);
 
     ~Shader();
 
@@ -47,7 +47,7 @@ private:
 
     GLuint createShader(const char** source, GLuint type);
 
-    GLuint linkShader(GLuint vertex, GLuint fragment);
+    GLuint linkShader(GLuint vertex, GLuint fragment, GLuint geometry = 0);
     // the program ID
     GLuint mID{};
 };

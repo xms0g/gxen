@@ -14,7 +14,7 @@ public:
 
 	void setData(const void* data, size_t size, size_t offset = 0);
 
-	void configure(unsigned int program, unsigned int uniformBlockBinding,  const char* uniformBlockName);
+	void configure(unsigned int program, unsigned int uniformBlockBinding, const char* uniformBlockName) const;
 
 private:
 	unsigned int mUBO{};
