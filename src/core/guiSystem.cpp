@@ -77,7 +77,7 @@ void GuiSystem::renderGraphicsInfo() const {
 }
 
 void GuiSystem::renderTransform() const {
-	for (auto entity: getSystemEntities()) {
+	for (const auto& entity: getSystemEntities()) {
 		auto& tc = entity.getComponent<TransformComponent>();
 
 		ImGui::PushID(static_cast<int>(entity.id()));
