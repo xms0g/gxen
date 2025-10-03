@@ -237,7 +237,7 @@ GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment, const GLui
 		glGetProgramInfoLog(mID, maxLength, nullptr, infoLog.data());
 
 		// The program is useless now. So delete it.
-		glDeleteShader(mID);
+		glDeleteProgram(mID);
 
 		throw std::runtime_error(std::string("PROGRAM_LINKING_ERROR:\n") + infoLog);
 	}

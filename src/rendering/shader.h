@@ -8,46 +8,65 @@
 
 class Shader {
 public:
-    Shader(const char* vs, const char* fs, const char* gs = nullptr);
+	Shader(const char* vs, const char* fs, const char* gs = nullptr);
 
-    ~Shader();
+	~Shader();
 
-    [[nodiscard]] GLuint ID() const { return mID; }
+	Shader(const Shader&) = delete;
 
-    // use/activate the shader
-    void activate() const;
+	Shader& operator=(const Shader&) = delete;
 
-    // utility uniform functions
-    void setBool(const std::string& name, bool value) const;
+	Shader(Shader&& other) noexcept {
+		mID = other.mID;
+		other.mID = 0;
+	}
 
-    void setInt(const std::string& name, int value) const;
+	Shader& operator=(Shader&& other) noexcept {
+		if (this != &other) {
+			glDeleteProgram(mID);
+			mID = other.mID;
+			other.mID = 0;
+		}
+		return *this;
+	}
 
-    void setFloat(const std::string& name, float value) const;
+	[[nodiscard]] GLuint ID() const { return mID; }
 
-    void setVec2(const std::string& name, const glm::vec2& value) const;
+	// use/activate the shader
+	void activate() const;
 
-    void setVec2(const std::string& name, float x, float y) const;
+	// utility uniform functions
+	void setBool(const std::string& name, bool value) const;
 
-    void setVec3(const std::string& name, const glm::vec3& value) const;
+	void setInt(const std::string& name, int value) const;
 
-    void setVec3(const std::string& name, float x, float y, float z) const;
+	void setFloat(const std::string& name, float value) const;
 
-    void setVec4(const std::string& name, const glm::vec4& value) const;
+	void setVec2(const std::string& name, const glm::vec2& value) const;
 
-    void setVec4(const std::string& name, float x, float y, float z, float w) const;
+	void setVec2(const std::string& name, float x, float y) const;
 
-    void setMat2(const std::string& name, const glm::mat2& mat) const;
+	void setVec3(const std::string& name, const glm::vec3& value) const;
 
-    void setMat3(const std::string& name, const glm::mat3& mat) const;
+	void setVec3(const std::string& name, float x, float y, float z) const;
 
-    void setMat4(const std::string& name, const glm::mat4& mat) const;
+	void setVec4(const std::string& name, const glm::vec4& value) const;
+
+	void setVec4(const std::string& name, float x, float y, float z, float w) const;
+
+	void setMat2(const std::string& name, const glm::mat2& mat) const;
+
+	void setMat3(const std::string& name, const glm::mat3& mat) const;
+
+	void setMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
 	std::string preprocess(std::string& source, const char* fileName, std::unordered_set<std::string>& includedFiles);
 
-    GLuint createShader(const char** source, GLuint type);
+	GLuint createShader(const char** source, GLuint type);
 
-    GLuint linkShader(GLuint vertex, GLuint fragment, GLuint geometry = 0);
-    // the program ID
-    GLuint mID{};
+	GLuint linkShader(GLuint vertex, GLuint fragment, GLuint geometry = 0);
+
+	// the program ID
+	GLuint mID{};
 };
