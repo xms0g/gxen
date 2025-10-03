@@ -7,9 +7,12 @@ layout (location = 2) in vec2 aTexCoord;
 
 uniform mat4 model;
 
-out vec2 vTexCoord;
+out VS_OUT
+{
+    vec2 TexCoord;
+} vs_out;
 
 void main() {
-    vTexCoord = aTexCoord;
+    vs_out.TexCoord = aTexCoord;
     gl_Position = projection * view * model * vec4(aPos, 1.0);
 }

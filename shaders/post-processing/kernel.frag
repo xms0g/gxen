@@ -1,5 +1,9 @@
 #version 410 core
-in vec2 vTexCoord;
+in VS_OUT
+{
+    vec2 TexCoord;
+} fs_in;
+
 #include "post-processing/sharpen.glsl"
 #include "post-processing/blur.glsl"
 #include "post-processing/edgeDetect.glsl"
@@ -31,7 +35,7 @@ void main() {
 
     vec3 sampleTex[9];
     for(int i = 0; i < 9; i++) {
-        sampleTex[i] = vec3(texture(screenTexture, vTexCoord.st + offsets[i]));
+        sampleTex[i] = vec3(texture(screenTexture, fs_in.TexCoord.st + offsets[i]));
     }
 
     vec3 col = vec3(0.0);

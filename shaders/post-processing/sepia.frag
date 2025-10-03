@@ -1,12 +1,16 @@
 #version 410 core
-in vec2 vTexCoord;
+in VS_OUT
+{
+    vec2 TexCoord;
+} fs_in;
+
 
 uniform sampler2D screenTexture;
 
 out vec4 fragColor;
 
 void main() {
-    vec4 color = texture(screenTexture, vTexCoord);
+    vec4 color = texture(screenTexture, fs_in.TexCoord);
 
     float r = dot(color, vec4(0.393f, 0.769f, 0.189f, 0.0f));
     float g = dot(color, vec4(0.349f, 0.686f, 0.168f, 0.0f));
