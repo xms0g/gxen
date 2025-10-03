@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ECS/system.hpp"
+#include "../../ECS/system.hpp"
 
 class Camera;
 class Shader;

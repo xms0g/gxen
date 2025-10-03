@@ -1,7 +1,7 @@
 #include "debugRenderer.h"
-#include "shader.h"
-#include "uniformBuffer.h"
-#include "../ECS/components/debug.hpp"
+#include "../shader.h"
+#include "../buffers/uniformBuffer.h"
+#include "../../ECS/components/debug.hpp"
 
 DebugRenderer::DebugRenderer() {
 	RequireComponent<DebugComponent>();

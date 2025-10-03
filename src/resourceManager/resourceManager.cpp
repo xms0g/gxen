@@ -5,7 +5,7 @@
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
 #include "../ECS/components/debug.hpp"
-#include "../renderer/shader.h"
+#include "../rendering/shader.h"
 
 ResourceManager& ResourceManager::instance() {
 	static ResourceManager instance;

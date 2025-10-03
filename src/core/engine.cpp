@@ -7,11 +7,11 @@
 #include "guiSystem.h"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
-#include "../renderer/forwardRenderer.h"
-#include "../renderer/debugRenderer.h"
-#include "../renderer/lightSystem.h"
-#include "../renderer/postProcess.h"
-#include "../renderer/skyboxSystem.h"
+#include "../rendering/renderers/forwardRenderer.h"
+#include "../rendering/renderers/debugRenderer.h"
+#include "../rendering/lightSystem.h"
+#include "../rendering/postProcess.h"
+#include "../rendering/skyboxSystem.h"
 
 XEngine::XEngine() = default;
 

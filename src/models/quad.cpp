@@ -1,6 +1,6 @@
 #include "quad.h"
 #include "glad/glad.h"
-#include "../renderer/shader.h"
+#include "../rendering/shader.h"
 #include "../config/config.hpp"
 
 Models::Quad::Quad() {

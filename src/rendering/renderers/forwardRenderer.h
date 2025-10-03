@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
-#include "frameBuffer.h"
+#include "../buffers/frameBuffer.h"
 #include "renderSystem.h"
-#include "uniformBuffer.h"
+#include "../buffers/uniformBuffer.h"
 
 class LightSystem;
 class Window;

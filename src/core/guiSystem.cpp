@@ -10,7 +10,7 @@
 #include "../ECS/registry.h"
 #include "../ECS/components/debug.hpp"
 #include "../ECS/components/transform.hpp"
-#include "../renderer/postProcess.h"
+#include "../rendering/postProcess.h"
 
 GuiSystem::GuiSystem(SDL_Window* window, const SDL_GLContext gl_context) {
 	RequireComponent<TransformComponent>(true);
