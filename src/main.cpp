@@ -2,9 +2,10 @@
 #include <ostream>
 #include "core/engine.h"
 #include "core/camera.h"
-#include "renderer/shader.h"
+#include "rendering/shader.h"
 #include "resourceManager/resourceManager.h"
 #include "ECS/registry.h"
+#include "ECS/components/debug.hpp"
 #include "ECS/components/directionalLight.hpp"
 #include "ECS/components/material.hpp"
 #include "ECS/components/mesh.hpp"
@@ -13,6 +14,7 @@
 #include "ECS/components/skyboxComponent.hpp"
 #include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
+#include "ECS/components/debug.hpp"
 #include "mesh/mesh.h"
 #include "models/cube.h"
 #include "models/cubemap.h"
@@ -66,6 +68,9 @@ int main() {
 		backpack.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("object.vert", "object.frag"));
 
+		backpack.addComponent<DebugComponent>(DebugMode::None);
+
+
 		// Suzanne
 		auto suzanne = registry.createEntity("Suzanne");
 		suzanne.addComponent<TransformComponent>(
@@ -81,6 +86,8 @@ int main() {
 		suzanne.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("object.vert", "object.frag"));
 
+		suzanne.addComponent<DebugComponent>(DebugMode::None);
+		//
 		// Plane
 		Models::Plane planeModel{"textures/metal.png", "textures/metal_specular.png"};
 		auto plane = registry.createEntity("Plane");
@@ -108,6 +115,8 @@ int main() {
 
 		cube.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("models/cube.vert", "models/cube.frag"));
+
+		cube.addComponent<DebugComponent>(DebugMode::None);
 
 		// Blend
 		std::vector<glm::vec3> windows{
@@ -137,11 +146,11 @@ int main() {
 			glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
 			glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
 
-		// auto pointLight = registry.createEntity();
+		// auto pointLight = registry.createEntity("Point Light");
 		// pointLight.addComponent<TransformComponent>(
-		// 	glm::vec4(-3.2f, 5.0f, 0.0f),
-		// 	glm::vec4(0.0f, 0.0f, 0.0f),
-		// 	glm::vec4(0.2f));
+		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
+		// 	glm::vec3(0.0f, 0.0f, 0.0f),
+		// 	glm::vec3(0.2f));
 		//
 		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
 		// pointLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
@@ -151,12 +160,11 @@ int main() {
 		//
 		// pointLight.addComponent<PointLightComponent>(
 		// 	glm::vec4(0.0f),
-		// 	glm::vec4(0.5f, 0.5f, 0.5f),  // ambient
-		// 	glm::vec4(0.5f, 0.5f, 0.5f),  // diffuse
-		// 	glm::vec4(0.5f, 0.5f, 0.5f),
-		// 	1.0f,
-		// 	0.09f,
-		// 	0.032f);
+		// 	glm::vec4(0.5f, 0.5f, 0.5f, 0.0f),  // ambient
+		// 	glm::vec4(0.5f, 0.5f, 0.5f,0.0f),  // diffuse
+		// 	glm::vec4(0.5f, 0.5f, 0.5f,0.0f),
+		// 	glm::vec4(1.0f, 0.09f, 0.032f,0.0f)
+		// 	);
 
 
 		// auto spotLight = registry.createEntity();

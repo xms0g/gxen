@@ -38,12 +38,6 @@ void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	mTexturesLoaded.clear();
 }
 
-ResourceManager::ResourceManager() {
-	mDebugShaders = {
-		{DebugMode::Normals, std::make_shared<Shader>("debug/normal.vert", "debug/normal.frag", "debug/normal.geom")}
-	};
-}
-
 void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
 	// process each mesh located at the current node
 	for (unsigned int i = 0; i < node->mNumMeshes; i++) {

@@ -30,12 +30,8 @@ public:
 		return &mEntityTextures.at(entityID);
 	}
 
-	const std::shared_ptr<Shader>& getDebugShader(const DebugMode mode) const {
-		return mDebugShaders.at(mode);
-	}
-
 private:
-	explicit ResourceManager();
+	explicit ResourceManager() = default;
 
 	~ResourceManager() = default;
 
@@ -51,5 +47,4 @@ private:
 	std::unordered_map<size_t, std::vector<Mesh> > mEntityMeshes;
 	std::unordered_map<size_t, std::vector<Texture> > mEntityTextures;
 	std::unordered_set<std::string> mTexturesLoaded;
-	std::unordered_map<DebugMode, std::shared_ptr<Shader>> mDebugShaders;
 };
