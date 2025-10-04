@@ -6,88 +6,47 @@
 #include "../config/config.hpp"
 
 Shader::Shader(const char* vs, const char* fs, const char* gs) {
-	// 1. retrieve the vertex/fragment source code from filePath
-	std::string vertexCode;
-	std::string fragmentCode;
-	std::string geometryCode;
-	std::ifstream vShaderFile;
-	std::ifstream fShaderFile;
-	std::ifstream gShaderFile;
-
-	// ensure ifstream objects can throw exceptions:
-	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-	gShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+	std::unordered_set<std::string> includedFiles{};
 
 	try {
-		// open files
-		vShaderFile.open(fs::path(SHADER_DIR + vs));
-		fShaderFile.open(fs::path(SHADER_DIR + fs));
-		std::stringstream vShaderStream, fShaderStream;
-		// read file's buffer contents into streams
-		vShaderStream << vShaderFile.rdbuf();
-		fShaderStream << fShaderFile.rdbuf();
-		// close file handlers
-		vShaderFile.close();
-		fShaderFile.close();
-		// convert stream into string
-		vertexCode = vShaderStream.str();
-		fragmentCode = fShaderStream.str();
-		if (gs != nullptr) {
-			gShaderFile.open(fs::path(SHADER_DIR + gs));
-			std::stringstream gShaderStream;
-			gShaderStream << gShaderFile.rdbuf();
-			gShaderFile.close();
-			geometryCode = gShaderStream.str();
-		}
-	} catch (std::ifstream::failure& e) {
-		throw std::runtime_error(std::string("ERROR::SHADER::FILE_NOT_SUCCESSFULLY_READ: ") + e.what());
-	}
-
-	try {
-		std::unordered_set<std::string> includedFiles{};
-
-		vertexCode = preprocess(vertexCode, vs, includedFiles);
+		std::string vertexCode = preprocess(loadFile(vs), vs, includedFiles);
 		includedFiles.clear();
-		fragmentCode = preprocess(fragmentCode, fs, includedFiles);
+		std::string fragmentCode = preprocess(loadFile(fs), fs, includedFiles);
+		includedFiles.clear();
+		std::string geometryCode = gs ? preprocess(loadFile(gs), gs, includedFiles) : "";
 		includedFiles.clear();
 
-		if (gs != nullptr) {
-			geometryCode = preprocess(geometryCode, gs, includedFiles);
-			includedFiles.clear();
-		}
+		const GLuint vertex = compileShader(vertexCode, GL_VERTEX_SHADER);
+		const GLuint fragment = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
+		GLuint geometry = 0;
 
-		const char* vs_str = vertexCode.c_str();
-		const char* fs_str = fragmentCode.c_str();
-		const char* gs_str = geometryCode.c_str();
-
-		GLuint vertex, fragment, geometry;
-		// vertex shader
-		vertex = createShader(&vs_str, GL_VERTEX_SHADER);
-
-		// fragment Shader
-		fragment = createShader(&fs_str, GL_FRAGMENT_SHADER);
-
-		if (gs != nullptr) {
-			// geometry Shader
-			geometry = createShader(&gs_str, GL_GEOMETRY_SHADER);
-		} else {
-			geometry = 0;
+		if (gs) {
+			geometry = compileShader(geometryCode, GL_GEOMETRY_SHADER);
 		}
 
 		linkShader(vertex, fragment, geometry);
-
-		glDeleteShader(vertex);
-		glDeleteShader(fragment);
-		if (gs != nullptr)
-			glDeleteShader(geometry);
 	} catch (std::runtime_error& e) {
-		throw std::runtime_error(std::string("ERROR::SHADER::") + e.what());
+		throw std::runtime_error(std::string("Shader error: ") + e.what());
 	}
 }
 
 Shader::~Shader() {
-	glDeleteProgram(mID);
+	if (mID)
+		glDeleteProgram(mID);
+}
+
+Shader::Shader(Shader&& other) noexcept {
+	mID = other.mID;
+	other.mID = 0;
+}
+
+Shader& Shader::operator=(Shader&& other) noexcept {
+	if (this != &other) {
+		glDeleteProgram(mID);
+		mID = other.mID;
+		other.mID = 0;
+	}
+	return *this;
 }
 
 void Shader::activate() const {
@@ -142,7 +101,17 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
 	glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
-std::string Shader::preprocess(std::string& source, const char* fileName,
+std::string Shader::loadFile(const char* sf) {
+	std::ifstream file(fs::path(SHADER_DIR + sf));
+	if (!file.is_open()) {
+		throw std::runtime_error(std::string("Failed to open shader file: ") + sf);
+	}
+	std::stringstream ss;
+	ss << file.rdbuf();
+	return ss.str();
+}
+
+std::string Shader::preprocess(std::string source, const char* fileName,
                                std::unordered_set<std::string>& includedFiles) {
 	std::stringstream result;
 	std::istringstream stream(source);
@@ -160,21 +129,18 @@ std::string Shader::preprocess(std::string& source, const char* fileName,
 
 				// Prevent cyclic includes
 				if (includedFiles.contains(fullPath)) {
-					throw std::runtime_error(std::string("FILE_ALREADY_INCLUDED: ") + includeFile + "\nin " + fileName);
+					throw std::runtime_error(std::string("File already included: ") + includeFile + "\nin " + fileName);
 				}
 				includedFiles.insert(fullPath);
-
 				// Load included file
-				std::ifstream file(fullPath);
-				if (file.is_open()) {
+				if (std::ifstream file(fullPath); file.is_open()) {
 					std::stringstream includeSource;
 					includeSource << file.rdbuf();
-					auto includeSourceStr = includeSource.str();
 					// Recurse
-					result << preprocess(includeSourceStr, fileName, includedFiles) << "\n";
+					result << preprocess(includeSource.str(), fileName, includedFiles) << "\n";
 				} else {
 					// Handle error: file not found
-					throw std::runtime_error(std::string("FILE_NOT_OPEN:\n") + fullPath);
+					throw std::runtime_error(std::string("File not open:\n") + fullPath);
 				}
 			}
 		} else {
@@ -184,10 +150,11 @@ std::string Shader::preprocess(std::string& source, const char* fileName,
 	return result.str();
 }
 
-GLuint Shader::createShader(const char** source, const GLuint type) {
+GLuint Shader::compileShader(std::string& source, const GLuint type) {
 	const GLuint shader = glCreateShader(type);
+	const char* code = source.c_str();
 
-	glShaderSource(shader, 1, source, nullptr);
+	glShaderSource(shader, 1, &code, nullptr);
 	glCompileShader(shader);
 
 	// Check compile errors
@@ -206,7 +173,7 @@ GLuint Shader::createShader(const char** source, const GLuint type) {
 		// The program is useless now. So delete it.
 		glDeleteShader(shader);
 
-		throw std::runtime_error(std::string("COMPILATION_ERROR:") + "\n" + infoLog);
+		throw std::runtime_error(std::string("Compilation error:") + "\n" + infoLog);
 	}
 
 	return shader;
@@ -239,8 +206,14 @@ GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment, const GLui
 		// The program is useless now. So delete it.
 		glDeleteProgram(mID);
 
-		throw std::runtime_error(std::string("PROGRAM_LINKING_ERROR:\n") + infoLog);
+		throw std::runtime_error(std::string("Linking error:\n") + infoLog);
 	}
+
+	glDeleteShader(vertex);
+	glDeleteShader(fragment);
+
+	if (geometry)
+		glDeleteShader(geometry);
 
 	return mID;
 }

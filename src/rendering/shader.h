@@ -2,7 +2,6 @@
 
 #include <string>
 #include <unordered_set>
-
 #include "glm/glm.hpp"
 #include "glad/glad.h"
 
@@ -16,19 +15,9 @@ public:
 
 	Shader& operator=(const Shader&) = delete;
 
-	Shader(Shader&& other) noexcept {
-		mID = other.mID;
-		other.mID = 0;
-	}
+	Shader(Shader&& other) noexcept;
 
-	Shader& operator=(Shader&& other) noexcept {
-		if (this != &other) {
-			glDeleteProgram(mID);
-			mID = other.mID;
-			other.mID = 0;
-		}
-		return *this;
-	}
+	Shader& operator=(Shader&& other) noexcept;
 
 	[[nodiscard]] GLuint ID() const { return mID; }
 
@@ -61,9 +50,11 @@ public:
 	void setMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
-	std::string preprocess(std::string& source, const char* fileName, std::unordered_set<std::string>& includedFiles);
+	std::string loadFile(const char* sf);
 
-	GLuint createShader(const char** source, GLuint type);
+	std::string preprocess(std::string source, const char* fileName, std::unordered_set<std::string>& includedFiles);
+
+	GLuint compileShader(std::string& source, GLuint type);
 
 	GLuint linkShader(GLuint vertex, GLuint fragment, GLuint geometry = 0);
 

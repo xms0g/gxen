@@ -11,7 +11,7 @@
 #include "ECS/components/mesh.hpp"
 #include "ECS/components/pointLight.hpp"
 #include "ECS/components/shader.hpp"
-#include "ECS/components/skyboxComponent.hpp"
+#include "ECS/components/skybox.hpp"
 #include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
 #include "ECS/components/debug.hpp"

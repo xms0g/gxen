@@ -4,7 +4,6 @@
 #include "../mesh/mesh.h"
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
-#include "../ECS/components/debug.hpp"
 #include "../rendering/shader.h"
 
 ResourceManager& ResourceManager::instance() {
