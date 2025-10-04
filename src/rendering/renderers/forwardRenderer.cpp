@@ -10,6 +10,8 @@
 #include "../../config/config.hpp"
 #include "../../core/camera.h"
 #include "../../ECS/registry.h"
+#include "../../ECS/components/transform.hpp"
+#include "../../ECS/components/material.hpp"
 #include "../../ECS/components/shader.hpp"
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
@@ -51,18 +53,33 @@ void ForwardRenderer::configure(const Camera& camera) const {
 void ForwardRenderer::render(const Camera& camera) {
 	updateCameraUBO(camera);
 	updateLightUBO();
-
-	TransEntityBucket transparentEntities;
+	
 	for (const auto& entity: getSystemEntities()) {
-		if (collectTransparentEntities(entity, camera, transparentEntities))
+		if (collectTransparentEntities(entity, camera))
 			continue;
 
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		shader->activate();
 		opaquePass(entity, *shader);
 	}
+}
 
-	transparentPass(transparentEntities);
+void ForwardRenderer::transparentPass() {
+	if (mTransparentEntities.empty()) return;
+
+	std::sort(mTransparentEntities.begin(), mTransparentEntities.end(),
+			  [](const auto& a, const auto& b) { return a.first > b.first; });
+
+	glDepthMask(GL_FALSE);
+	for (auto& [dist, entity]: mTransparentEntities) {
+		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+
+		shader->activate();
+		opaquePass(entity, *shader);
+	}
+	glDepthMask(GL_TRUE);
+
+	mTransparentEntities.clear();
 }
 
 void ForwardRenderer::beginSceneRender() const {
@@ -74,6 +91,18 @@ void ForwardRenderer::beginSceneRender() const {
 
 void ForwardRenderer::endSceneRender() const {
 	mSceneBuffer->unbind();
+}
+
+bool ForwardRenderer::collectTransparentEntities(const Entity& entity, const Camera& camera) {
+	const auto& tc = entity.getComponent<TransformComponent>();
+	const auto& mtc = entity.getComponent<MaterialComponent>();
+
+	if (mtc.isTransparent) {
+		float distance = glm::length(camera.position() - tc.position);
+		mTransparentEntities.emplace_back(distance, entity);
+		return true;
+	}
+	return false;
 }
 
 void ForwardRenderer::updateCameraUBO(const Camera& camera) const {

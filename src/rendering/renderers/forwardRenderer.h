@@ -11,15 +11,18 @@ class Camera;
 class guiSystem;
 class Shader;
 
+using TransEntityBucket = std::vector<std::pair<float, Entity> >;
+
 class ForwardRenderer final : public RenderSystem {
 public:
+
 	explicit ForwardRenderer();
 
 	[[nodiscard]] GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
 	[[nodiscard]] uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
 	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
 
-	const UniformBuffer& getCameraUBO() const { return *mCameraUBO; }
+	[[nodiscard]] const UniformBuffer& getCameraUBO() const { return *mCameraUBO; }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
@@ -27,11 +30,15 @@ public:
 
 	void render(const Camera& camera);
 
+	void transparentPass();
+
 	void beginSceneRender() const;
 
 	void endSceneRender() const;
 
 private:
+	bool collectTransparentEntities(const Entity& entity, const Camera& camera);
+
 	void updateCameraUBO(const Camera& camera) const;
 
 	void updateLightUBO() const;
@@ -40,4 +47,6 @@ private:
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 	std::unique_ptr<UniformBuffer> mLightUBO;
+
+	TransEntityBucket mTransparentEntities;
 };

@@ -68,6 +68,7 @@ void XEngine::run() {
 		mSkyboxSystem->render(*mCamera);
 		mForwardRenderer->render(*mCamera);
 		mDebugRenderer->render();
+		mForwardRenderer->transparentPass();
 		mForwardRenderer->endSceneRender();
 
 		mPostProcess->render(mForwardRenderer->getSceneTexture());

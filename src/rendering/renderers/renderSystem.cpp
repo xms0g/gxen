@@ -37,34 +37,6 @@ RenderSystem::RenderSystem() {
 	glFrontFace(GL_CCW);
 }
 
-bool RenderSystem::collectTransparentEntities(const Entity& entity, const Camera& camera, TransEntityBucket& bucket) {
-	const auto& tc = entity.getComponent<TransformComponent>();
-	const auto& mtc = entity.getComponent<MaterialComponent>();
-
-	if (mtc.isTransparent) {
-		float distance = glm::length(camera.position() - tc.position);
-		bucket.emplace_back(distance, entity);
-		return true;
-	}
-	return false;
-}
-
-void RenderSystem::transparentPass(TransEntityBucket& bucket) const {
-	if (bucket.empty()) return;
-
-	std::sort(bucket.begin(), bucket.end(),
-			  [](const auto& a, const auto& b) { return a.first > b.first; });
-
-	glDepthMask(GL_FALSE);
-	for (auto& [dist, entity]: bucket) {
-		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-
-		shader->activate();
-		opaquePass(entity, *shader);
-	}
-	glDepthMask(GL_TRUE);
-}
-
 void RenderSystem::opaquePass(const Entity& entity, const Shader& shader) const {
 	geometryPass(entity, shader);
 	materialPass(entity, shader);
