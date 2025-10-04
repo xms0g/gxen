@@ -8,7 +8,7 @@
 #include "../ECS/components/material.hpp"
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
-#include "../ECS/components/skyboxComponent.hpp"
+#include "../ECS/components/skybox.hpp"
 #include "../resourceManager/texture.h"
 
 SkyboxSystem::SkyboxSystem() {
