@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -22,6 +23,11 @@ struct Vertex {
 	float weights[MAX_BONE_INFLUENCE];
 };
 
+struct InstanceData {
+	glm::mat4 model;
+	glm::mat3 normalMatrix;
+};
+
 class Mesh {
 public:
 	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
@@ -30,11 +36,15 @@ public:
 
 	[[nodiscard]] const std::vector<unsigned int>& indices() const { return mIndices; }
 
-	[[nodiscard]] unsigned int VAO() const { return mVAO; }
+	[[nodiscard]] GLuint VAO() const { return mVAO; }
+
+	void enableInstanceAttributes(GLuint instanceVBO) const;
 
 private:
 	// mesh Data
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
-	unsigned int mVAO{}, mVBO{}, mEBO{};
+	GLuint mVAO{}, mVBO{}, mEBO{};
 };
+
+void setupInstancing();

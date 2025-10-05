@@ -9,6 +9,7 @@
 #include "../../libs/imgui/imgui_internal.h"
 #include "../ECS/registry.h"
 #include "../ECS/components/debug.hpp"
+#include "../ECS/components/instance.hpp"
 #include "../ECS/components/transform.hpp"
 #include "../rendering/postProcess.h"
 
@@ -84,6 +85,8 @@ void GuiSystem::renderGraphicsInfo() const {
 }
 
 void GuiSystem::renderTransform(const Entity& entity) const {
+	if (entity.hasComponent<InstanceComponent>()) return;
+
 	auto& tc = entity.getComponent<TransformComponent>();
 
 	ImGui::PushID(static_cast<int>(entity.id()));
@@ -107,6 +110,8 @@ void GuiSystem::renderTransform(const Entity& entity) const {
 }
 
 void GuiSystem::renderDebugViews(const Entity& entity) const {
+	if (entity.hasComponent<InstanceComponent>()) return;
+
 	auto& db = entity.getComponent<DebugComponent>();
 
 	ImGui::PushID(static_cast<int>(entity.id()));

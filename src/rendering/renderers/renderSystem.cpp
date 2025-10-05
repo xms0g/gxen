@@ -2,19 +2,17 @@
 #include <iostream>
 #include <SDL.h>
 #include "glad/glad.h"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include "../lightSystem.h"
 #include "../shader.h"
 #include "../renderFlags.hpp"
 #include "../../mesh/mesh.h"
-#include "../../core/camera.h"
 #include "../../ECS/registry.h"
 #include "../../ECS/components/transform.hpp"
 #include "../../ECS/components/shader.hpp"
 #include "../../ECS/components/material.hpp"
 #include "../../ECS/components/mesh.hpp"
 #include "../../resourceManager/texture.h"
+#include "../../math/utils.hpp"
 
 RenderSystem::RenderSystem() {
 	RequireComponent<MeshComponent>();
@@ -47,14 +45,9 @@ void RenderSystem::opaquePass(const Entity& entity, const Shader& shader) const 
 void RenderSystem::geometryPass(const Entity& entity, const Shader& shader) const {
 	const auto& tc = entity.getComponent<TransformComponent>();
 
-	auto modelMat = glm::mat4(1.0f);
-	modelMat = glm::translate(modelMat, tc.position);
-	modelMat *= glm::toMat4(glm::quat(glm::radians(tc.rotation)));
-	modelMat *= glm::scale(glm::mat4(1.0f), tc.scale);
-	shader.setMat4("model", modelMat);
-
-	const glm::mat3 normalMatrix = glm::transpose(glm::inverse(glm::mat3(modelMat)));
-	shader.setMat3("normalMatrix", normalMatrix);
+	auto [model, normal] = math::computeModelMatrices(tc.position, tc.rotation, tc.scale);
+	shader.setMat4("model", model);
+	shader.setMat3("normalMatrix", normal);
 }
 
 void RenderSystem::materialPass(const Entity& entity, const Shader& shader) const {

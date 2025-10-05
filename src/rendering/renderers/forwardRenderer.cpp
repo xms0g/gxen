@@ -1,21 +1,25 @@
 #include "forwardRenderer.h"
 #include <iostream>
+#include <numeric>
 #include <SDL.h>
 #include "glad/glad.h"
-#include "glm/gtx/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "../lightSystem.h"
 #include "../shader.h"
+#include "../renderFlags.hpp"
 #include "../../mesh/mesh.h"
 #include "../../config/config.hpp"
 #include "../../core/camera.h"
 #include "../../ECS/registry.h"
 #include "../../ECS/components/transform.hpp"
 #include "../../ECS/components/material.hpp"
+#include "../../ECS/components/mesh.hpp"
 #include "../../ECS/components/shader.hpp"
 #include "../../ECS/components/directionalLight.hpp"
+#include "../../ECS/components/instance.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
+#include "../../math/utils.hpp"
 
 ForwardRenderer::ForwardRenderer() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
@@ -32,13 +36,21 @@ ForwardRenderer::ForwardRenderer() {
 			MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);
 
 	mLightUBO = std::make_unique<UniformBuffer>(totalLightBufferSize, 1);
+	glGenBuffers(1, &mStaticInstanceVBO);
+	glGenBuffers(1, &mDynamicInstanceVBO);
 }
 
 void ForwardRenderer::configure(const Camera& camera) const {
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+		const auto& mat = entity.getComponent<MaterialComponent>();
+
 		mCameraUBO->configure(shader->ID(), 0, "CameraBlock");
 		mLightUBO->configure(shader->ID(), 1, "LightBlock");
+
+		if (mat.flags & Instanced) {
+			prepareInstanceData(entity, mat.flags);
+		}
 	}
 
 	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera.zoom()),
@@ -53,22 +65,46 @@ void ForwardRenderer::configure(const Camera& camera) const {
 void ForwardRenderer::render(const Camera& camera) {
 	updateCameraUBO(camera);
 	updateLightUBO();
-	
-	for (const auto& entity: getSystemEntities()) {
-		if (collectTransparentEntities(entity, camera))
-			continue;
 
+	for (const auto& entity: getSystemEntities()) {
+		batchEntities(entity, camera);
+	}
+
+	for (const auto& entity: mOpaqueEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		shader->activate();
 		opaquePass(entity, *shader);
 	}
+	mOpaqueEntities.clear();
+}
+
+void ForwardRenderer::instancedRender() {
+	for (const auto& entity: mInstancedEntities) {
+		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+		const auto& mc = entity.getComponent<MeshComponent>();
+		const auto& ic = entity.getComponent<InstanceComponent>();
+
+		shader->activate();
+		materialPass(entity, *shader);
+
+		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO);
+
+		for (const auto& mesh: *mc.meshes) {
+			glBindVertexArray(mesh.VAO());
+			glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()),
+			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	mInstancedEntities.clear();
 }
 
 void ForwardRenderer::transparentPass() {
 	if (mTransparentEntities.empty()) return;
 
 	std::sort(mTransparentEntities.begin(), mTransparentEntities.end(),
-			  [](const auto& a, const auto& b) { return a.first > b.first; });
+	          [](const auto& a, const auto& b) { return a.first > b.first; });
 
 	glDepthMask(GL_FALSE);
 	for (auto& [dist, entity]: mTransparentEntities) {
@@ -82,6 +118,41 @@ void ForwardRenderer::transparentPass() {
 	mTransparentEntities.clear();
 }
 
+void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
+	glDepthMask(GL_FALSE);
+	for (auto& entity: mTransparentInstancedEntities) {
+		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+		const auto& mc = entity.getComponent<MeshComponent>();
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const auto& mat = entity.getComponent<MaterialComponent>();
+
+		auto positions = *ic.positions;
+
+		std::sort(positions.begin(), positions.end(),
+		[&](const glm::vec3& a, const glm::vec3& b) {
+			const float da = glm::length2(camera.position() - a);
+			const float db = glm::length2(camera.position() - b);
+			return da > db; // back to front
+		});
+
+		prepareInstanceData(entity, mat.flags);
+
+		shader->activate();
+		materialPass(entity, *shader);
+
+		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO);
+		for (const auto& mesh: *mc.meshes) {
+			glBindVertexArray(mesh.VAO());
+			glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()),
+			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
+		}
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	glDepthMask(GL_TRUE);
+	mTransparentInstancedEntities.clear();
+}
+
 void ForwardRenderer::beginSceneRender() const {
 	mSceneBuffer->bind();
 	glEnable(GL_DEPTH_TEST);
@@ -93,16 +164,23 @@ void ForwardRenderer::endSceneRender() const {
 	mSceneBuffer->unbind();
 }
 
-bool ForwardRenderer::collectTransparentEntities(const Entity& entity, const Camera& camera) {
-	const auto& tc = entity.getComponent<TransformComponent>();
-	const auto& mtc = entity.getComponent<MaterialComponent>();
+void ForwardRenderer::batchEntities(const Entity& entity, const Camera& camera) {
+	const auto& mat = entity.getComponent<MaterialComponent>();
 
-	if (mtc.isTransparent) {
-		float distance = glm::length(camera.position() - tc.position);
-		mTransparentEntities.emplace_back(distance, entity);
-		return true;
+	if (mat.flags & Instanced) {
+		if (mat.flags & Transparent) {
+			mTransparentInstancedEntities.push_back(entity);
+		} else
+			mInstancedEntities.push_back(entity);
+	} else {
+		const auto& tc = entity.getComponent<TransformComponent>();
+
+		if (mat.flags & Transparent) {
+			float distance = glm::length(camera.position() - tc.position);
+			mTransparentEntities.emplace_back(distance, entity);
+		} else
+			mOpaqueEntities.push_back(entity);
 	}
-	return false;
 }
 
 void ForwardRenderer::updateCameraUBO(const Camera& camera) const {
@@ -122,7 +200,7 @@ void ForwardRenderer::updateLightUBO() const {
 	const auto& dirLights = mLightSystem->getDirLights();
 	for (size_t i = 0; i < dirLights.size(); i++) {
 		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
-			offset + i * sizeof(DirectionalLightComponent));
+		                   offset + i * sizeof(DirectionalLightComponent));
 	}
 
 	offset += MAX_DIR_LIGHTS * sizeof(DirectionalLightComponent);
@@ -147,4 +225,37 @@ void ForwardRenderer::updateLightUBO() const {
 	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
 
 	mLightUBO->unbind();
+}
+
+void ForwardRenderer::prepareInstanceData(const Entity& entity, const uint32_t flags) const {
+	const auto& tc = entity.getComponent<TransformComponent>();
+	const auto& ic = entity.getComponent<InstanceComponent>();
+
+	std::vector<InstanceData> gpuData;
+	gpuData.reserve(ic.positions->size());
+
+	for (auto& pos: *ic.positions) {
+		auto [model, normal] = math::computeModelMatrices(pos, tc.rotation, tc.scale);
+		gpuData.emplace_back(model, normal);
+	}
+
+	const auto& mc = entity.getComponent<MeshComponent>();
+	GLuint instanceVBO;
+	if (flags & Transparent) {
+		instanceVBO = mDynamicInstanceVBO;
+		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO);
+		glBufferData(GL_ARRAY_BUFFER, gpuData.size() * sizeof(InstanceData), &gpuData[0],
+					 GL_DYNAMIC_DRAW);
+	} else {
+		instanceVBO = mStaticInstanceVBO;
+		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO);
+		glBufferData(GL_ARRAY_BUFFER, gpuData.size() * sizeof(InstanceData), &gpuData[0],
+					 GL_STATIC_DRAW);
+	}
+
+	for (auto mesh: *mc.meshes) {
+		mesh.enableInstanceAttributes(instanceVBO);
+	}
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
