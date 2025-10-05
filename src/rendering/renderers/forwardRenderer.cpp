@@ -62,42 +62,24 @@ void ForwardRenderer::configure(const Camera& camera) const {
 	mCameraUBO->unbind();
 }
 
-void ForwardRenderer::render(const Camera& camera) {
+void ForwardRenderer::updateBuffers(const Camera& camera) const {
 	updateCameraUBO(camera);
 	updateLightUBO();
+}
 
+void ForwardRenderer::batchEntities(const Camera& camera) {
 	for (const auto& entity: getSystemEntities()) {
 		batchEntities(entity, camera);
 	}
+}
 
+void ForwardRenderer::opaquePass() {
 	for (const auto& entity: mOpaqueEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		shader->activate();
 		opaquePass(entity, *shader);
 	}
 	mOpaqueEntities.clear();
-}
-
-void ForwardRenderer::instancedRender() {
-	for (const auto& entity: mInstancedEntities) {
-		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& mc = entity.getComponent<MeshComponent>();
-		const auto& ic = entity.getComponent<InstanceComponent>();
-
-		shader->activate();
-		materialPass(entity, *shader);
-
-		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO);
-
-		for (const auto& mesh: *mc.meshes) {
-			glBindVertexArray(mesh.VAO());
-			glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()),
-			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	mInstancedEntities.clear();
 }
 
 void ForwardRenderer::transparentPass() {
@@ -116,6 +98,25 @@ void ForwardRenderer::transparentPass() {
 	glDepthMask(GL_TRUE);
 
 	mTransparentEntities.clear();
+}
+
+void ForwardRenderer::instancedPass() {
+	for (const auto& entity: mInstancedEntities) {
+		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+		const auto& mc = entity.getComponent<MeshComponent>();
+		const auto& ic = entity.getComponent<InstanceComponent>();
+
+		shader->activate();
+		materialPass(entity, *shader);
+
+		for (const auto& mesh: *mc.meshes) {
+			glBindVertexArray(mesh.VAO());
+			glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()),
+									GL_UNSIGNED_INT, 0, ic.instancedCount);
+		}
+	}
+
+	mInstancedEntities.clear();
 }
 
 void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
@@ -140,13 +141,11 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 		shader->activate();
 		materialPass(entity, *shader);
 
-		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO);
 		for (const auto& mesh: *mc.meshes) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()),
 			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
 		}
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	glDepthMask(GL_TRUE);
@@ -239,7 +238,6 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const uint32_t f
 		gpuData.emplace_back(model, normal);
 	}
 
-	const auto& mc = entity.getComponent<MeshComponent>();
 	GLuint instanceVBO;
 	if (flags & Transparent) {
 		instanceVBO = mDynamicInstanceVBO;
@@ -253,6 +251,7 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const uint32_t f
 					 GL_STATIC_DRAW);
 	}
 
+	const auto& mc = entity.getComponent<MeshComponent>();
 	for (auto mesh: *mc.meshes) {
 		mesh.enableInstanceAttributes(instanceVBO);
 	}

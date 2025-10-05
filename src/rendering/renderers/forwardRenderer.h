@@ -13,6 +13,7 @@ class Shader;
 
 class ForwardRenderer final : public RenderSystem {
 public:
+	using RenderSystem::opaquePass;
 	explicit ForwardRenderer();
 
 	[[nodiscard]] GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
@@ -25,11 +26,15 @@ public:
 
 	void configure(const Camera& camera) const;
 
-	void render(const Camera& camera);
+	void updateBuffers(const Camera& camera) const;
 
-	void instancedRender();
+	void batchEntities(const Camera& camera);
+
+	void opaquePass();
 
 	void transparentPass();
+
+	void instancedPass();
 
 	void transparentInstancedPass(const Camera& camera);
 

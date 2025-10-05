@@ -65,10 +65,14 @@ void XEngine::run() {
 		mLightSystem->update();
 
 		mForwardRenderer->beginSceneRender();
+		mForwardRenderer->updateBuffers(*mCamera);
 		mSkyboxSystem->render(*mCamera);
-		mForwardRenderer->render(*mCamera);
+		mForwardRenderer->batchEntities(*mCamera);
+		mForwardRenderer->opaquePass();
+		mForwardRenderer->instancedPass();
 		mDebugRenderer->render();
 		mForwardRenderer->transparentPass();
+		mForwardRenderer->transparentInstancedPass(*mCamera);
 		mForwardRenderer->endSceneRender();
 
 		mPostProcess->render(mForwardRenderer->getSceneTexture());
