@@ -15,11 +15,13 @@
 #include "ECS/components/spotLight.hpp"
 #include "ECS/components/transform.hpp"
 #include "ECS/components/debug.hpp"
+#include "ECS/components/instance.hpp"
 #include "mesh/mesh.h"
 #include "models/cube.h"
 #include "models/cubemap.h"
 #include "models/plane.h"
 #include "models/window.h"
+#include "rendering/renderFlags.hpp"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 2
@@ -96,8 +98,8 @@ int main() {
 			glm::vec3(0.0f),
 			glm::vec3(2.0f));
 
-		plane.addComponent<MeshComponent>(planeModel.getMeshes(), true);
-		plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f);
+		plane.addComponent<MeshComponent>(planeModel.getMeshes());
+		plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f, TwoSided);
 
 		plane.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("models/plane.vert", "models/plane.frag"));
@@ -125,19 +127,20 @@ int main() {
 		};
 
 		Models::Window windowModel{"textures/window.png"};
-		auto windowShader = std::make_shared<Shader>("models/blend.vert", "models/blend.frag");
 
-		for (int i = 0; i < windows.size(); i++) {
-			auto w = registry.createEntity("window" + std::to_string(i));
-			w.addComponent<TransformComponent>(
-				windows[i],
-				glm::vec3(0.0f),
-				glm::vec3(2.0f));
+		auto window = registry.createEntity("Window");
+		window.addComponent<TransformComponent>(
+			glm::vec3(0.0f),
+			glm::vec3(0.0f),
+			glm::vec3(2.0f));
 
-			w.addComponent<MeshComponent>(windowModel.getMeshes(), true);
-			w.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, true);
-			w.addComponent<ShaderComponent>(windowShader);
-		}
+		window.addComponent<MeshComponent>(windowModel.getMeshes());
+		window.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, TwoSided | Transparent | Instanced);
+		window.addComponent<ShaderComponent>(
+			std::make_shared<Shader>("instanced.vert", "models/blend.frag"));
+
+		window.addComponent<InstanceComponent>(&windows, windows.size());
+
 
 		auto dirLight = registry.createEntity("Directional Light");
 		dirLight.addComponent<DirectionalLightComponent>(
