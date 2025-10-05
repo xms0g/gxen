@@ -23,8 +23,12 @@
 
 ForwardRenderer::ForwardRenderer() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-	mSceneBuffer->withTexture().withRenderBufferDepthStencil().checkStatus();
+	mSceneBuffer->withTextureMultisampled().withRenderBufferDepthStencilMultisampled().checkStatus();
 	mSceneBuffer->unbind();
+
+	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
+	mIntermediateBuffer->withTexture().withRenderBufferDepthStencil().checkStatus();
+	mIntermediateBuffer->unbind();
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 #define MAX_DIR_LIGHTS  1
@@ -112,7 +116,7 @@ void ForwardRenderer::instancedPass() {
 		for (const auto& mesh: *mc.meshes) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElementsInstanced(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()),
-									GL_UNSIGNED_INT, 0, ic.instancedCount);
+			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
 		}
 	}
 
@@ -130,11 +134,11 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 		auto positions = *ic.positions;
 
 		std::sort(positions.begin(), positions.end(),
-		[&](const glm::vec3& a, const glm::vec3& b) {
-			const float da = glm::length2(camera.position() - a);
-			const float db = glm::length2(camera.position() - b);
-			return da > db; // back to front
-		});
+		          [&](const glm::vec3& a, const glm::vec3& b) {
+			          const float da = glm::length2(camera.position() - a);
+			          const float db = glm::length2(camera.position() - b);
+			          return da > db; // back to front
+		          });
 
 		prepareInstanceData(entity, mat.flags);
 
@@ -161,6 +165,11 @@ void ForwardRenderer::beginSceneRender() const {
 
 void ForwardRenderer::endSceneRender() const {
 	mSceneBuffer->unbind();
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, mSceneBuffer->texture());
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mIntermediateBuffer->texture());
+	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mSceneBuffer->width(),
+	                  mSceneBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ForwardRenderer::batchEntities(const Entity& entity, const Camera& camera) {
@@ -243,12 +252,12 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const uint32_t f
 		instanceVBO = mDynamicInstanceVBO;
 		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO);
 		glBufferData(GL_ARRAY_BUFFER, gpuData.size() * sizeof(InstanceData), &gpuData[0],
-					 GL_DYNAMIC_DRAW);
+		             GL_DYNAMIC_DRAW);
 	} else {
 		instanceVBO = mStaticInstanceVBO;
 		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO);
 		glBufferData(GL_ARRAY_BUFFER, gpuData.size() * sizeof(InstanceData), &gpuData[0],
-					 GL_STATIC_DRAW);
+		             GL_STATIC_DRAW);
 	}
 
 	const auto& mc = entity.getComponent<MeshComponent>();

@@ -75,7 +75,7 @@ void XEngine::run() {
 		mForwardRenderer->transparentInstancedPass(*mCamera);
 		mForwardRenderer->endSceneRender();
 
-		mPostProcess->render(mForwardRenderer->getSceneTexture());
+		mPostProcess->render(mForwardRenderer->getIntermediateTexture());
 #ifdef DEBUG
 		mGuiSystem->update(mDeltaTime);
 		mGuiSystem->render(mPostProcess->effects());

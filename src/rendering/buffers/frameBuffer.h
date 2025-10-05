@@ -18,9 +18,15 @@ public:
 
 	FrameBuffer& withTexture();
 
+	FrameBuffer& withTextureMultisampled();
+
 	FrameBuffer& withTextureDepthStencil();
 
+	FrameBuffer& withTextureDepthStencilMultisampled();
+
 	FrameBuffer& withRenderBufferDepthStencil();
+
+	FrameBuffer& withRenderBufferDepthStencilMultisampled();
 
 	void checkStatus();
 

@@ -17,6 +17,7 @@ public:
 	explicit ForwardRenderer();
 
 	[[nodiscard]] GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
+	[[nodiscard]] GLuint getIntermediateTexture() const { return mIntermediateBuffer->texture(); }
 	[[nodiscard]] uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
 	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
 
@@ -54,6 +55,7 @@ private:
 	GLuint mStaticInstanceVBO, mDynamicInstanceVBO;
 	LightSystem* mLightSystem{};
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
+	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 	std::unique_ptr<UniformBuffer> mLightUBO;
 
