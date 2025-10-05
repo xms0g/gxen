@@ -6,6 +6,7 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "../lightSystem.h"
 #include "../shader.h"
+#include "../renderFlags.hpp"
 #include "../../mesh/mesh.h"
 #include "../../core/camera.h"
 #include "../../ECS/registry.h"
@@ -59,6 +60,10 @@ void RenderSystem::geometryPass(const Entity& entity, const Shader& shader) cons
 void RenderSystem::materialPass(const Entity& entity, const Shader& shader) const {
 	const auto& mtc = entity.getComponent<MaterialComponent>();
 
+	if (mtc.flags & TwoSided) {
+		glDisable(GL_CULL_FACE);
+	}
+
 	shader.setFloat("material.shininess", mtc.shininess);
 
 	if (!mtc.textures) {
@@ -96,15 +101,13 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 }
 
 void RenderSystem::drawPass(const Entity& entity) const {
-	const bool isCulling = glIsEnabled(GL_CULL_FACE);
 	const auto& mc = entity.getComponent<MeshComponent>();
 
-	if (mc.isTwoSided && isCulling)
-		glDisable(GL_CULL_FACE);
 	for (const auto& mesh: *mc.meshes) {
 		glBindVertexArray(mesh.VAO());
 		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 	}
-	if (mc.isTwoSided && isCulling)
+
+	if (!glIsEnabled(GL_CULL_FACE))
 		glEnable(GL_CULL_FACE);
 }

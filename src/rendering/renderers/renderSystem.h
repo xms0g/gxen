@@ -5,7 +5,7 @@
 class Camera;
 class Shader;
 
-class RenderSystem: public System {
+class RenderSystem : public System {
 public:
 	RenderSystem();
 
