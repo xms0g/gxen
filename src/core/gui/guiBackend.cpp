@@ -51,3 +51,9 @@ void Ui::colorField3(const char* label, glm::vec4& value, const float speed, con
 	ImGui::ColorEdit3(("##" + std::string(label) + "c").c_str(), glm::value_ptr(value),
 	                  ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 }
+
+void Ui::dragFloat3(const char* label, glm::vec3& value, const float speed, const float sameLineOffset) {
+	ImGui::Text("%s", label);
+	ImGui::SameLine(sameLineOffset);
+	ImGui::DragFloat3(("##" + std::string(label) + "v").c_str(), glm::value_ptr(value), speed);
+}
