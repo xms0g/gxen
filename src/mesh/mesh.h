@@ -38,7 +38,7 @@ public:
 
 	[[nodiscard]] GLuint VAO() const { return mVAO; }
 
-	void enableInstanceAttributes(GLuint instanceVBO) const;
+	void enableInstanceAttributes(GLuint instanceVBO, size_t offset) const;
 
 private:
 	// mesh Data

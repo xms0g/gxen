@@ -1,8 +1,9 @@
 #pragma once
 
 #include <memory>
-#include "../buffers/frameBuffer.h"
+#include "glm/glm.hpp"
 #include "renderSystem.h"
+#include "../buffers/frameBuffer.h"
 #include "../buffers/uniformBuffer.h"
 
 class LightSystem;
@@ -25,7 +26,7 @@ public:
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
-	void configure(const Camera& camera) const;
+	void configure(const Camera& camera);
 
 	void updateBuffers(const Camera& camera) const;
 
@@ -50,9 +51,20 @@ private:
 
 	void updateLightUBO() const;
 
-	void prepareInstanceData(const Entity& entity, uint32_t flags) const;
+	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions, size_t instanceSize, uint32_t flags);
 
-	GLuint mStaticInstanceVBO, mDynamicInstanceVBO;
+	struct {
+		GLuint buffer;
+		int offset{0};
+		size_t size{0};
+	} mStaticInstanceVBO;
+
+	struct {
+		GLuint buffer;
+		int offset{0};
+		size_t size{0};
+	} mDynamicInstanceVBO;
+
 	LightSystem* mLightSystem{};
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;

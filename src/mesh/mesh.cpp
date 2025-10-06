@@ -58,23 +58,22 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : 
 	glBindVertexArray(0);
 }
 
-void Mesh::enableInstanceAttributes(const GLuint instanceVBO) const {
+void Mesh::enableInstanceAttributes(const GLuint instanceVBO, const size_t offset) const {
 	glBindVertexArray(mVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 	// Model matrix attributes (7–10)
 	for (int i = 0; i < 4; i++) {
 		glEnableVertexAttribArray(7 + i);
 		glVertexAttribPointer(7 + i, 4, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
-		                      reinterpret_cast<void*>(sizeof(glm::vec4) * i));
+		                      reinterpret_cast<void*>(offset + sizeof(glm::vec4) * i));
 		glVertexAttribDivisor(7 + i, 1);
 	}
 
 	// Normal matrix attributes (11–13)
-	size_t offset = sizeof(glm::mat4);
 	for (int i = 0; i < 3; i++) {
 		glEnableVertexAttribArray(11 + i);
 		glVertexAttribPointer(11 + i, 3, GL_FLOAT, GL_FALSE, sizeof(InstanceData),
-		                      reinterpret_cast<void*>(offset + sizeof(glm::vec3) * i));
+		                      reinterpret_cast<void*>(offset + sizeof(glm::mat4) + sizeof(glm::vec3) * i));
 		glVertexAttribDivisor(11 + i, 1);
 	}
 }

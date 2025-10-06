@@ -40,11 +40,37 @@ ForwardRenderer::ForwardRenderer() {
 			MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);
 
 	mLightUBO = std::make_unique<UniformBuffer>(totalLightBufferSize, 1);
-	glGenBuffers(1, &mStaticInstanceVBO);
-	glGenBuffers(1, &mDynamicInstanceVBO);
+	glGenBuffers(1, &mStaticInstanceVBO.buffer);
+	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
 }
 
-void ForwardRenderer::configure(const Camera& camera) const {
+void ForwardRenderer::configure(const Camera& camera) {
+	size_t totalOpaqueRequiredGPUBufferSize = 0, totalTransparentRequiredGPUBufferSize = 0;
+
+	// Calculate required GPU buffer sizes of opaque and transparent objects
+	for (const auto& entity: getSystemEntities()) {
+		const auto& mat = entity.getComponent<MaterialComponent>();
+
+		if (mat.flags & Instanced) {
+			const auto& ic = entity.getComponent<InstanceComponent>();
+			mat.flags & Transparent
+				? totalTransparentRequiredGPUBufferSize += ic.positions->size() * sizeof(InstanceData)
+				: totalOpaqueRequiredGPUBufferSize += ic.positions->size() * sizeof(InstanceData);
+		}
+	}
+
+	if (totalOpaqueRequiredGPUBufferSize > 0) {
+		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO.buffer);
+		glBufferData(GL_ARRAY_BUFFER, totalOpaqueRequiredGPUBufferSize, nullptr, GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	if (totalTransparentRequiredGPUBufferSize > 0) {
+		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO.buffer);
+		glBufferData(GL_ARRAY_BUFFER, totalTransparentRequiredGPUBufferSize, nullptr, GL_DYNAMIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& mat = entity.getComponent<MaterialComponent>();
@@ -53,7 +79,10 @@ void ForwardRenderer::configure(const Camera& camera) const {
 		mLightUBO->configure(shader->ID(), 1, "LightBlock");
 
 		if (mat.flags & Instanced) {
-			prepareInstanceData(entity, mat.flags);
+			const auto& ic = entity.getComponent<InstanceComponent>();
+			const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
+
+			prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
 		}
 	}
 
@@ -140,7 +169,7 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 			          return da > db; // back to front
 		          });
 
-		prepareInstanceData(entity, mat.flags);
+		prepareInstanceData(entity, positions, positions.size() * sizeof(InstanceData), mat.flags);
 
 		shader->activate();
 		materialPass(entity, *shader);
@@ -235,35 +264,33 @@ void ForwardRenderer::updateLightUBO() const {
 	mLightUBO->unbind();
 }
 
-void ForwardRenderer::prepareInstanceData(const Entity& entity, const uint32_t flags) const {
+void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
+                                          const size_t instanceSize, const uint32_t flags) {
 	const auto& tc = entity.getComponent<TransformComponent>();
-	const auto& ic = entity.getComponent<InstanceComponent>();
 
 	std::vector<InstanceData> gpuData;
-	gpuData.reserve(ic.positions->size());
+	gpuData.reserve(positions.size());
 
-	for (auto& pos: *ic.positions) {
+	for (auto& pos: positions) {
 		auto [model, normal] = math::computeModelMatrices(pos, tc.rotation, tc.scale);
 		gpuData.emplace_back(model, normal);
 	}
 
-	GLuint instanceVBO;
-	if (flags & Transparent) {
-		instanceVBO = mDynamicInstanceVBO;
-		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO);
-		glBufferData(GL_ARRAY_BUFFER, gpuData.size() * sizeof(InstanceData), &gpuData[0],
-		             GL_DYNAMIC_DRAW);
-	} else {
-		instanceVBO = mStaticInstanceVBO;
-		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO);
-		glBufferData(GL_ARRAY_BUFFER, gpuData.size() * sizeof(InstanceData), &gpuData[0],
-		             GL_STATIC_DRAW);
-	}
+	const GLuint vbo = flags & Transparent ? mDynamicInstanceVBO.buffer : mStaticInstanceVBO.buffer;
+	const size_t offset = flags & Transparent ? mDynamicInstanceVBO.offset : mStaticInstanceVBO.offset;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, offset, instanceSize, &gpuData[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	const auto& mc = entity.getComponent<MeshComponent>();
-	for (auto mesh: *mc.meshes) {
-		mesh.enableInstanceAttributes(instanceVBO);
+	for (const auto& mesh: *mc.meshes) {
+		mesh.enableInstanceAttributes(vbo, offset);
 	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	if (flags & Transparent) {
+		mDynamicInstanceVBO.offset += instanceSize;
+	} else {
+		mStaticInstanceVBO.offset += instanceSize;
+	}
 }
