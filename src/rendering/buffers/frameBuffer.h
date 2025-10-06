@@ -18,15 +18,15 @@ public:
 
 	FrameBuffer& withTexture();
 
-	FrameBuffer& withTextureMultisampled();
+	FrameBuffer& withTextureMultisampled(int multisampledCount);
 
 	FrameBuffer& withTextureDepthStencil();
 
-	FrameBuffer& withTextureDepthStencilMultisampled();
+	FrameBuffer& withTextureDepthStencilMultisampled(int multisampledCount);
 
 	FrameBuffer& withRenderBufferDepthStencil();
 
-	FrameBuffer& withRenderBufferDepthStencilMultisampled();
+	FrameBuffer& withRenderBufferDepthStencilMultisampled(int multisampledCount);
 
 	void checkStatus();
 

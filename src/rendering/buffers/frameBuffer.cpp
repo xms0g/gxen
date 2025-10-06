@@ -40,10 +40,10 @@ FrameBuffer& FrameBuffer::withTexture() {
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::withTextureMultisampled() {
+FrameBuffer& FrameBuffer::withTextureMultisampled(const int multisampledCount) {
 	glGenTextures(1, &mTextureColorBuffer);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mTextureColorBuffer);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, mWidth, mHeight, GL_TRUE);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGB, mWidth, mHeight, GL_TRUE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, mTextureColorBuffer, 0);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	return *this;
@@ -61,10 +61,10 @@ FrameBuffer& FrameBuffer::withTextureDepthStencil() {
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::withTextureDepthStencilMultisampled() {
+FrameBuffer& FrameBuffer::withTextureDepthStencilMultisampled(const int multisampledCount) {
 	glGenTextures(1, &mDepthStencilTex);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mDepthStencilTex);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGB, mWidth, mHeight, GL_TRUE);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGB, mWidth, mHeight, GL_TRUE);
 	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, mDepthStencilTex, 0);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	return *this;
@@ -80,10 +80,10 @@ FrameBuffer& FrameBuffer::withRenderBufferDepthStencil() {
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::withRenderBufferDepthStencilMultisampled() {
+FrameBuffer& FrameBuffer::withRenderBufferDepthStencilMultisampled(const int multisampledCount) {
 	glGenRenderbuffers(1, &mRB0);
 	glBindRenderbuffer(GL_RENDERBUFFER, mRB0);
-	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH24_STENCIL8, mWidth, mHeight);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisampledCount, GL_DEPTH24_STENCIL8, mWidth, mHeight);
 	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRB0);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return *this;

@@ -23,7 +23,7 @@
 
 ForwardRenderer::ForwardRenderer() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-	mSceneBuffer->withTextureMultisampled().withRenderBufferDepthStencilMultisampled().checkStatus();
+	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT).withRenderBufferDepthStencilMultisampled(MULTISAMPLED_COUNT).checkStatus();
 	mSceneBuffer->unbind();
 
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());

@@ -73,25 +73,38 @@ int main() {
 		backpack.addComponent<DebugComponent>(DebugMode::None);
 
 
+		std::vector<glm::vec3> pos1;
+		float x = 5.0f, y = 4.0f, z = 0.0f;
+		for (int i = 0; i < 5; i++) {
+			pos1.push_back(glm::vec3(x, 0.0, z));
+			x += 5.0f;
+			if (x == 20) {
+				x = 0.0f;
+				z += 5;
+			}
+		}
+
 		// Suzanne
 		auto suzanne = registry.createEntity("Suzanne");
 		suzanne.addComponent<TransformComponent>(
-			glm::vec3(3.2f, 0.8f, 0.0f),
-			glm::vec3(0.0f),
+			glm::vec3(3.2f, 0.1f, 0.0f),
+			glm::vec3(1.0f, 45.0f, 23.0f),
 			glm::vec3(1.0f));
 
 		ResourceManager::instance().loadModel(suzanne.id(), "suzanne/suzanne.obj");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(suzanne.id()), 32.0f);
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(suzanne.id()), 32.0f,
+		                                        Opaque | Instanced);
 
 		suzanne.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("object.vert", "object.frag"));
+			std::make_shared<Shader>("instanced.vert", "object.frag"));
 
 		suzanne.addComponent<DebugComponent>(DebugMode::None);
-		//
+		suzanne.addComponent<InstanceComponent>(&pos1, pos1.size());
+
 		// Plane
-		Models::Plane planeModel{"textures/metal.png", "textures/metal_specular.png"};
+		Models::Plane planeModel{"textures/wood.png", "textures/wood_specular.png"};
 		auto plane = registry.createEntity("Plane");
 		plane.addComponent<TransformComponent>(
 			glm::vec3(0.0f),
@@ -99,10 +112,11 @@ int main() {
 			glm::vec3(2.0f));
 
 		plane.addComponent<MeshComponent>(planeModel.getMeshes());
-		plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f, TwoSided);
+		plane.addComponent<MaterialComponent>(planeModel.getTextures(), 64.0f, TwoSided);
 
 		plane.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("models/plane.vert", "models/plane.frag"));
+
 
 		// CUbe
 		Models::Cube cubeModel{"textures/wall.jpg"};
@@ -120,54 +134,55 @@ int main() {
 
 		cube.addComponent<DebugComponent>(DebugMode::None);
 
+
 		// Blend
-		std::vector<glm::vec3> windows{
-			glm::vec3(-4.3f, 0.0f, 1.8f),
-			glm::vec3(-0.45f, 0.9f, 1.9f),
-		};
-
-		Models::Window windowModel{"textures/window.png"};
-
-		auto window = registry.createEntity("Window");
-		window.addComponent<TransformComponent>(
-			glm::vec3(0.0f),
-			glm::vec3(0.0f),
-			glm::vec3(2.0f));
-
-		window.addComponent<MeshComponent>(windowModel.getMeshes());
-		window.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, TwoSided | Transparent | Instanced);
-		window.addComponent<ShaderComponent>(
-			std::make_shared<Shader>("instanced.vert", "models/blend.frag"));
-
-		window.addComponent<InstanceComponent>(&windows, windows.size());
-
-
-		auto dirLight = registry.createEntity("Directional Light");
-		dirLight.addComponent<DirectionalLightComponent>(
-			glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
-			glm::vec4(0.05f, 0.05f, 0.05f, 0.0f),
-			glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
-			glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
-
-		// auto pointLight = registry.createEntity("Point Light");
-		// pointLight.addComponent<TransformComponent>(
-		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.2f));
+		// std::vector<glm::vec3> windows{
+		// 	glm::vec3(-4.3f, 0.0f, 1.8f),
+		// 	glm::vec3(-0.45f, 0.9f, 1.9f),
+		// };
 		//
-		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		// pointLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
+		// Models::Window windowModel{"textures/window.png"};
 		//
-		// pointLight.addComponent<ShaderComponent>(
-		// 	std::make_shared<Shader>("models/light.vert", "models/light.frag"));
+		// auto window = registry.createEntity("Window");
+		// window.addComponent<TransformComponent>(
+		// 	glm::vec3(0.0f),
+		// 	glm::vec3(0.0f),
+		// 	glm::vec3(2.0f));
 		//
-		// pointLight.addComponent<PointLightComponent>(
-		// 	glm::vec4(0.0f),
-		// 	glm::vec4(0.5f, 0.5f, 0.5f, 0.0f),  // ambient
-		// 	glm::vec4(0.5f, 0.5f, 0.5f,0.0f),  // diffuse
-		// 	glm::vec4(0.5f, 0.5f, 0.5f,0.0f),
-		// 	glm::vec4(1.0f, 0.09f, 0.032f,0.0f)
-		// 	);
+		// window.addComponent<MeshComponent>(windowModel.getMeshes());
+		// window.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, TwoSided | Transparent | Instanced);
+		// window.addComponent<ShaderComponent>(
+		// 	std::make_shared<Shader>("instanced.vert", "models/blend.frag"));
+		//
+		// window.addComponent<InstanceComponent>(&windows, windows.size());
+
+
+		// auto dirLight = registry.createEntity("Directional Light");
+		// dirLight.addComponent<DirectionalLightComponent>(
+		// 	glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
+		// 	glm::vec4(0.05f, 0.05f, 0.05f, 0.0f),
+		// 	glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
+		// 	glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
+
+		auto pointLight = registry.createEntity("Point Light");
+		pointLight.addComponent<TransformComponent>(
+			glm::vec3(-3.2f, 5.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.2f));
+
+		pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
+		pointLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
+
+		pointLight.addComponent<ShaderComponent>(
+			std::make_shared<Shader>("models/light.vert", "models/light.frag"));
+
+		pointLight.addComponent<PointLightComponent>(
+			glm::vec4(0.0f),
+			glm::vec4(0.1f, 0.1f, 0.1f, 0.0f), // ambient
+			glm::vec4(0.8f, 0.7f, 0.5f, 0.0f), // diffuse
+			glm::vec4(0.9f, 0.85f, 0.7f, 0.0f),
+			glm::vec4(0.3f, 0.2f, 0.1f, 0.0f)
+		);
 
 
 		// auto spotLight = registry.createEntity();

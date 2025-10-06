@@ -11,9 +11,9 @@ const std::string SHADER_DIR = "shaders/";
 const std::string ASSET_DIR = "assets/";
 
 // Window Settings
-constexpr uint32_t SCR_WIDTH = 1600;
-constexpr uint32_t SCR_HEIGHT = 900;
-constexpr float ASPECT = static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT);
+inline uint32_t SCR_WIDTH{0};
+inline uint32_t SCR_HEIGHT{0};
+inline float ASPECT = static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT);
 
 // Camera Settings
 constexpr float YAW{-90.0f};
@@ -23,3 +23,6 @@ constexpr float SENSITIVITY{0.1f};
 constexpr float ZOOM{45.0f};
 constexpr float ZNEAR{0.1f};
 constexpr float ZFAR{100.0f};
+
+// Render Settings
+constexpr uint32_t MULTISAMPLED_COUNT{4};
