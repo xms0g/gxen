@@ -23,6 +23,8 @@ void GuiPanels::renderGraphicsInfoPanel(uint32_t fps) {
 }
 
 void GuiPanels::renderTransformPanel(const Entity& entity) {
+	if (!entity.hasComponent<TransformComponent>()) return;
+
 	auto& tc = entity.getComponent<TransformComponent>();
 
 	ImGui::PushID(static_cast<int>(entity.id()));
@@ -45,6 +47,8 @@ void GuiPanels::renderTransformPanel(const Entity& entity) {
 }
 
 void GuiPanels::renderDebugViewsPanel(const Entity& entity) {
+	if (!entity.hasComponent<DebugComponent>()) return;
+
 	auto& db = entity.getComponent<DebugComponent>();
 
 	ImGui::PushID(static_cast<int>(entity.id()));
