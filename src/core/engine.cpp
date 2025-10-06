@@ -4,7 +4,7 @@
 #include "camera.h"
 #include "glm/glm.hpp"
 #include "window.h"
-#include "guiSystem.h"
+#include "gui/guiSystem.h"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
 #include "../rendering/renderers/forwardRenderer.h"

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SDL.h>
-#include "../ECS/system.hpp"
+#include "guiBackend.h"
+#include "../../ECS/system.hpp"
 
 struct PostEffect;
 
@@ -13,18 +13,10 @@ public:
 
 	void update(float dt);
 
-	void render(std::vector<PostEffect>& effects);
+	void render(std::vector<PostEffect>& effects) const;
 
 private:
 	void updateFpsCounter(float dt);
-
-	void renderGraphicsInfo() const;
-
-	void renderTransform(const Entity& entity) const;
-
-	void renderDebugViews(const Entity& entity) const;
-
-	void renderPostProcess(std::vector<PostEffect>& effects);
 
 	// Frame
 	double mPreviousSeconds{0.0};
