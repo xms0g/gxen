@@ -40,6 +40,7 @@ void GuiSystem::render(std::vector<PostEffect>& effects) const {
 		if (Ui::beginEntity(entity.name())) {
 			GuiPanels::renderTransformPanel(entity);
 			GuiPanels::renderDebugViewsPanel(entity);
+			GuiPanels::renderLightPanel(entity);
 			Ui::endEntity();
 		}
 	}

@@ -1,4 +1,8 @@
 #include "guiBackend.h"
+
+#include <string>
+
+#include "glm/gtc/type_ptr.hpp"
 #include "imgui/imgui.h"
 #include "imgui/imgui_impl_sdl.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -37,4 +41,13 @@ bool Ui::beginEntity(const char* label) {
 
 void Ui::endEntity() {
 	ImGui::Separator();
+}
+
+void Ui::colorField3(const char* label, glm::vec4& value, const float speed, const float sameLineOffset) {
+	ImGui::Text("%s", label);
+	ImGui::SameLine(sameLineOffset);
+	ImGui::DragFloat3(("##" + std::string(label) + "v").c_str(), glm::value_ptr(value), speed);
+	ImGui::SameLine();
+	ImGui::ColorEdit3(("##" + std::string(label) + "c").c_str(), glm::value_ptr(value),
+	                  ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_NoLabel);
 }

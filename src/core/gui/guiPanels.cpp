@@ -1,4 +1,5 @@
 #include "guiPanels.h"
+#include "guiBackend.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -6,6 +7,8 @@
 #include "../../ECS/registry.h"
 #include "../../ECS/components/transform.hpp"
 #include "../../ECS/components/debug.hpp"
+#include "../../ECS/components/pointLight.hpp"
+#include "../../ECS/components/spotLight.hpp"
 #include "../../rendering/postProcess.h"
 
 void GuiPanels::renderGraphicsInfoPanel(uint32_t fps) {
@@ -59,6 +62,45 @@ void GuiPanels::renderDebugViewsPanel(const Entity& entity) {
 }
 
 void GuiPanels::renderLightPanel(const Entity& entity) {
+	if (!entity.hasComponent<SpotLightComponent>() && !entity.hasComponent<PointLightComponent>()) return;
+
+	ImGui::PushID(static_cast<int>(entity.id()));
+	if (ImGui::TreeNodeEx("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
+		if (entity.hasComponent<SpotLightComponent>()) {
+			renderSpotLight(entity);
+		} else if (entity.hasComponent<PointLightComponent>()) {
+			renderPointLight(entity);
+		}
+		ImGui::TreePop();
+	}
+	ImGui::PopID();
+}
+
+void GuiPanels::renderSpotLight(const Entity& entity) {
+	auto& splc = entity.getComponent<SpotLightComponent>();
+
+	Ui::colorField3("Direction", splc.direction, 0.01f, 100);
+	Ui::colorField3("Ambient", splc.ambient, 0.01f, 100);
+	Ui::colorField3("Diffuse", splc.diffuse, 0.01f, 100);
+	Ui::colorField3("Specular", splc.specular, 0.01f, 100);
+	ImGui::Text("Cutoff");
+	ImGui::SameLine(100);
+	ImGui::DragFloat4("##Cutoff", glm::value_ptr(splc.cutOff));
+
+	ImGui::Text("Attenua");
+	ImGui::SameLine(100);
+	ImGui::DragFloat3("##att", glm::value_ptr(splc.attenuation));
+}
+
+void GuiPanels::renderPointLight(const Entity& entity) {
+	auto& plc = entity.getComponent<PointLightComponent>();
+
+	Ui::colorField3("Ambient", plc.ambient, 0.01f, 100);
+	Ui::colorField3("Diffuse", plc.diffuse, 0.01f, 100);
+	Ui::colorField3("Specular", plc.specular, 0.01f, 100);
+	ImGui::Text("Attenua");
+	ImGui::SameLine(100);
+	ImGui::DragFloat3("##att", glm::value_ptr(plc.attenuation));
 }
 
 void GuiPanels::renderPostProcessPanel(std::vector<PostEffect>& effects) {
