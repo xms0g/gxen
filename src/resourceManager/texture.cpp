@@ -15,22 +15,19 @@ unsigned int texture::load(const char* path, const std::string& type) {
         exit(1);
     }
 
-    GLenum format{0}, internalFormat{0};
+    GLenum format{0};
     if (depth == 1) {
     	format = GL_RED;
-    	internalFormat = GL_RED;
     } else if (depth == 3) {
     	format = GL_RGB;
-    	internalFormat = type == "texture_diffuse" ? GL_SRGB : GL_RGB;
     } else if (depth == 4) {
     	format = GL_RGBA;
-    	internalFormat = type == "texture_diffuse" ? GL_SRGB_ALPHA: GL_RGBA;
     }
 
 	glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-	glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, format == GL_RGBA ? GL_CLAMP_TO_EDGE: GL_REPEAT);
