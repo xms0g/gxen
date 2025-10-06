@@ -6,7 +6,7 @@ in VS_OUT
     vec3 FragPos;
 } fs_in;
 
-#include "phong.glsl"
+#include "blinnPhong.glsl"
 #include "camera.glsl"
 
 out vec4 fragColor;
