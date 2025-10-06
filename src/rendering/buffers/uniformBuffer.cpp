@@ -1,5 +1,4 @@
 #include "uniformBuffer.h"
-#include "glad/glad.h"
 
 UniformBuffer::UniformBuffer(const int size, const int binding) {
 	glGenBuffers(1, &mUBO);

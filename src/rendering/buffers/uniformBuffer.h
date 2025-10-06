@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdlib>
+#include "glad/glad.h"
 
 class UniformBuffer {
 public:
@@ -17,5 +18,5 @@ public:
 	void configure(unsigned int program, unsigned int uniformBlockBinding, const char* uniformBlockName) const;
 
 private:
-	unsigned int mUBO{};
+	GLuint mUBO{};
 };

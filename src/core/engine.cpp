@@ -1,8 +1,8 @@
 #include "engine.h"
 #include <iostream>
+#include "glm/glm.hpp"
 #include "input.h"
 #include "camera.h"
-#include "glm/glm.hpp"
 #include "window.h"
 #include "gui/guiSystem.h"
 #include "../config/config.hpp"

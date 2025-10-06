@@ -1,5 +1,4 @@
 #include "mesh.h"
-#include "glad/glad.h"
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : mVertices(std::move(vertices)),
 	mIndices(std::move(indices)) {

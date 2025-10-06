@@ -1,8 +1,7 @@
 #include "window.h"
 #include <iostream>
-
-#include "../config/config.hpp"
 #include "glad/glad.h"
+#include "../config/config.hpp"
 
 Window::~Window() {
     SDL_GL_DeleteContext(mGlContext);

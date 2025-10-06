@@ -1,5 +1,4 @@
 #include "frameBuffer.h"
-#include "glad/glad.h"
 #include "../../config/config.hpp"
 
 FrameBuffer::FrameBuffer(const int width, const int height) : mWidth(width), mHeight(height) {
