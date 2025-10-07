@@ -63,11 +63,12 @@ void XEngine::run() {
 
 		mCamera->update();
 		mLightSystem->update();
+		mForwardRenderer->updateBuffers(*mCamera);
+
+		mForwardRenderer->batchEntities(*mCamera);
 
 		mForwardRenderer->beginSceneRender();
-		mForwardRenderer->updateBuffers(*mCamera);
 		mSkyboxSystem->render(*mCamera);
-		mForwardRenderer->batchEntities(*mCamera);
 		mForwardRenderer->opaquePass();
 		mForwardRenderer->instancedPass();
 		mDebugRenderer->render();
