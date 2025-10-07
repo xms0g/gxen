@@ -45,7 +45,7 @@ ForwardRenderer::ForwardRenderer() {
 }
 
 void ForwardRenderer::configure(const Camera& camera) {
-	size_t totalOpaqueRequiredGPUBufferSize = 0, totalTransparentRequiredGPUBufferSize = 0;
+	size_t requiredOpaqueGPUBufferSize = 0, requiredTransparentGPUBufferSize = 0;
 
 	// Calculate required GPU buffer sizes of opaque and transparent objects
 	for (const auto& entity: getSystemEntities()) {
@@ -54,20 +54,20 @@ void ForwardRenderer::configure(const Camera& camera) {
 		if (mat.flags & Instanced) {
 			const auto& ic = entity.getComponent<InstanceComponent>();
 			mat.flags & Transparent
-				? totalTransparentRequiredGPUBufferSize += ic.positions->size() * sizeof(InstanceData)
-				: totalOpaqueRequiredGPUBufferSize += ic.positions->size() * sizeof(InstanceData);
+				? requiredTransparentGPUBufferSize += ic.positions->size() * sizeof(InstanceData)
+				: requiredOpaqueGPUBufferSize += ic.positions->size() * sizeof(InstanceData);
 		}
 	}
 
-	if (totalOpaqueRequiredGPUBufferSize > 0) {
+	if (requiredOpaqueGPUBufferSize > 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO.buffer);
-		glBufferData(GL_ARRAY_BUFFER, totalOpaqueRequiredGPUBufferSize, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, requiredOpaqueGPUBufferSize, nullptr, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	if (totalTransparentRequiredGPUBufferSize > 0) {
+	if (requiredTransparentGPUBufferSize > 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO.buffer);
-		glBufferData(GL_ARRAY_BUFFER, totalTransparentRequiredGPUBufferSize, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, requiredTransparentGPUBufferSize, nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -196,8 +196,8 @@ void ForwardRenderer::endSceneRender() const {
 	mSceneBuffer->unbind();
 	glBindFramebuffer(GL_READ_FRAMEBUFFER, mSceneBuffer->texture());
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mIntermediateBuffer->texture());
-	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mSceneBuffer->width(),
-	                  mSceneBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mIntermediateBuffer->width(),
+	                  mIntermediateBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
