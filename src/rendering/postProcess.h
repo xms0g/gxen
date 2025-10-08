@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 #include <string>
-#include "glad/glad.h"
 #include "../models/quad.h"
 
 class FrameBuffer;
@@ -24,10 +23,10 @@ public:
 
 	std::vector<PostEffect>& effects() { return mEffects; }
 
-	void render(GLuint sceneTexture) const;
+	void render(uint32_t sceneTexture) const;
 
 private:
-	void draw(GLuint sceneTexture) const;
+	void draw(uint32_t sceneTexture) const;
 
 	std::unique_ptr<Models::Quad> mQuad;
 	std::unique_ptr<FrameBuffer> pingPongBuffers[2];

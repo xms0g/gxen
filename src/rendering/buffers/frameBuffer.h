@@ -1,6 +1,5 @@
 #pragma once
-
-#include "glad/glad.h"
+#include <cstdint>
 
 class FrameBuffer {
 public:
@@ -10,7 +9,7 @@ public:
 
 	[[nodiscard]] int width() const { return mWidth; }
 	[[nodiscard]] int height() const { return mHeight; }
-	[[nodiscard]] GLuint texture() const { return mTextureColorBuffer; }
+	[[nodiscard]] uint32_t texture() const { return mTextureColorBuffer; }
 
 	void bind() const;
 
@@ -33,8 +32,8 @@ public:
 private:
 	int mWidth{0};
 	int mHeight{0};
-	GLuint mFBO{0};
-	GLuint mRB0{0};
-	GLuint mDepthStencilTex{0};
-	GLuint mTextureColorBuffer{0};
+	uint32_t mFBO{0};
+	uint32_t mRB0{0};
+	uint32_t mDepthStencilTex{0};
+	uint32_t mTextureColorBuffer{0};
 };

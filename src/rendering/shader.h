@@ -3,7 +3,6 @@
 #include <string>
 #include <unordered_set>
 #include "glm/glm.hpp"
-#include "glad/glad.h"
 
 class Shader {
 public:
@@ -19,7 +18,7 @@ public:
 
 	Shader& operator=(Shader&& other) noexcept;
 
-	[[nodiscard]] GLuint ID() const { return mID; }
+	[[nodiscard]] uint32_t ID() const { return mID; }
 
 	// use/activate the shader
 	void activate() const;
@@ -54,10 +53,10 @@ private:
 
 	std::string preprocess(std::string source, const char* fileName, std::unordered_set<std::string>& includedFiles);
 
-	GLuint compileShader(std::string& source, GLuint type);
+	uint32_t compileShader(std::string& source, uint32_t type);
 
-	GLuint linkShader(GLuint vertex, GLuint fragment, GLuint geometry = 0);
+	uint32_t linkShader(uint32_t vertex, uint32_t fragment, uint32_t geometry = 0);
 
 	// the program ID
-	GLuint mID{};
+	uint32_t mID{};
 };

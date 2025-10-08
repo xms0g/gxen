@@ -1,4 +1,5 @@
 #include "uniformBuffer.h"
+#include "glad/glad.h"
 
 UniformBuffer::UniformBuffer(const int size, const int binding) {
 	glGenBuffers(1, &mUBO);
@@ -24,8 +25,8 @@ void UniformBuffer::setData(const void* data, const size_t size, const size_t of
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 
-void UniformBuffer::configure(const unsigned int program, const unsigned int uniformBlockBinding,
+void UniformBuffer::configure(const uint32_t program, const uint32_t uniformBlockBinding,
                               const char* uniformBlockName) const {
-	const unsigned int ubidx = glGetUniformBlockIndex(program, uniformBlockName);
+	const uint32_t ubidx = glGetUniformBlockIndex(program, uniformBlockName);
 	glUniformBlockBinding(program, ubidx, uniformBlockBinding);
 }

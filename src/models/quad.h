@@ -9,12 +9,12 @@ public:
 	Quad();
 	~Quad();
 
-	[[nodiscard]] unsigned int VAO() const { return mVAO; }
+	[[nodiscard]] uint32_t VAO() const { return mVAO; }
 
 	[[nodiscard]] const Shader& shader() const { return *mShader; }
 
 private:
-	unsigned int mVAO{0}, mVBO{0};
+	uint32_t mVAO{0}, mVBO{0};
 	std::unique_ptr<Shader> mShader;
 };
 }

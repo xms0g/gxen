@@ -2,6 +2,7 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include "glad/glad.h"
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
 
@@ -16,9 +17,9 @@ Shader::Shader(const char* vs, const char* fs, const char* gs) {
 		std::string geometryCode = gs ? preprocess(loadFile(gs), gs, includedFiles) : "";
 		includedFiles.clear();
 
-		const GLuint vertex = compileShader(vertexCode, GL_VERTEX_SHADER);
-		const GLuint fragment = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
-		GLuint geometry = 0;
+		const uint32_t vertex = compileShader(vertexCode, GL_VERTEX_SHADER);
+		const uint32_t fragment = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
+		uint32_t geometry = 0;
 
 		if (gs) {
 			geometry = compileShader(geometryCode, GL_GEOMETRY_SHADER);
@@ -150,8 +151,8 @@ std::string Shader::preprocess(std::string source, const char* fileName,
 	return result.str();
 }
 
-GLuint Shader::compileShader(std::string& source, const GLuint type) {
-	const GLuint shader = glCreateShader(type);
+uint32_t Shader::compileShader(std::string& source, const uint32_t type) {
+	const uint32_t shader = glCreateShader(type);
 	const char* code = source.c_str();
 
 	glShaderSource(shader, 1, &code, nullptr);
@@ -179,7 +180,7 @@ GLuint Shader::compileShader(std::string& source, const GLuint type) {
 	return shader;
 }
 
-GLuint Shader::linkShader(const GLuint vertex, const GLuint fragment, const GLuint geometry) {
+uint32_t Shader::linkShader(const uint32_t vertex, const uint32_t fragment, const uint32_t geometry) {
 	mID = glCreateProgram();
 
 	glAttachShader(mID, vertex);

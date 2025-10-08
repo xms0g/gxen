@@ -1,4 +1,5 @@
 #include "mesh.h"
+#include "glad/glad.h"
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : mVertices(std::move(vertices)),
 	mIndices(std::move(indices)) {
@@ -57,7 +58,7 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : 
 	glBindVertexArray(0);
 }
 
-void Mesh::enableInstanceAttributes(const GLuint instanceVBO, const size_t offset) const {
+void Mesh::enableInstanceAttributes(const uint32_t instanceVBO, const size_t offset) const {
 	glBindVertexArray(mVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, instanceVBO);
 	// Model matrix attributes (7–10)

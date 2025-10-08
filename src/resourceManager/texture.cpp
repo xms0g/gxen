@@ -1,9 +1,10 @@
 #include "texture.h"
 #include <iostream>
+#include "glad/glad.h"
 #include "image/stb_image.h"
 
 unsigned int texture::load(const char* path, const std::string& type) {
-    GLuint textureID;
+    uint32_t textureID;
 
 	stbi_set_flip_vertically_on_load(true);
 
@@ -47,7 +48,7 @@ unsigned int texture::load(const char* path, const std::string& type) {
 }
 
 unsigned int texture::loadCubemap(const std::vector<std::string>& faces) {
-    GLuint textureID;
+    uint32_t textureID;
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);

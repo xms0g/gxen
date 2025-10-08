@@ -17,8 +17,8 @@ public:
 	using RenderSystem::opaquePass;
 	explicit ForwardRenderer();
 
-	[[nodiscard]] GLuint getSceneTexture() const { return mSceneBuffer->texture(); }
-	[[nodiscard]] GLuint getIntermediateTexture() const { return mIntermediateBuffer->texture(); }
+	[[nodiscard]] uint32_t getSceneTexture() const { return mSceneBuffer->texture(); }
+	[[nodiscard]] uint32_t getIntermediateTexture() const { return mIntermediateBuffer->texture(); }
 	[[nodiscard]] uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
 	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
 
@@ -54,13 +54,13 @@ private:
 	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions, size_t instanceSize, uint32_t flags);
 
 	struct {
-		GLuint buffer;
+		uint32_t buffer;
 		int offset{0};
 		size_t size{0};
 	} mStaticInstanceVBO;
 
 	struct {
-		GLuint buffer;
+		uint32_t buffer;
 		int offset{0};
 		size_t size{0};
 	} mDynamicInstanceVBO;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vector>
-#include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 
@@ -36,15 +35,15 @@ public:
 
 	[[nodiscard]] const std::vector<unsigned int>& indices() const { return mIndices; }
 
-	[[nodiscard]] GLuint VAO() const { return mVAO; }
+	[[nodiscard]] uint32_t VAO() const { return mVAO; }
 
-	void enableInstanceAttributes(GLuint instanceVBO, size_t offset) const;
+	void enableInstanceAttributes(uint32_t instanceVBO, size_t offset) const;
 
 private:
 	// mesh Data
 	std::vector<Vertex> mVertices;
 	std::vector<unsigned int> mIndices;
-	GLuint mVAO{}, mVBO{}, mEBO{};
+	uint32_t mVAO{}, mVBO{}, mEBO{};
 };
 
 void setupInstancing();
