@@ -112,7 +112,7 @@ std::string Shader::loadFile(const char* sf) {
 	return ss.str();
 }
 
-std::string Shader::preprocess(std::string source, const char* fileName,
+std::string Shader::preprocess(const std::string& source, const char* fileName,
                                std::unordered_set<std::string>& includedFiles) {
 	std::stringstream result;
 	std::istringstream stream(source);
@@ -151,7 +151,7 @@ std::string Shader::preprocess(std::string source, const char* fileName,
 	return result.str();
 }
 
-uint32_t Shader::compileShader(std::string& source, const uint32_t type) {
+uint32_t Shader::compileShader(const std::string& source, const uint32_t type) {
 	const uint32_t shader = glCreateShader(type);
 	const char* code = source.c_str();
 

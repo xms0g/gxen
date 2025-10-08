@@ -51,9 +51,9 @@ public:
 private:
 	std::string loadFile(const char* sf);
 
-	std::string preprocess(std::string source, const char* fileName, std::unordered_set<std::string>& includedFiles);
+	std::string preprocess(const std::string& source, const char* fileName, std::unordered_set<std::string>& includedFiles);
 
-	uint32_t compileShader(std::string& source, uint32_t type);
+	uint32_t compileShader(const std::string& source, uint32_t type);
 
 	uint32_t linkShader(uint32_t vertex, uint32_t fragment, uint32_t geometry = 0);
 

@@ -8,7 +8,7 @@
 #include "imgui/imgui_impl_opengl3.h"
 #include "imgui/imgui_internal.h"
 
-void GuiBackend::init(SDL_Window* window, SDL_GLContext context, const char* glsl_version) {
+void GuiBackend::init(SDL_Window* window, const SDL_GLContext context, const char* glsl_version) {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	// Setup Dear ImGui style
