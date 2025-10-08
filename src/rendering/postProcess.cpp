@@ -46,6 +46,7 @@ void PostProcess::render(const GLuint sceneTexture) const {
 void PostProcess::draw(const GLuint sceneTexture) const {
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mQuad->VAO());
+	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sceneTexture);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
