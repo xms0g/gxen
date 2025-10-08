@@ -29,11 +29,11 @@ struct InstanceData {
 
 class Mesh {
 public:
-	Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
+	Mesh(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices);
 
 	[[nodiscard]] const std::vector<Vertex>& vertices() const { return mVertices; }
 
-	[[nodiscard]] const std::vector<unsigned int>& indices() const { return mIndices; }
+	[[nodiscard]] const std::vector<uint32_t>& indices() const { return mIndices; }
 
 	[[nodiscard]] uint32_t VAO() const { return mVAO; }
 
@@ -42,7 +42,7 @@ public:
 private:
 	// mesh Data
 	std::vector<Vertex> mVertices;
-	std::vector<unsigned int> mIndices;
+	std::vector<uint32_t> mIndices;
 	uint32_t mVAO{}, mVBO{}, mEBO{};
 };
 

@@ -3,7 +3,7 @@
 #include "glad/glad.h"
 #include "image/stb_image.h"
 
-unsigned int texture::load(const char* path, const std::string& type) {
+uint32_t texture::load(const char* path, const std::string& type) {
     uint32_t textureID;
 
 	stbi_set_flip_vertically_on_load(true);
@@ -47,7 +47,7 @@ unsigned int texture::load(const char* path, const std::string& type) {
     return textureID;
 }
 
-unsigned int texture::loadCubemap(const std::vector<std::string>& faces) {
+uint32_t texture::loadCubemap(const std::vector<std::string>& faces) {
     uint32_t textureID;
 
     glGenTextures(1, &textureID);
@@ -56,7 +56,7 @@ unsigned int texture::loadCubemap(const std::vector<std::string>& faces) {
 	stbi_set_flip_vertically_on_load(false);
 
 	int width, height, depth;
-    for (unsigned int i = 0; i < faces.size(); i++) {
+    for (uint32_t i = 0; i < faces.size(); i++) {
     	unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &depth, 0);
 
         if (!data) {

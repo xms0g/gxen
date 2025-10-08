@@ -39,14 +39,14 @@ void ResourceManager::loadModel(const size_t entityID, const char* file) {
 
 void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
 	// process each mesh located at the current node
-	for (unsigned int i = 0; i < node->mNumMeshes; i++) {
+	for (uint32_t i = 0; i < node->mNumMeshes; i++) {
 		// the node object only contains mIndices to index the actual objects in the scene.
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
 		mMeshes.push_back(processMesh(mesh, scene));
 	}
 	// after we've processed all of the mMeshes (if any) we then recursively process each of the children nodes
-	for (unsigned int i = 0; i < node->mNumChildren; i++) {
+	for (uint32_t i = 0; i < node->mNumChildren; i++) {
 		processNode(node->mChildren[i], scene);
 	}
 }
@@ -54,11 +54,11 @@ void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
 Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// data to fill
 	std::vector<Vertex> vertices;
-	std::vector<unsigned int> indices;
+	std::vector<uint32_t> indices;
 	std::vector<Texture> textures;
 
 	// walk through each of the mesh's mVertices
-	for (unsigned int i = 0; i < mesh->mNumVertices; i++) {
+	for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
 		Vertex vertex{};
 		glm::vec3 vector;
 		// we declare a placeholder std::vector since assimp uses its own std::vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
@@ -102,10 +102,10 @@ Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 		vertices.push_back(vertex);
 	}
 	// now wak through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex mIndices.
-	for (unsigned int i = 0; i < mesh->mNumFaces; i++) {
+	for (uint32_t i = 0; i < mesh->mNumFaces; i++) {
 		aiFace face = mesh->mFaces[i];
 		// retrieve all mIndices of the face and store them in the mIndices std::vector
-		for (unsigned int j = 0; j < face.mNumIndices; j++)
+		for (uint32_t j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
 	// process materials
@@ -131,7 +131,7 @@ Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 
 void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextureType type,
                                            const std::string& typeName) {
-	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++) {
+	for (uint32_t i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
 		// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture

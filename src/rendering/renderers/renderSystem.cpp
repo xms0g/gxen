@@ -69,7 +69,7 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 	shader.setBool("useTexture", true);
 	const auto textures = *mtc.textures;
 
-	unsigned int diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
+	uint32_t diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 
@@ -99,7 +99,7 @@ void RenderSystem::drawPass(const Entity& entity) const {
 
 	for (const auto& mesh: *mc.meshes) {
 		glBindVertexArray(mesh.VAO());
-		glDrawElements(GL_TRIANGLES, static_cast<unsigned int>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+		glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 	}
 
 	if (!glIsEnabled(GL_CULL_FACE))

@@ -13,7 +13,7 @@ Models::Window::Window(const char* texture) {
 		1.0f,  0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f   // 3
 	};
 
-	std::vector<unsigned int> indices = {
+	std::vector<uint32_t> indices = {
 		0, 2, 1,  // First triangle
 		0, 3, 2   // Second triangle
 	};

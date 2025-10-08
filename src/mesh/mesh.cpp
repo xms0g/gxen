@@ -1,7 +1,7 @@
 #include "mesh.h"
 #include "glad/glad.h"
 
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : mVertices(std::move(vertices)),
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) : mVertices(std::move(vertices)),
 	mIndices(std::move(indices)) {
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	// create vao
@@ -17,7 +17,7 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices) : 
 	glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), &mVertices[0], GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(unsigned int), &mIndices[0],
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(uint32_t), &mIndices[0],
 	             GL_STATIC_DRAW);
 
 	// set the vertex attribute pointers

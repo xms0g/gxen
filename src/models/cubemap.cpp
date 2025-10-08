@@ -55,7 +55,7 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 		vertices.emplace_back(vertex);
 	}
 
-	std::vector<unsigned int> indices;
+	std::vector<uint32_t> indices;
 	meshes.emplace_back(vertices, indices);
 
 	std::vector<std::string> faces;
