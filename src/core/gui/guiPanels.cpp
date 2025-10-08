@@ -97,7 +97,7 @@ void GuiPanels::renderPointLight(const Entity& entity) {
 	ImGui::DragFloat3("##att", glm::value_ptr(plc.attenuation));
 }
 
-void GuiPanels::renderPostProcessPanel(std::vector<PostEffect>& effects) {
+void GuiPanels::renderPostProcessPanel(std::array<PostEffect, 7>& effects) {
 	if (ImGui::Begin("Post-Processing")) {
 		for (auto& effect: effects) {
 			ImGui::Checkbox(effect.name.c_str(), &effect.enabled);

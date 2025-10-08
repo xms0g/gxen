@@ -1,7 +1,7 @@
 #pragma once
 
 #include <memory>
-#include <vector>
+#include <array>
 #include <string>
 #include "../models/quad.h"
 
@@ -21,7 +21,7 @@ class PostProcess {
 public:
 	PostProcess(int width, int height);
 
-	std::vector<PostEffect>& effects() { return mEffects; }
+	std::array<PostEffect, 7>& effects() { return mEffects; }
 
 	void render(uint32_t sceneTexture) const;
 
@@ -30,5 +30,5 @@ private:
 
 	std::unique_ptr<Models::Quad> mQuad;
 	std::unique_ptr<FrameBuffer> pingPongBuffers[2];
-	std::vector<PostEffect> mEffects;
+	std::array<PostEffect, 7> mEffects;
 };

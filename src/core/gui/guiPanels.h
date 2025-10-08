@@ -18,6 +18,6 @@ void renderSpotLight(const Entity& entity);
 
 void renderPointLight(const Entity& entity);
 
-void renderPostProcessPanel(std::vector<PostEffect>& effects);
+void renderPostProcessPanel(std::array<PostEffect, 7>& effects);
 
 }

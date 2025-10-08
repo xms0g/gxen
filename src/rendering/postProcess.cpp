@@ -4,17 +4,17 @@
 #include "buffers/frameBuffer.h"
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
-	mEffects = {
+	mEffects = {{
 		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, false},
 		{"Sepia", std::make_shared<Shader>("models/quad.vert", "post-processing/sepia.frag"), NONE, false},
 		{"Edge Detection", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), EDGE, false},
 		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), NONE, false},
 		{"Sharpen", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), SHARPEN, false},
 		{"Blur", std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag"), BLUR, false},
-		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true},
-	};
+		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true}
+	}};
 
-	for (auto& pingPongBuffer : pingPongBuffers) {
+	for (auto& pingPongBuffer: pingPongBuffers) {
 		pingPongBuffer = std::make_unique<FrameBuffer>(width, height);
 		pingPongBuffer->withTexture().checkStatus();
 	}
