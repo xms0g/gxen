@@ -69,7 +69,7 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 	shader.setBool("useTexture", true);
 	const auto textures = *mtc.textures;
 
-	uint32_t diffuseNr = 1, specularNr = 1, normalNr = 1, heightNr = 1;
+	uint32_t diffuseCount = 1, specularCount = 1, normalCount = 1, heightCount = 1;
 	for (int i = 0; i < textures.size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 
@@ -78,13 +78,13 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 		std::string name = textures[i].type;
 
 		if (name == "texture_diffuse")
-			number = std::to_string(diffuseNr++);
+			number = std::to_string(diffuseCount++);
 		else if (name == "texture_specular")
-			number = std::to_string(specularNr++);
+			number = std::to_string(specularCount++);
 		else if (name == "texture_normal")
-			number = std::to_string(normalNr++);
+			number = std::to_string(normalCount++);
 		else if (name == "texture_height")
-			number = std::to_string(heightNr++);
+			number = std::to_string(heightCount++);
 
 		// now set the sampler to the correct texture unit
 		shader.setInt(std::string("material.").append(name).append(number), i);
