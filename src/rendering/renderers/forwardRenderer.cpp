@@ -51,6 +51,7 @@ ForwardRenderer::ForwardRenderer() {
 			MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);
 
 	mLightUBO = std::make_unique<UniformBuffer>(totalLightBufferSize, 1);
+
 	glGenBuffers(1, &mStaticInstanceVBO.buffer);
 	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
 }
@@ -289,7 +290,8 @@ void ForwardRenderer::updateLightUBO() const {
 	int offset = 0;
 	// Directional lights
 	const auto& dirLights = mLightSystem->getDirLights();
-	for (size_t i = 0; i < dirLights.size(); i++) {
+	const size_t dirCount = std::min(dirLights.size(), static_cast<size_t>(MAX_DIR_LIGHTS));
+	for (size_t i = 0; i < dirCount; i++) {
 		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
 		                   offset + i * sizeof(DirectionalLightComponent));
 	}
@@ -298,7 +300,8 @@ void ForwardRenderer::updateLightUBO() const {
 
 	// Point lights
 	const auto& pointLights = mLightSystem->getPointLights();
-	for (size_t i = 0; i < pointLights.size(); i++) {
+	const size_t pointCount = std::min(pointLights.size(), static_cast<size_t>(MAX_POINT_LIGHTS));
+	for (size_t i = 0; i < pointCount; i++) {
 		mLightUBO->setData(pointLights[i], sizeof(PointLightComponent), offset + i * sizeof(PointLightComponent));
 	}
 
@@ -306,15 +309,15 @@ void ForwardRenderer::updateLightUBO() const {
 
 	// Spot Lights
 	const auto& spotLights = mLightSystem->getSpotLights();
-	for (size_t i = 0; i < spotLights.size(); i++) {
+	const size_t spotCount = std::min(spotLights.size(), static_cast<size_t>(MAX_SPOT_LIGHTS));
+	for (size_t i = 0; i < spotCount; i++) {
 		mLightUBO->setData(spotLights[i], sizeof(SpotLightComponent), offset + i * sizeof(SpotLightComponent));
 	}
 
 	offset += MAX_SPOT_LIGHTS * sizeof(SpotLightComponent);
 
-	auto lightCount = glm::ivec4(dirLights.size(), pointLights.size(), spotLights.size(), 0);
+	auto lightCount = glm::ivec4(dirCount, pointCount, spotCount, 0);
 	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
-
 	mLightUBO->unbind();
 }
 
