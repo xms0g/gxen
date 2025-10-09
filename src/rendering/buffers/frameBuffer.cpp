@@ -10,8 +10,8 @@ FrameBuffer::FrameBuffer(const int width, const int height) : mWidth(width), mHe
 FrameBuffer::~FrameBuffer() {
 	if (mTextureID)
 		glDeleteTextures(1, &mTextureID);
-	if (mRB0)
-		glDeleteRenderbuffers(1, &mRB0);
+	if (mRBO)
+		glDeleteRenderbuffers(1, &mRBO);
 
 	glDeleteFramebuffers(1, &mFBO);
 }
@@ -19,6 +19,14 @@ FrameBuffer::~FrameBuffer() {
 void FrameBuffer::bind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
 	glViewport(0, 0, mWidth, mHeight);
+}
+
+void FrameBuffer::bindForRead() const {
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, mFBO);
+}
+
+void FrameBuffer::bindForDraw() const {
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBO);
 }
 
 void FrameBuffer::unbind() {
@@ -89,20 +97,20 @@ FrameBuffer& FrameBuffer::withTextureDepthStencilMultisampled(const int multisam
 }
 
 FrameBuffer& FrameBuffer::withRenderBufferDepthStencil() {
-	glGenRenderbuffers(1, &mRB0);
-	glBindRenderbuffer(GL_RENDERBUFFER, mRB0);
+	glGenRenderbuffers(1, &mRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);
 
 	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, mWidth, mHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRB0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return *this;
 }
 
 FrameBuffer& FrameBuffer::withRenderBufferDepthStencilMultisampled(const int multisampledCount) {
-	glGenRenderbuffers(1, &mRB0);
-	glBindRenderbuffer(GL_RENDERBUFFER, mRB0);
+	glGenRenderbuffers(1, &mRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);
 	glRenderbufferStorageMultisample(GL_RENDERBUFFER, multisampledCount, GL_DEPTH24_STENCIL8, mWidth, mHeight);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRB0);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, mRBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, 0);
 	return *this;
 }

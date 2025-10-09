@@ -212,8 +212,8 @@ void ForwardRenderer::beginSceneRender() const {
 
 void ForwardRenderer::endSceneRender() const {
 	mSceneBuffer->unbind();
-	glBindFramebuffer(GL_READ_FRAMEBUFFER, mSceneBuffer->texture());
-	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mIntermediateBuffer->texture());
+	mSceneBuffer->bindForRead();
+	mIntermediateBuffer->bindForDraw();
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mIntermediateBuffer->width(),
 	                  mIntermediateBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

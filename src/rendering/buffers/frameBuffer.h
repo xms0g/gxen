@@ -13,6 +13,10 @@ public:
 
 	void bind() const;
 
+	void bindForRead() const;
+
+	void bindForDraw() const;
+
 	void unbind();
 
 	FrameBuffer& withTexture();
@@ -35,6 +39,6 @@ private:
 	int mWidth{0};
 	int mHeight{0};
 	uint32_t mFBO{0};
-	uint32_t mRB0{0};
+	uint32_t mRBO{0};
 	uint32_t mTextureID{0};
 };
