@@ -333,11 +333,13 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vecto
 		gpuData.emplace_back(model, normal);
 	}
 
+	if (gpuData.empty()) return;
+
 	const GLuint vbo = flags & Transparent ? mDynamicInstanceVBO.buffer : mStaticInstanceVBO.buffer;
 	const size_t offset = flags & Transparent ? mDynamicInstanceVBO.offset : mStaticInstanceVBO.offset;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, offset, instanceSize, &gpuData[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, offset, instanceSize, gpuData.data());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	const auto& mc = entity.getComponent<MeshComponent>();
