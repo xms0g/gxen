@@ -19,6 +19,8 @@ public:
 
 	FrameBuffer& withTextureMultisampled(int multisampledCount);
 
+	FrameBuffer& withTextureDepth();
+
 	FrameBuffer& withTextureDepthStencil();
 
 	FrameBuffer& withTextureDepthStencilMultisampled(int multisampledCount);
