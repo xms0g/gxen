@@ -44,6 +44,8 @@ public:
 
 	void endSceneRender() const;
 
+	void shadowPass() const;
+
 private:
 	void batchEntities(const Entity& entity, const Camera& camera);
 
@@ -56,18 +58,20 @@ private:
 	struct {
 		uint32_t buffer;
 		int offset{0};
-		size_t size{0};
 	} mStaticInstanceVBO;
 
 	struct {
 		uint32_t buffer;
 		int offset{0};
-		size_t size{0};
 	} mDynamicInstanceVBO;
 
 	LightSystem* mLightSystem{};
+
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
+	std::unique_ptr<FrameBuffer> mDepthMap;
+	std::unique_ptr<Shader> mDepthShader;
+
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 	std::unique_ptr<UniformBuffer> mLightUBO;
 

@@ -26,3 +26,7 @@ constexpr float ZFAR{100.0f};
 
 // Render Settings
 constexpr uint32_t MULTISAMPLED_COUNT{4};
+
+constexpr uint32_t SHADOW_WIDTH{1024};
+constexpr uint32_t SHADOW_HEIGHT{1024};
+constexpr uint32_t SHADOWMAP_TEXTURE_SLOT{4};

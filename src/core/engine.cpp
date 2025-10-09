@@ -7,6 +7,7 @@
 #include "gui/guiSystem.h"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
+#include "../rendering/shader.h"
 #include "../rendering/renderers/forwardRenderer.h"
 #include "../rendering/renderers/debugRenderer.h"
 #include "../rendering/lightSystem.h"
@@ -66,6 +67,7 @@ void XEngine::run() {
 		mForwardRenderer->updateBuffers(*mCamera);
 
 		mForwardRenderer->batchEntities(*mCamera);
+		mForwardRenderer->shadowPass();
 
 		mForwardRenderer->beginSceneRender();
 		mSkyboxSystem->render(*mCamera);
