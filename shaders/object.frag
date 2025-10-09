@@ -4,6 +4,7 @@ in VS_OUT
     vec2 TexCoord;
     vec3 Normal;
     vec3 FragPos;
+    vec4 FragPosLightSpace;
 } fs_in;
 
 #include "blinnPhong.glsl"

@@ -13,12 +13,14 @@ out VS_OUT
     vec2 TexCoord;
     vec3 Normal;
     vec3 FragPos;
+    vec4 FragPosLightSpace;
 } vs_out;
 
 void main() {
     vs_out.TexCoord = aTexCoord;
     vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
     vs_out.Normal = normalMatrix * aNormal;
+    vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
 
     gl_Position = projection * view  * model * vec4(aPos, 1.0);
 }
