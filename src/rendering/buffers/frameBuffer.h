@@ -9,7 +9,7 @@ public:
 
 	[[nodiscard]] int width() const { return mWidth; }
 	[[nodiscard]] int height() const { return mHeight; }
-	[[nodiscard]] uint32_t texture() const { return mTextureColorBuffer; }
+	[[nodiscard]] uint32_t texture() const { return mTextureID; }
 
 	void bind() const;
 
@@ -34,6 +34,5 @@ private:
 	int mHeight{0};
 	uint32_t mFBO{0};
 	uint32_t mRB0{0};
-	uint32_t mDepthStencilTex{0};
-	uint32_t mTextureColorBuffer{0};
+	uint32_t mTextureID{0};
 };

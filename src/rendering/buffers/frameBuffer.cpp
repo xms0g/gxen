@@ -8,12 +8,11 @@ FrameBuffer::FrameBuffer(const int width, const int height) : mWidth(width), mHe
 }
 
 FrameBuffer::~FrameBuffer() {
-	if (mTextureColorBuffer)
-		glDeleteTextures(1, &mTextureColorBuffer);
-	if (mDepthStencilTex)
-		glDeleteTextures(1, &mDepthStencilTex);
+	if (mTextureID)
+		glDeleteTextures(1, &mTextureID);
 	if (mRB0)
 		glDeleteRenderbuffers(1, &mRB0);
+
 	glDeleteFramebuffers(1, &mFBO);
 }
 
@@ -28,44 +27,44 @@ void FrameBuffer::unbind() {
 }
 
 FrameBuffer& FrameBuffer::withTexture() {
-	glGenTextures(1, &mTextureColorBuffer);
-	glBindTexture(GL_TEXTURE_2D, mTextureColorBuffer);
+	glGenTextures(1, &mTextureID);
+	glBindTexture(GL_TEXTURE_2D, mTextureID);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, mWidth, mHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTextureColorBuffer, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, mTextureID, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
 }
 
 FrameBuffer& FrameBuffer::withTextureMultisampled(const int multisampledCount) {
-	glGenTextures(1, &mTextureColorBuffer);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mTextureColorBuffer);
+	glGenTextures(1, &mTextureID);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mTextureID);
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGB, mWidth, mHeight, GL_TRUE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, mTextureColorBuffer, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D_MULTISAMPLE, mTextureID, 0);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	return *this;
 }
 
 FrameBuffer& FrameBuffer::withTextureDepthStencil() {
-	glGenTextures(1, &mDepthStencilTex);
-	glBindTexture(GL_TEXTURE_2D, mDepthStencilTex);
+	glGenTextures(1, &mTextureID);
+	glBindTexture(GL_TEXTURE_2D, mTextureID);
 	glTexImage2D(
 		GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, mWidth, mHeight, 0,
 		GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
 
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mDepthStencilTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, mTextureID, 0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
 }
 
 FrameBuffer& FrameBuffer::withTextureDepthStencilMultisampled(const int multisampledCount) {
-	glGenTextures(1, &mDepthStencilTex);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mDepthStencilTex);
+	glGenTextures(1, &mTextureID);
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, mTextureID);
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGB, mWidth, mHeight, GL_TRUE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, mDepthStencilTex, 0);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, mTextureID, 0);
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	return *this;
 }
