@@ -1,8 +1,6 @@
 #version 410 core
 #include "material.glsl"
 
-uniform bool useTexture;
-
 out vec4 fragColor;
 
 void main() {

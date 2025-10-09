@@ -60,13 +60,6 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 
 	shader.setFloat("material.shininess", mtc.shininess);
 
-	if (!mtc.textures) {
-		shader.setBool("useTexture", false);
-		shader.setVec3("material.color", mtc.color);
-		return;
-	}
-
-	shader.setBool("useTexture", true);
 	const auto textures = *mtc.textures;
 
 	uint32_t diffuseCount = 1, specularCount = 1, normalCount = 1, heightCount = 1;

@@ -13,7 +13,6 @@ const std::string ASSET_DIR = "assets/";
 // Window Settings
 inline uint32_t SCR_WIDTH{0};
 inline uint32_t SCR_HEIGHT{0};
-inline float ASPECT = static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT);
 
 // Camera Settings
 constexpr float YAW{-90.0f};
