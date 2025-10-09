@@ -47,6 +47,8 @@ public:
 	void shadowPass() const;
 
 private:
+	void directionalShadowPass() const;
+
 	void batchEntities(const Entity& entity, const Camera& camera);
 
 	void updateCameraUBO(const Camera& camera) const;

@@ -220,6 +220,12 @@ void ForwardRenderer::endSceneRender() const {
 }
 
 void ForwardRenderer::shadowPass() const {
+	directionalShadowPass();
+}
+
+void ForwardRenderer::directionalShadowPass() const {
+	if (mLightSystem->getDirLights().empty()) return;
+
 	constexpr float nearPlane = 0.1f;
 	constexpr float farPlane = 7.5f;
 
