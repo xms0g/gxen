@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) : mVertices(std::move(vertices)),
-	mIndices(std::move(indices)) {
+                                                                            mIndices(std::move(indices)) {
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	// create vao
 	glGenVertexArrays(1, &mVAO);
@@ -14,11 +14,10 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) : mVer
 
 	// bind the buffer to be used
 	glBindBuffer(GL_ARRAY_BUFFER, mVBO);
-	glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), &mVertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, mVertices.size() * sizeof(Vertex), mVertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mEBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(uint32_t), &mIndices[0],
-	             GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, mIndices.size() * sizeof(uint32_t), mIndices.data(), GL_STATIC_DRAW);
 
 	// set the vertex attribute pointers
 	// vertex Positions
