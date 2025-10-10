@@ -163,7 +163,7 @@ void ForwardRenderer::instancedPass() {
 		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
-			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
+			                        GL_UNSIGNED_INT, 0, ic.positions->size());
 		}
 	}
 
@@ -194,7 +194,7 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
-			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
+			                        GL_UNSIGNED_INT, 0, positions.size());
 		}
 	}
 
