@@ -342,8 +342,7 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vecto
 	glBufferSubData(GL_ARRAY_BUFFER, offset, instanceSize, gpuData.data());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	const auto& mc = entity.getComponent<MeshComponent>();
-	for (const auto& mesh: *mc.meshes) {
+	for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
 		mesh.enableInstanceAttributes(vbo, offset);
 	}
 
