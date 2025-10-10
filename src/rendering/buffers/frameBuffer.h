@@ -25,6 +25,8 @@ public:
 
 	FrameBuffer& withTextureDepth();
 
+	FrameBuffer& withTextureCubeMapDepth();
+
 	FrameBuffer& withTextureDepthStencil();
 
 	FrameBuffer& withTextureDepthStencilMultisampled(int multisampledCount);
