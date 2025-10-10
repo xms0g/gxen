@@ -88,9 +88,7 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 }
 
 void RenderSystem::drawPass(const Entity& entity) const {
-	const auto& mc = entity.getComponent<MeshComponent>();
-
-	for (const auto& mesh: *mc.meshes) {
+	for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
 		glBindVertexArray(mesh.VAO());
 		glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 	}

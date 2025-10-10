@@ -155,13 +155,12 @@ void ForwardRenderer::transparentPass() {
 void ForwardRenderer::instancedPass() {
 	for (const auto& entity: mInstancedEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& mc = entity.getComponent<MeshComponent>();
 		const auto& ic = entity.getComponent<InstanceComponent>();
 
 		shader->activate();
 		materialPass(entity, *shader);
 
-		for (const auto& mesh: *mc.meshes) {
+		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
 			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
@@ -175,7 +174,6 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 	glDepthMask(GL_FALSE);
 	for (auto& entity: mTransparentInstancedEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& mc = entity.getComponent<MeshComponent>();
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& mat = entity.getComponent<MaterialComponent>();
 
@@ -193,7 +191,7 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 		shader->activate();
 		materialPass(entity, *shader);
 
-		for (const auto& mesh: *mc.meshes) {
+		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
 			                        GL_UNSIGNED_INT, 0, ic.instancedCount);
