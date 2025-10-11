@@ -7,6 +7,7 @@ layout (location = 2) in vec2 aTexCoord;
 
 uniform mat4 model;
 uniform mat3 normalMatrix;
+uniform mat4 lightSpaceMatrix;
 
 out VS_OUT
 {
