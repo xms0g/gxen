@@ -10,11 +10,11 @@ Shader::Shader(const char* vs, const char* fs, const char* gs) {
 	std::unordered_set<std::string> includedFiles{};
 
 	try {
-		std::string vertexCode = preprocess(loadFile(vs), vs, includedFiles);
+		const std::string vertexCode = preprocess(loadFile(vs), vs, includedFiles);
 		includedFiles.clear();
-		std::string fragmentCode = preprocess(loadFile(fs), fs, includedFiles);
+		const std::string fragmentCode = preprocess(loadFile(fs), fs, includedFiles);
 		includedFiles.clear();
-		std::string geometryCode = gs ? preprocess(loadFile(gs), gs, includedFiles) : "";
+		const std::string geometryCode = gs ? preprocess(loadFile(gs), gs, includedFiles) : "";
 		includedFiles.clear();
 
 		const uint32_t vertex = compileShader(vertexCode, GL_VERTEX_SHADER);
@@ -102,10 +102,10 @@ void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
 	glUniformMatrix4fv(glGetUniformLocation(mID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
 
-std::string Shader::loadFile(const char* sf) {
-	std::ifstream file(fs::path(SHADER_DIR + sf));
+std::string Shader::loadFile(const char* fn) {
+	std::ifstream file(fs::path(SHADER_DIR + fn));
 	if (!file.is_open()) {
-		throw std::runtime_error(std::string("Failed to open shader file: ") + sf);
+		throw std::runtime_error(std::string("Failed to open shader file: ") + fn);
 	}
 	std::stringstream ss;
 	ss << file.rdbuf();
@@ -126,23 +126,14 @@ std::string Shader::preprocess(const std::string& source, const char* fileName,
 
 			if (start != std::string::npos && end != std::string::npos && start != end) {
 				std::string includeFile = line.substr(start + 1, end - start - 1);
-				std::string fullPath = fs::path(SHADER_DIR + includeFile);
 
 				// Prevent cyclic includes
-				if (includedFiles.contains(fullPath)) {
+				if (includedFiles.contains(includeFile)) {
 					throw std::runtime_error(std::string("File already included: ") + includeFile + "\nin " + fileName);
 				}
-				includedFiles.insert(fullPath);
+				includedFiles.insert(includeFile);
 				// Load included file
-				if (std::ifstream file(fullPath); file.is_open()) {
-					std::stringstream includeSource;
-					includeSource << file.rdbuf();
-					// Recurse
-					result << preprocess(includeSource.str(), fileName, includedFiles) << "\n";
-				} else {
-					// Handle error: file not found
-					throw std::runtime_error(std::string("File not open:\n") + fullPath);
-				}
+				result << preprocess(loadFile(includeFile.c_str()), fileName, includedFiles) << "\n";
 			}
 		} else {
 			result << line << "\n";

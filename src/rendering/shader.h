@@ -49,7 +49,7 @@ public:
 	void setMat4(const std::string& name, const glm::mat4& mat) const;
 
 private:
-	std::string loadFile(const char* sf);
+	std::string loadFile(const char* fn);
 
 	std::string preprocess(const std::string& source, const char* fileName, std::unordered_set<std::string>& includedFiles);
 
