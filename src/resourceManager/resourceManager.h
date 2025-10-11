@@ -5,10 +5,9 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-#include "texture.h"
 
+struct Texture;
 class Shader;
-enum class DebugMode;
 class Mesh;
 
 class ResourceManager {

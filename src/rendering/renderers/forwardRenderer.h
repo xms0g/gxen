@@ -2,9 +2,9 @@
 #include <memory>
 #include "glm/glm.hpp"
 #include "renderSystem.h"
-#include "../buffers/frameBuffer.h"
-#include "../buffers/uniformBuffer.h"
 
+class FrameBuffer;
+class UniformBuffer;
 class LightSystem;
 class Window;
 class Camera;
@@ -14,12 +14,18 @@ class Shader;
 class ForwardRenderer final : public RenderSystem {
 public:
 	using RenderSystem::opaquePass;
+
 	explicit ForwardRenderer();
 
-	[[nodiscard]] uint32_t getSceneTexture() const { return mSceneBuffer->texture(); }
-	[[nodiscard]] uint32_t getIntermediateTexture() const { return mIntermediateBuffer->texture(); }
-	[[nodiscard]] uint32_t getSceneWidth() const { return mSceneBuffer->width(); }
-	[[nodiscard]] uint32_t getSceneHeight() const { return mSceneBuffer->height(); }
+	~ForwardRenderer() override;
+
+	[[nodiscard]] uint32_t getSceneTexture() const;
+
+	[[nodiscard]] uint32_t getIntermediateTexture() const;
+
+	[[nodiscard]] uint32_t getSceneWidth() const;
+
+	[[nodiscard]] uint32_t getSceneHeight() const;
 
 	[[nodiscard]] const UniformBuffer& getCameraUBO() const { return *mCameraUBO; }
 
@@ -54,7 +60,8 @@ private:
 
 	void updateLightUBO() const;
 
-	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions, size_t instanceSize, uint32_t flags);
+	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions, size_t instanceSize,
+	                         uint32_t flags);
 
 	struct {
 		uint32_t buffer;

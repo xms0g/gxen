@@ -7,6 +7,8 @@
 #include "../lightSystem.h"
 #include "../shader.h"
 #include "../renderFlags.hpp"
+#include "../buffers/frameBuffer.h"
+#include "../buffers/uniformBuffer.h"
 #include "../../mesh/mesh.h"
 #include "../../config/config.hpp"
 #include "../../core/camera.h"
@@ -55,6 +57,13 @@ ForwardRenderer::ForwardRenderer() {
 	glGenBuffers(1, &mStaticInstanceVBO.buffer);
 	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
 }
+
+ForwardRenderer::~ForwardRenderer() = default;
+
+[[nodiscard]] uint32_t ForwardRenderer::getSceneTexture() const { return mSceneBuffer->texture(); }
+[[nodiscard]] uint32_t ForwardRenderer::getIntermediateTexture() const { return mIntermediateBuffer->texture(); }
+[[nodiscard]] uint32_t ForwardRenderer::getSceneWidth() const { return mSceneBuffer->width(); }
+[[nodiscard]] uint32_t ForwardRenderer::getSceneHeight() const { return mSceneBuffer->height(); }
 
 void ForwardRenderer::configure(const Camera& camera) {
 	size_t requiredOpaqueGPUBufferSize = 0, requiredTransparentGPUBufferSize = 0;

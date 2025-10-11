@@ -1,5 +1,6 @@
 #include "resourceManager.h"
 #include <iostream>
+#include "texture.h"
 #include "image/stb_image.h"
 #include "../mesh/mesh.h"
 #include "../io/filesystem.hpp"

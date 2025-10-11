@@ -70,3 +70,6 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 		"skybox",
 		"skybox.jpg");
 }
+
+Models::Cubemap::~Cubemap() = default;
+

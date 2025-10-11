@@ -2,7 +2,10 @@
 #include <memory>
 #include <array>
 #include <string>
-#include "../models/quad.h"
+
+namespace Models {
+class Quad;
+}
 
 class FrameBuffer;
 class Shader;
@@ -19,6 +22,8 @@ struct PostEffect {
 class PostProcess {
 public:
 	PostProcess(int width, int height);
+
+	~PostProcess();
 
 	std::array<PostEffect, 7>& effects() { return mEffects; }
 

@@ -44,3 +44,6 @@ Models::Plane::Plane(const char* diffuseTexture, const char* specularTexture) {
 		specularTexture);
 	}
 }
+
+Models::Plane::~Plane() = default;
+

@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include "shader.h"
 #include "buffers/frameBuffer.h"
+#include "../models/quad.h"
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	mEffects = {{
@@ -19,6 +20,9 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 		pingPongBuffer->withTexture().checkStatus();
 	}
 }
+
+PostProcess::~PostProcess() = default;
+
 
 void PostProcess::render(const GLuint sceneTexture) const {
 	int toggle = 0;

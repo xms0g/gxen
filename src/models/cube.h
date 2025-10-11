@@ -9,6 +9,8 @@ class Cube {
 public:
 	explicit Cube(const char* texture = nullptr);
 
+	~Cube();
+
 	[[nodiscard]] const std::vector<Mesh>* getMeshes() const { return &meshes; }
 	[[nodiscard]] const std::vector<Texture>* getTextures() const { return &textures; }
 

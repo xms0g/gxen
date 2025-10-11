@@ -1,4 +1,6 @@
 #include "cube.h"
+
+#include "cubemap.h"
 #include "../config/config.hpp"
 #include "../mesh/mesh.h"
 #include "../io/filesystem.hpp"
@@ -85,3 +87,6 @@ Models::Cube::Cube(const char* texture) {
 		texture);
 	}
 }
+
+Models::Cube::~Cube() = default;
+
