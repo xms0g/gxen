@@ -1,5 +1,4 @@
 #pragma once
-
 #include <memory>
 
 class DebugRenderer;

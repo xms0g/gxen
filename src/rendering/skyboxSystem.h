@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../ECS/system.hpp"
 
 class Camera;

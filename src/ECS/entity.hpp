@@ -1,5 +1,4 @@
 #pragma once
-
 #include <bitset>
 
 static constexpr size_t MAX_COMPONENTS = 16;

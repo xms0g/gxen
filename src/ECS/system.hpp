@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vector>
 #include "component.hpp"
 #include "entity.hpp"

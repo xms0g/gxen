@@ -1,5 +1,4 @@
 #pragma once
-
 #include <cstdint>
 #include <typeindex>
 #include <unordered_map>

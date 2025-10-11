@@ -1,5 +1,4 @@
 #pragma once
-
 enum class DebugMode {
 	None,
 	Normals,

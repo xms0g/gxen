@@ -1,5 +1,4 @@
 #pragma once
-
 #include "../config/config.hpp"
 
 class Camera;

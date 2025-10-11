@@ -1,5 +1,4 @@
 #pragma once
-
 #include "glm/glm.hpp"
 
 struct alignas(16) PointLightComponent {
