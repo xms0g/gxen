@@ -17,32 +17,31 @@ SkyboxSystem::SkyboxSystem() {
 }
 
 void SkyboxSystem::render(const Camera& camera) const {
-	for (const auto& entity: getSystemEntities()) {
-		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& mc = entity.getComponent<MeshComponent>();
-		const auto& mat = entity.getComponent<MaterialComponent>();
+	const auto& skybox = getSystemEntities().front();
+	const auto& shader = skybox.getComponent<ShaderComponent>().shader;
+	const auto& mc = skybox.getComponent<MeshComponent>();
+	const auto& mat = skybox.getComponent<MaterialComponent>();
 
-		const glm::mat4 projectionMat = glm::perspective(
-			glm::radians(camera.zoom()),
-			static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
-			ZNEAR, ZFAR);
+	const glm::mat4 projectionMat = glm::perspective(
+		glm::radians(camera.zoom()),
+		static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+		ZNEAR, ZFAR);
 
-		shader->activate();
-		shader->setInt(mat.textures->front().type, 0);
-		shader->setMat4("projection", projectionMat);
+	shader->activate();
+	shader->setInt(mat.textures->front().type, 0);
+	shader->setMat4("projection", projectionMat);
 
-		auto view = glm::mat4(glm::mat3(camera.viewMatrix()));
-		shader->setMat4("view", view);
+	const auto view = glm::mat4(glm::mat3(camera.viewMatrix()));
+	shader->setMat4("view", view);
 
-		glActiveTexture(GL_TEXTURE0); // active proper texture unit before binding
-		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_CUBE_MAP, mat.textures->front().id);
+	glActiveTexture(GL_TEXTURE0); // active proper texture unit before binding
+	// and finally bind the texture
+	glBindTexture(GL_TEXTURE_CUBE_MAP, mat.textures->front().id);
 
-		// Draw
-		glDepthFunc(GL_LEQUAL);
-		glBindVertexArray(mc.meshes->front().VAO());
-		glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		glDepthFunc(GL_LESS);
-	}
+	// Draw
+	glDepthFunc(GL_LEQUAL);
+	glBindVertexArray(mc.meshes->front().VAO());
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindVertexArray(0);
+	glDepthFunc(GL_LESS);
 }

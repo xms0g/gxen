@@ -12,7 +12,7 @@ class DirectionalShadowPass final : public RenderSystem {
 public:
 	DirectionalShadowPass(int mapWidth, int mapHeight);
 
-	~DirectionalShadowPass();
+	~DirectionalShadowPass() override;
 
 	uint32_t getShadowMap() const;
 

@@ -11,7 +11,7 @@ public:
 
 	void addEntityToSystem(const Entity& entity) { entities.emplace_back(entity); }
 
-	[[nodiscard]] std::vector<Entity> getSystemEntities() const { return entities; }
+	[[nodiscard]] const std::vector<Entity>& getSystemEntities() const { return entities; }
 
 	[[nodiscard]] const Signature& getComponentSignature() const { return componentSignature; }
 

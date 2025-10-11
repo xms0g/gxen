@@ -13,7 +13,7 @@ class OmnidirectionalShadowPass final : public RenderSystem {
 public:
 	OmnidirectionalShadowPass(int mapWidth, int mapHeight);
 
-	~OmnidirectionalShadowPass();
+	~OmnidirectionalShadowPass() override;
 
 	uint32_t getShadowMap() const;
 

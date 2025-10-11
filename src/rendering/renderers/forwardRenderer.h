@@ -59,7 +59,9 @@ private:
 
 	void updateLightUBO() const;
 
-	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions, size_t instanceSize,
+	void prepareInstanceData(const Entity& entity,
+	                         const std::vector<glm::vec3>& positions,
+	                         size_t instanceSize,
 	                         uint32_t flags);
 
 	struct {
