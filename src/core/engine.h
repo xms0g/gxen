@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 
+class ShadowManager;
 class DebugRenderer;
 class SkyboxSystem;
 class LightSystem;
@@ -38,6 +39,8 @@ private:
 	SkyboxSystem* mSkyboxSystem{};
 
 	std::unique_ptr<PostProcess> mPostProcess;
+	std::unique_ptr<ShadowManager> mShadowManager;
+
 	std::unique_ptr<Window> mWindow;
 	std::unique_ptr<Camera> mCamera;
     std::unique_ptr<Input> mInput;

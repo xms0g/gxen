@@ -13,6 +13,7 @@
 #include "../rendering/lightSystem.h"
 #include "../rendering/postProcess.h"
 #include "../rendering/skyboxSystem.h"
+#include "../rendering/shadowPass/shadowManager.h"
 
 XEngine::XEngine() = default;
 
@@ -43,6 +44,8 @@ void XEngine::init(Registry* registry) {
 
 	mPostProcess = std::make_unique<PostProcess>(mForwardRenderer->getSceneWidth(), mForwardRenderer->getSceneHeight());
 
+	mShadowManager = std::make_unique<ShadowManager>();
+
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
 	mInput = std::make_unique<Input>();
 }
@@ -67,12 +70,13 @@ void XEngine::run() {
 		mForwardRenderer->updateBuffers(*mCamera);
 
 		mForwardRenderer->batchEntities(*mCamera);
-		mForwardRenderer->shadowPass();
+
+		mShadowManager->render(mForwardRenderer->getOpaqueEntities(), *mLightSystem);
 
 		mForwardRenderer->beginSceneRender();
 		mSkyboxSystem->render(*mCamera);
-		mForwardRenderer->opaquePass();
-		mForwardRenderer->instancedPass();
+		mForwardRenderer->opaquePass(mShadowManager->getShadowData());
+		mForwardRenderer->instancedPass(mShadowManager->getShadowData());
 		mDebugRenderer->render();
 		mForwardRenderer->transparentPass();
 		mForwardRenderer->transparentInstancedPass(*mCamera);
