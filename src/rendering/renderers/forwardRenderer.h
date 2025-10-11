@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "renderSystem.h"
 
+struct ShadowData;
 class FrameBuffer;
 class UniformBuffer;
 class LightSystem;
@@ -29,6 +30,8 @@ public:
 
 	[[nodiscard]] const UniformBuffer& getCameraUBO() const { return *mCameraUBO; }
 
+	const std::vector<Entity>& getOpaqueEntities() { return mOpaqueEntities; }
+
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
 	void configure(const Camera& camera);
@@ -37,11 +40,11 @@ public:
 
 	void batchEntities(const Camera& camera);
 
-	void opaquePass();
+	void opaquePass(const ShadowData& shadowData);
 
 	void transparentPass();
 
-	void instancedPass();
+	void instancedPass(const ShadowData& shadowData);
 
 	void transparentInstancedPass(const Camera& camera);
 
@@ -49,11 +52,7 @@ public:
 
 	void endSceneRender() const;
 
-	void shadowPass() const;
-
 private:
-	void directionalShadowPass() const;
-
 	void batchEntities(const Entity& entity, const Camera& camera);
 
 	void updateCameraUBO(const Camera& camera) const;
@@ -77,8 +76,6 @@ private:
 
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
-	std::unique_ptr<FrameBuffer> mDepthMap;
-	std::unique_ptr<Shader> mDepthShader;
 
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 	std::unique_ptr<UniformBuffer> mLightUBO;

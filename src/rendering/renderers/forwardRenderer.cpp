@@ -9,6 +9,7 @@
 #include "../renderFlags.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../buffers/uniformBuffer.h"
+#include "../shadowPass/shadowData.hpp"
 #include "../../mesh/mesh.h"
 #include "../../config/config.hpp"
 #include "../../core/camera.h"
@@ -23,6 +24,7 @@
 #include "../../ECS/components/spotLight.hpp"
 #include "../../math/utils.hpp"
 
+
 ForwardRenderer::ForwardRenderer() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
@@ -36,14 +38,7 @@ ForwardRenderer::ForwardRenderer() {
 			.checkStatus();
 	mIntermediateBuffer->unbind();
 
-	mDepthMap = std::make_unique<FrameBuffer>(SHADOW_WIDTH, SHADOW_HEIGHT);
-	mDepthMap->withTextureDepth()
-			.checkStatus();
-	mDepthMap->unbind();
-
-	mDepthShader = std::make_unique<Shader>("depth.vert", "depth.frag");
-
-	mCameraUBO = std::make_unique<UniformBuffer>(3 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
+	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 #define MAX_DIR_LIGHTS  1
 #define MAX_POINT_LIGHTS 8
 #define MAX_SPOT_LIGHTS  4
@@ -109,8 +104,6 @@ void ForwardRenderer::configure(const Camera& camera) {
 	mStaticInstanceVBO.offset = 0;
 	mDynamicInstanceVBO.offset = 0;
 
-	mCameraUBO->configure(mDepthShader->ID(), 0, "CameraBlock");
-
 	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera.zoom()),
 	                                                 static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
 	                                                 ZNEAR, ZFAR);
@@ -131,14 +124,22 @@ void ForwardRenderer::batchEntities(const Camera& camera) {
 	}
 }
 
-void ForwardRenderer::opaquePass() {
+void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
 	for (const auto& entity: mOpaqueEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		shader->activate();
 
+		shader->setMat4("lightSpaceMatrix", shadowData.lightSpaceMatrix);
+		shader->setFloat("omniFarPlane", shadowData.omniFarPlane);
+
 		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
 		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
-		glBindTexture(GL_TEXTURE_2D, mDepthMap->texture());
+		glBindTexture(GL_TEXTURE_2D, shadowData.shadowMap);
+		glActiveTexture(GL_TEXTURE0);
+
+		shader->setInt("shadowCubemap", SHADOWCUBEMAP_TEXTURE_SLOT);
+		glActiveTexture(GL_TEXTURE0 + SHADOWCUBEMAP_TEXTURE_SLOT);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
 
 		opaquePass(entity, *shader);
 	}
@@ -163,12 +164,24 @@ void ForwardRenderer::transparentPass() {
 	mTransparentEntities.clear();
 }
 
-void ForwardRenderer::instancedPass() {
+void ForwardRenderer::instancedPass(const ShadowData& shadowData) {
 	for (const auto& entity: mInstancedEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 
 		shader->activate();
+		shader->setMat4("lightSpaceMatrix", shadowData.lightSpaceMatrix);
+		shader->setFloat("omniFarPlane", shadowData.omniFarPlane);
+
+		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
+		glBindTexture(GL_TEXTURE_2D, shadowData.shadowMap);
+		glActiveTexture(GL_TEXTURE0);
+
+		shader->setInt("shadowCubemap", SHADOWCUBEMAP_TEXTURE_SLOT);
+		glActiveTexture(GL_TEXTURE0 + SHADOWCUBEMAP_TEXTURE_SLOT);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
+
 		materialPass(entity, *shader);
 
 		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
@@ -234,42 +247,6 @@ void ForwardRenderer::endSceneRender() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void ForwardRenderer::shadowPass() const {
-	directionalShadowPass();
-}
-
-void ForwardRenderer::directionalShadowPass() const {
-	if (mLightSystem->getDirLights().empty()) return;
-
-	constexpr float nearPlane = 0.1f;
-	constexpr float farPlane = 7.5f;
-
-	const glm::vec3 lightDir = glm::normalize(mLightSystem->getDirLights().front()->direction);
-	const glm::vec3 lightPos = -lightDir * 5.0f;
-	const glm::mat4 lightProjection = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, nearPlane, farPlane);
-	const glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
-	const glm::mat4 lightSpaceMatrix = lightProjection * lightView;
-
-	mCameraUBO->bind();
-	mCameraUBO->setData(glm::value_ptr(lightSpaceMatrix), sizeof(glm::mat4), 2 * sizeof(glm::mat4));
-	mCameraUBO->unbind();
-
-	mDepthShader->activate();
-
-	// render scene from light's point of view
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	mDepthMap->bind();
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glCullFace(GL_FRONT);
-	for (const auto& entity: mOpaqueEntities) {
-		opaquePass(entity, *mDepthShader);
-	}
-	mDepthMap->unbind();
-	glCullFace(GL_BACK);
-	glViewport(0, 0, mSceneBuffer->width(), mSceneBuffer->height());
-}
-
 void ForwardRenderer::batchEntities(const Entity& entity, const Camera& camera) {
 	const auto& mat = entity.getComponent<MaterialComponent>();
 
@@ -295,7 +272,7 @@ void ForwardRenderer::updateCameraUBO(const Camera& camera) const {
 
 	mCameraUBO->bind();
 	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
-	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 3 * sizeof(glm::mat4));
+	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
 	mCameraUBO->unbind();
 }
 

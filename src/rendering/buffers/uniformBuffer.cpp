@@ -21,7 +21,7 @@ void UniformBuffer::unbind() const {
 	glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void UniformBuffer::setData(const void* data, const size_t size, const size_t offset) {
+void UniformBuffer::setData(const void* data, const size_t size, const size_t offset) const {
 	glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
 }
 

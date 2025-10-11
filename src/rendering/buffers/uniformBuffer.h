@@ -11,7 +11,7 @@ public:
 
 	void unbind() const;
 
-	void setData(const void* data, size_t size, size_t offset = 0);
+	void setData(const void* data, size_t size, size_t offset = 0) const;
 
 	void configure(uint32_t program, uint32_t uniformBlockBinding, const char* uniformBlockName) const;
 
