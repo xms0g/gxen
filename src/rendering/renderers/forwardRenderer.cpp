@@ -97,6 +97,8 @@ void ForwardRenderer::configure(const Camera& camera) {
 			prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
 		}
 	}
+	mStaticInstanceVBO.offset = 0;
+	mDynamicInstanceVBO.offset = 0;
 
 	mCameraUBO->configure(mDepthShader->ID(), 0, "CameraBlock");
 
@@ -131,6 +133,7 @@ void ForwardRenderer::opaquePass() {
 
 		opaquePass(entity, *shader);
 	}
+
 	mOpaqueEntities.clear();
 }
 
@@ -148,7 +151,6 @@ void ForwardRenderer::transparentPass() {
 		opaquePass(entity, *shader);
 	}
 	glDepthMask(GL_TRUE);
-
 	mTransparentEntities.clear();
 }
 
@@ -166,6 +168,8 @@ void ForwardRenderer::instancedPass() {
 			                        GL_UNSIGNED_INT, 0, ic.positions->size());
 		}
 	}
+	if (!glIsEnabled(GL_CULL_FACE))
+		glEnable(GL_CULL_FACE);
 
 	mInstancedEntities.clear();
 }
@@ -199,7 +203,10 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 	}
 
 	glDepthMask(GL_TRUE);
+	if (!glIsEnabled(GL_CULL_FACE))
+		glEnable(GL_CULL_FACE);
 	mTransparentInstancedEntities.clear();
+	mDynamicInstanceVBO.offset = 0;
 }
 
 void ForwardRenderer::beginSceneRender() const {
@@ -266,7 +273,7 @@ void ForwardRenderer::batchEntities(const Entity& entity, const Camera& camera) 
 		const auto& tc = entity.getComponent<TransformComponent>();
 
 		if (mat.flags & Transparent) {
-			float distance = glm::length(camera.position() - tc.position);
+			float distance = glm::length2(camera.position() - tc.position);
 			mTransparentEntities.emplace_back(distance, entity);
 		} else
 			mOpaqueEntities.push_back(entity);
