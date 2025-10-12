@@ -27,7 +27,6 @@ constexpr uint32_t MULTISAMPLED_COUNT{4};
 constexpr uint32_t SHADOW_WIDTH{1024};
 constexpr uint32_t SHADOW_HEIGHT{1024};
 constexpr uint32_t SHADOWMAP_TEXTURE_SLOT{4};
-constexpr uint32_t SHADOWCUBEMAP_TEXTURE_SLOT{5};
 constexpr float SHADOW_DIRECTIONAL_NEAR{1.0f};
 constexpr float SHADOW_DIRECTIONAL_FAR{7.5f};
 constexpr float SHADOW_DIRECTIONAL_LEFT{-10.0f};

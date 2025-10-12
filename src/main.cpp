@@ -83,7 +83,7 @@ int main() {
 		// 		z += 5;
 		// 	}
 		// }
-		//
+
 		// Suzanne
 		auto suzanne = registry.createEntity("Suzanne");
 		suzanne.addComponent<TransformComponent>(
@@ -152,36 +152,35 @@ int main() {
 		// window.addComponent<ShaderComponent>(
 		// 	std::make_shared<Shader>("instanced.vert", "models/blend.frag"));
 		//
-		// window.addComponent<InstanceComponent>(&windows, windows.size());
+		// window.addComponent<InstanceComponent>(&windows);
 
 
-		auto dirLight = registry.createEntity("Directional Light");
-		dirLight.addComponent<DirectionalLightComponent>(
-			glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
-			glm::vec4(0.05f, 0.05f, 0.05f, 0.0f),
-			glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
-			glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
+		// auto dirLight = registry.createEntity("Directional Light");
+		// dirLight.addComponent<DirectionalLightComponent>(
+		// 	glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
+		// 	glm::vec4(0.05f, 0.05f, 0.05f, 0.0f),
+		// 	glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
+		// 	glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
 
-		// auto pointLight = registry.createEntity("Point Light");
-		// pointLight.addComponent<TransformComponent>(
-		// 	glm::vec3(-3.2f, 5.0f, 0.0f),
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.2f));
-		//
-		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		// pointLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
-		//
-		// pointLight.addComponent<ShaderComponent>(
-		// 	std::make_shared<Shader>("models/light.vert", "models/light.frag"));
-		//
-		// pointLight.addComponent<PointLightComponent>(
-		// 	glm::vec4(0.0f),
-		// 	glm::vec4(0.1f, 0.1f, 0.1f, 0.0f), // ambient
-		// 	glm::vec4(0.8f, 0.7f, 0.5f, 0.0f), // diffuse
-		// 	glm::vec4(0.9f, 0.85f, 0.7f, 0.0f),
-		// 	glm::vec4(0.3f, 0.2f, 0.1f, 0.0f)
-		// );
+		auto pointLight = registry.createEntity("Point Light");
+		pointLight.addComponent<TransformComponent>(
+			glm::vec3(-3.2f, 5.0f, 0.0f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.2f));
 
+		pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
+		pointLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f);
+
+		pointLight.addComponent<ShaderComponent>(
+			std::make_shared<Shader>("models/light.vert", "models/light.frag"));
+
+		pointLight.addComponent<PointLightComponent>(
+			glm::vec4(0.0f),
+			glm::vec4(0.1f, 0.1f, 0.1f, 0.0f), // ambient
+			glm::vec4(0.8f, 0.7f, 0.5f, 0.0f), // diffuse
+			glm::vec4(0.9f, 0.85f, 0.7f, 0.0f),
+			glm::vec4(0.3f, 0.2f, 0.1f, 0.0f)
+		);
 
 		// auto spotLight = registry.createEntity();
 		// spotLight.addComponent<TransformComponent>(
