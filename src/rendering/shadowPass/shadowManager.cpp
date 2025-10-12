@@ -19,16 +19,16 @@ ShadowData& ShadowManager::getShadowData() {
 }
 
 void ShadowManager::render(const std::vector<Entity>& entities, const LightSystem& lights) {
+	mShadowData.dirShadows.clear();
+	mShadowData.pointShadows.clear();
+
 	for (auto& light: lights.getDirLights()) {
 		mDirShadowPass->render(entities, light->direction);
+		mShadowData.dirShadows.emplace_back(mDirShadowPass->getShadowMap(), mDirShadowPass->getLightSpaceMatrix());
 	}
 
 	for (auto& light: lights.getPointLights()) {
 		mOmnidirShadowPass->render(entities, light->position);
+		mShadowData.pointShadows.emplace_back(mOmnidirShadowPass->getShadowMap(), SHADOW_OMNIDIRECTIONAL_FAR);
 	}
-
-	mShadowData.shadowMap = mDirShadowPass->getShadowMap();
-	mShadowData.shadowCubemap = mOmnidirShadowPass->getShadowMap();
-	mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
-	mShadowData.omniFarPlane = SHADOW_OMNIDIRECTIONAL_FAR;
 }

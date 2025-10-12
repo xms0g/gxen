@@ -129,17 +129,24 @@ void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		shader->activate();
 
-		shader->setMat4("lightSpaceMatrix", shadowData.lightSpaceMatrix);
-		shader->setFloat("omniFarPlane", shadowData.omniFarPlane);
+		int slot = SHADOWMAP_TEXTURE_SLOT;
+		for (const auto& shadow: shadowData.dirShadows) {
+			shader->setMat4("lightSpaceMatrix", shadow.lightSpaceMatrix);
+			shader->setInt("shadowMap", slot);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, shadow.shadowMap);
+			glActiveTexture(GL_TEXTURE0);
+			++slot;
+		}
 
-		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
-		glBindTexture(GL_TEXTURE_2D, shadowData.shadowMap);
-		glActiveTexture(GL_TEXTURE0);
-
-		shader->setInt("shadowCubemap", SHADOWCUBEMAP_TEXTURE_SLOT);
-		glActiveTexture(GL_TEXTURE0 + SHADOWCUBEMAP_TEXTURE_SLOT);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
+		for (const auto& shadow: shadowData.pointShadows) {
+			shader->setFloat("omniFarPlane", shadow.farPlane);
+			shader->setInt("shadowCubemap", slot);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, shadow.shadowMap);
+			glActiveTexture(GL_TEXTURE0);
+			++slot;
+		}
 
 		opaquePass(entity, *shader);
 	}
@@ -170,17 +177,17 @@ void ForwardRenderer::instancedPass(const ShadowData& shadowData) {
 		const auto& ic = entity.getComponent<InstanceComponent>();
 
 		shader->activate();
-		shader->setMat4("lightSpaceMatrix", shadowData.lightSpaceMatrix);
-		shader->setFloat("omniFarPlane", shadowData.omniFarPlane);
-
-		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
-		glBindTexture(GL_TEXTURE_2D, shadowData.shadowMap);
-		glActiveTexture(GL_TEXTURE0);
-
-		shader->setInt("shadowCubemap", SHADOWCUBEMAP_TEXTURE_SLOT);
-		glActiveTexture(GL_TEXTURE0 + SHADOWCUBEMAP_TEXTURE_SLOT);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
+		// shader->setMat4("lightSpaceMatrix", shadowData.lightSpaceMatrix);
+		// shader->setFloat("omniFarPlane", shadowData.omniFarPlane);
+		//
+		// shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+		// glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
+		// glBindTexture(GL_TEXTURE_2D, shadowData.shadowMap);
+		// glActiveTexture(GL_TEXTURE0);
+		//
+		// shader->setInt("shadowCubemap", SHADOWCUBEMAP_TEXTURE_SLOT);
+		// glActiveTexture(GL_TEXTURE0 + SHADOWCUBEMAP_TEXTURE_SLOT);
+		// glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
 
 		materialPass(entity, *shader);
 
