@@ -50,6 +50,7 @@ vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec4 viewP
 vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec4 viewPos);
 float calculateDirectionalShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
 float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec4 viewPos);
+float calculatePerspectiveShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
 
 vec3 calculateLights(vec3 normal, vec3 fragPos, vec4 viewPos) {
     vec3 norm = normalize(normal);
@@ -138,7 +139,7 @@ vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec4 viewPos
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;
 
-    float shadow = calculateOmnidirectionalShadow(fragPos, light.position, viewPos);
+    float shadow = calculatePerspectiveShadow(fs_in.FragPosLightSpace, normal, lightDir);
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
     return lighting;
 }
@@ -188,13 +189,41 @@ float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec4 viewPos) 
     float viewDistance = length(viewPos.xyz - fragPos);
     float diskRadius = (1.0 + (viewDistance / omniFarPlane)) / 25.0;
 
-    for(int i = 0; i < samples; ++i){
+    for (int i = 0; i < samples; ++i) {
         float closestDepth = texture(shadowCubemap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
         closestDepth *= omniFarPlane;   // undo mapping [0;1]
-        if(currentDepth - bias > closestDepth)
+        if (currentDepth - bias > closestDepth)
         shadow += 1.0;
     }
     shadow /= float(samples);
+
+    return shadow;
+}
+
+float calculatePerspectiveShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir) {
+    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
+    // transform to [0,1]
+    projCoords = projCoords * 0.5 + 0.5;
+    float currentDepth = projCoords.z;
+
+    // outside light frustum:
+    if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
+        projCoords.y < 0.0 || projCoords.y > 1.0 ||
+        projCoords.z > 1.0)
+    return 0.0;
+    // simple bias based on normal and light direction (reduces peter-panning)
+    float biasLocal = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
+    // PCF
+    float shadow = 0.0;
+    int samples = 2;
+    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    for (int x = -samples; x <= samples; ++x) {
+        for (int y = -samples; y <= samples; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            shadow += currentDepth - biasLocal > pcfDepth ? 1.0 : 0.0;
+        }
+    }
+    shadow /= float((2 * samples + 1) * (2 * samples + 1));
 
     return shadow;
 }

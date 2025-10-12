@@ -1,4 +1,4 @@
-#include "directionalShadowPass.h"
+#include "perspectiveShadowPass.h"
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
@@ -7,7 +7,7 @@
 #include "../buffers/frameBuffer.h"
 #include "../../config/config.hpp"
 
-DirectionalShadowPass::DirectionalShadowPass(int mapWidth, int mapHeight) {
+PerspectiveShadowPass::PerspectiveShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
 	mDepthMap->withTextureDepth()
 			.checkStatus();
@@ -16,26 +16,24 @@ DirectionalShadowPass::DirectionalShadowPass(int mapWidth, int mapHeight) {
 	mDepthShader = std::make_unique<Shader>("depth/depth.vert", "depth/depth.frag");
 }
 
-DirectionalShadowPass::~DirectionalShadowPass() = default;
+PerspectiveShadowPass::~PerspectiveShadowPass() = default;
 
-uint32_t DirectionalShadowPass::getShadowMap() const {
+uint32_t PerspectiveShadowPass::getShadowMap() const {
 	return mDepthMap->texture();
 }
 
-glm::mat4 DirectionalShadowPass::getLightSpaceMatrix() const {
+glm::mat4 PerspectiveShadowPass::getLightSpaceMatrix() const {
 	return mLightSpaceMatrix;
 }
 
-void DirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec3& dir) {
-	const glm::vec3 lightPos = -dir * 5.0f;
-	const glm::mat4 lightProjection = glm::ortho(
-		SHADOW_DIRECTIONAL_LEFT,
-		SHADOW_DIRECTIONAL_RIGHT,
-		SHADOW_DIRECTIONAL_BOTTOM,
-		SHADOW_DIRECTIONAL_TOP,
-		SHADOW_DIRECTIONAL_NEAR,
-		SHADOW_DIRECTIONAL_FAR);
-	const glm::mat4 lightView = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0, 1.0, 0.0));
+void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const glm::vec3& dir, const glm::vec3& pos,
+                                   const float fovy) {
+	const glm::mat4 lightProjection = glm::perspective(
+		fovy,
+		static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT),
+		SHADOW_PERSPECTIVE_NEAR,
+		SHADOW_PERSPECTIVE_FAR);
+	const glm::mat4 lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.0, 1.0, 0.0));
 	mLightSpaceMatrix = lightProjection * lightView;
 
 	mDepthShader->activate();

@@ -36,3 +36,6 @@ constexpr float SHADOW_DIRECTIONAL_TOP{10.0f};
 constexpr float SHADOW_OMNIDIRECTIONAL_NEAR{1.0f};
 constexpr float SHADOW_OMNIDIRECTIONAL_FAR{25.0f};
 constexpr float SHADOW_OMNIDIRECTIONAL_FOVY{90.0f};
+constexpr float SHADOW_PERSPECTIVE_NEAR{1.0f};
+constexpr float SHADOW_PERSPECTIVE_FAR{25.0f};
+

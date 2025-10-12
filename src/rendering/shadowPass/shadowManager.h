@@ -3,6 +3,7 @@
 #include <memory>
 #include "shadowData.hpp"
 
+class PerspectiveShadowPass;
 class OmnidirectionalShadowPass;
 class DirectionalShadowPass;
 class LightSystem;
@@ -22,4 +23,5 @@ private:
 	ShadowData mShadowData{};
 	std::unique_ptr<DirectionalShadowPass> mDirShadowPass;
 	std::unique_ptr<OmnidirectionalShadowPass> mOmnidirShadowPass;
+	std::unique_ptr<PerspectiveShadowPass> mPerspectiveShadowPass;
 };

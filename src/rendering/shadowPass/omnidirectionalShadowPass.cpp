@@ -6,11 +6,10 @@
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
 #include "../../config/config.hpp"
-#include "../../ECS/components/pointLight.hpp"
 
 OmnidirectionalShadowPass::OmnidirectionalShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
-	mDepthMap->withTextureCubeMapDepth()
+	mDepthMap->withTextureCubemapDepth()
 			.checkStatus();
 	mDepthMap->unbind();
 
@@ -27,7 +26,7 @@ uint32_t OmnidirectionalShadowPass::getShadowMap() const {
 void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec3& pos) const {
 	const glm::mat4 shadowProj = glm::perspective(
 		glm::radians(SHADOW_OMNIDIRECTIONAL_FOVY),
-		(float) SHADOW_WIDTH / (float) SHADOW_HEIGHT,
+		static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT),
 		SHADOW_OMNIDIRECTIONAL_NEAR,
 		SHADOW_OMNIDIRECTIONAL_FAR);
 
