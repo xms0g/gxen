@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include "glm/glm.hpp"
 #include "../renderers/renderSystem.h"
 
 class LightSystem;
@@ -7,7 +8,6 @@ class UniformBuffer;
 class Entity;
 class Shader;
 class FrameBuffer;
-struct PointLightComponent;
 
 class OmnidirectionalShadowPass final : public RenderSystem {
 public:
@@ -17,7 +17,7 @@ public:
 
 	uint32_t getShadowMap() const;
 
-	void render(const std::vector<Entity>& entities, const LightSystem& lights) const;
+	void render(const std::vector<Entity>& entities, const glm::vec3& pos) const;
 
 private:
 	std::unique_ptr<FrameBuffer> mDepthMap;

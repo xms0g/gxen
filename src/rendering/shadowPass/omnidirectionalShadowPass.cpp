@@ -24,10 +24,7 @@ uint32_t OmnidirectionalShadowPass::getShadowMap() const {
 	return mDepthMap->texture();
 }
 
-void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, const LightSystem& lights) const {
-	if (lights.getPointLights().empty()) return;
-
-	const glm::vec3 lightPos = lights.getPointLights().front()->position;
+void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec3& pos) const {
 	const glm::mat4 shadowProj = glm::perspective(
 		glm::radians(SHADOW_OMNIDIRECTIONAL_FOVY),
 		(float) SHADOW_WIDTH / (float) SHADOW_HEIGHT,
@@ -35,12 +32,12 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 		SHADOW_OMNIDIRECTIONAL_FAR);
 
 	std::vector<glm::mat4> shadowTransforms;
-	shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(1.0f, 0.0f, 0.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(-1.0f, 0.0f, 0.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, -1.0f, 0.0f),glm::vec3(0.0f, 0.0f, -1.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(lightPos, lightPos + glm::vec3(0.0f, 0.0f, -1.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(1.0f, 0.0f, 0.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(-1.0f, 0.0f, 0.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, -1.0f, 0.0f),glm::vec3(0.0f, 0.0f, -1.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, -1.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
 
 	mDepthShader->activate();
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -51,7 +48,7 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 		mDepthShader->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 
 	mDepthShader->setFloat("omniFarPlane", SHADOW_OMNIDIRECTIONAL_FAR);
-	mDepthShader->setVec3("lightPos", lightPos);
+	mDepthShader->setVec3("lightPos", pos);
 
 	for (const auto& entity: entities) {
 		opaquePass(entity, *mDepthShader);

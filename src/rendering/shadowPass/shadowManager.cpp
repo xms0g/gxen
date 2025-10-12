@@ -4,6 +4,8 @@
 #include "../shader.h"
 #include "../lightSystem.h"
 #include "../../config/config.hpp"
+#include "../../ECS/components/directionalLight.hpp"
+#include "../../ECS/components/pointLight.hpp"
 
 ShadowManager::ShadowManager() {
 	mDirShadowPass = std::make_unique<DirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -17,8 +19,13 @@ ShadowData& ShadowManager::getShadowData() {
 }
 
 void ShadowManager::render(const std::vector<Entity>& entities, const LightSystem& lights) {
-	mDirShadowPass->render(entities, lights);
-	mOmnidirShadowPass->render(entities, lights);
+	for (auto& light: lights.getDirLights()) {
+		mDirShadowPass->render(entities, light->direction);
+	}
+
+	for (auto& light: lights.getPointLights()) {
+		mOmnidirShadowPass->render(entities, light->position);
+	}
 
 	mShadowData.shadowMap = mDirShadowPass->getShadowMap();
 	mShadowData.shadowCubemap = mOmnidirShadowPass->getShadowMap();

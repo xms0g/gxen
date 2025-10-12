@@ -18,7 +18,7 @@ public:
 
 	glm::mat4 getLightSpaceMatrix() const;
 
-	void render(const std::vector<Entity>& entities, const LightSystem& lights);
+	void render(const std::vector<Entity>& entities, const glm::vec3& dir);
 
 private:
 	glm::mat4 mLightSpaceMatrix{};
