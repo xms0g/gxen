@@ -75,7 +75,7 @@ FrameBuffer& FrameBuffer::withTextureDepth() {
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::withTextureCubeMapDepth() {
+FrameBuffer& FrameBuffer::withTextureCubemapDepth() {
 	glGenTextures(1, &mTextureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, mTextureID);
 	for (unsigned int i = 0; i < 6; ++i)

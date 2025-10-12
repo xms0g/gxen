@@ -25,7 +25,7 @@ public:
 
 	FrameBuffer& withTextureDepth();
 
-	FrameBuffer& withTextureCubeMapDepth();
+	FrameBuffer& withTextureCubemapDepth();
 
 	FrameBuffer& withTextureDepthStencil();
 
