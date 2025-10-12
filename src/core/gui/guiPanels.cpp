@@ -73,28 +73,21 @@ void GuiPanels::renderLightPanel(const Entity& entity) {
 void GuiPanels::renderSpotLight(const Entity& entity) {
 	auto& splc = entity.getComponent<SpotLightComponent>();
 
-	Ui::colorField3("Direction", splc.direction, 0.01f, 100);
-	Ui::colorField3("Ambient", splc.ambient, 0.01f, 100);
-	Ui::colorField3("Diffuse", splc.diffuse, 0.01f, 100);
-	Ui::colorField3("Specular", splc.specular, 0.01f, 100);
-	ImGui::Text("Cutoff");
-	ImGui::SameLine(100);
-	ImGui::DragFloat4("##Cutoff", glm::value_ptr(splc.cutOff));
-
-	ImGui::Text("Attenua");
-	ImGui::SameLine(100);
-	ImGui::DragFloat3("##att", glm::value_ptr(splc.attenuation));
+	Ui::dragFloat4("Direction", splc.direction, 0.01f, 100);
+	Ui::colorField4("Ambient", splc.ambient, 0.01f, 100);
+	Ui::colorField4("Diffuse", splc.diffuse, 0.01f, 100);
+	Ui::colorField4("Specular", splc.specular, 0.01f, 100);
+	Ui::dragFloat4("Cutoff", splc.cutOff, 0.01f, 100);
+	Ui::dragFloat4("Attenua", splc.attenuation, 0.01f, 100);
 }
 
 void GuiPanels::renderPointLight(const Entity& entity) {
 	auto& plc = entity.getComponent<PointLightComponent>();
 
-	Ui::colorField3("Ambient", plc.ambient, 0.01f, 100);
-	Ui::colorField3("Diffuse", plc.diffuse, 0.01f, 100);
-	Ui::colorField3("Specular", plc.specular, 0.01f, 100);
-	ImGui::Text("Attenua");
-	ImGui::SameLine(100);
-	ImGui::DragFloat3("##att", glm::value_ptr(plc.attenuation));
+	Ui::colorField4("Ambient", plc.ambient, 0.01f, 100);
+	Ui::colorField4("Diffuse", plc.diffuse, 0.01f, 100);
+	Ui::colorField4("Specular", plc.specular, 0.01f, 100);
+	Ui::dragFloat4("Attenua", plc.attenuation, 0.01f, 100);
 }
 
 void GuiPanels::renderPostProcessPanel(std::array<PostEffect, 7>& effects) {
