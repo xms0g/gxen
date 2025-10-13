@@ -1,5 +1,7 @@
 #pragma once
 #include <memory>
+#include <unordered_map>
+
 #include "glm/glm.hpp"
 #include "renderSystem.h"
 
@@ -29,8 +31,6 @@ public:
 	[[nodiscard]] uint32_t getSceneHeight() const;
 
 	[[nodiscard]] const UniformBuffer& getCameraUBO() const { return *mCameraUBO; }
-
-	const std::vector<Entity>& getOpaqueEntities() { return mOpaqueEntities; }
 
 	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
 
@@ -85,6 +85,6 @@ private:
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
 	TransEntityBucket mTransparentEntities;
 	std::vector<Entity> mTransparentInstancedEntities;
-	std::vector<Entity> mOpaqueEntities;
 	std::vector<Entity> mInstancedEntities;
+	std::unordered_map<Shader*, std::vector<Entity>> mOpaqueBatches;
 };

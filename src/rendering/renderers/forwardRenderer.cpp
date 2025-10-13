@@ -125,8 +125,7 @@ void ForwardRenderer::batchEntities(const Camera& camera) {
 }
 
 void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
-	for (const auto& entity: mOpaqueEntities) {
-		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+	for (auto& [shader, entities]: mOpaqueBatches) {
 		shader->activate();
 
 		int slot = SHADOWMAP_TEXTURE_SLOT;
@@ -142,10 +141,12 @@ void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
 		glActiveTexture(GL_TEXTURE0 + slot);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
 
-		opaquePass(entity, *shader);
+		for (const auto& entity : entities) {
+			opaquePass(entity, *shader);
+		}
 	}
 
-	mOpaqueEntities.clear();
+	mOpaqueBatches.clear();
 }
 
 void ForwardRenderer::transparentPass() {
@@ -246,13 +247,14 @@ void ForwardRenderer::batchEntities(const Entity& entity, const Camera& camera) 
 		} else
 			mInstancedEntities.push_back(entity);
 	} else {
-		const auto& tc = entity.getComponent<TransformComponent>();
-
 		if (mat.flags & Transparent) {
+			const auto& tc = entity.getComponent<TransformComponent>();
 			float distance = glm::length2(camera.position() - tc.position);
 			mTransparentEntities.emplace_back(distance, entity);
-		} else
-			mOpaqueEntities.push_back(entity);
+		} else {
+			auto& shader = *entity.getComponent<ShaderComponent>().shader;
+			mOpaqueBatches[&shader].push_back(entity);
+		}
 	}
 }
 
