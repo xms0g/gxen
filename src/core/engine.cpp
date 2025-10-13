@@ -68,10 +68,10 @@ void XEngine::run() {
 
 		mCamera->update();
 		mLightSystem->update();
+		mShadowSystem->render(*mLightSystem);
+
 		mForwardRenderer->updateBuffers(*mCamera);
 		mForwardRenderer->batchEntities(*mCamera);
-
-		mShadowSystem->render(*mLightSystem);
 
 		mForwardRenderer->beginSceneRender();
 		mSkyboxSystem->render(*mCamera);
