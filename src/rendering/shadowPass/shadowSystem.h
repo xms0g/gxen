@@ -18,7 +18,7 @@ public:
 
 	ShadowData& getShadowData();
 
-	void render(const LightSystem& lights);
+	void calculateShadowMaps(const LightSystem& lights);
 
 private:
 	ShadowData mShadowData{};

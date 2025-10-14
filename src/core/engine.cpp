@@ -68,7 +68,7 @@ void XEngine::run() {
 
 		mCamera->update();
 		mLightSystem->update();
-		mShadowSystem->render(*mLightSystem);
+		mShadowSystem->calculateShadowMaps(*mLightSystem);
 
 		mForwardRenderer->updateBuffers(*mCamera);
 		mForwardRenderer->batchEntities(*mCamera);

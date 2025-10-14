@@ -24,7 +24,7 @@ ShadowData& ShadowSystem::getShadowData() {
 	return mShadowData;
 }
 
-void ShadowSystem::render(const LightSystem& lights) {
+void ShadowSystem::calculateShadowMaps(const LightSystem& lights) {
 	mEntities.clear();
 	mShadowData.omnidirShadows.clear();
 	mShadowData.omnidirShadows.reserve(lights.getPointLights().size());
@@ -45,8 +45,8 @@ void ShadowSystem::render(const LightSystem& lights) {
 	}
 
 	if (lights.getPointLights().empty()) {
-		// We also have to set unused depth map, otherwise OpenGL binds it slot 0
-		mShadowData.omnidirShadows.emplace_back(SHADOW_OMNIDIRECTIONAL_FAR, mOmnidirShadowPass->getShadowMap());
+		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
+		mShadowData.omnidirShadows.emplace_back(0.0, mOmnidirShadowPass->getShadowMap());
 	} else {
 		for (auto& light: lights.getPointLights()) {
 			mOmnidirShadowPass->render(mEntities, light->position);
@@ -55,9 +55,9 @@ void ShadowSystem::render(const LightSystem& lights) {
 	}
 
 	if (lights.getSpotLights().empty()) {
-		// We also have to set unused depth map, otherwise OpenGL binds it slot 0
+		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
 		mShadowData.persShadows.emplace_back(
-			mPerspectiveShadowPass->getLightSpaceMatrix(),
+			glm::mat4(1.0f),
 			mPerspectiveShadowPass->getShadowMap());
 	} else {
 		for (auto& light: lights.getSpotLights()) {
