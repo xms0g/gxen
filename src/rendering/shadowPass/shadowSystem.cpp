@@ -26,6 +26,8 @@ ShadowData& ShadowSystem::getShadowData() {
 
 void ShadowSystem::render(const LightSystem& lights) {
 	mEntities.clear();
+	mShadowData.omnidirShadows.clear();
+	mShadowData.persShadows.clear();
 
 	for (auto& entity: getSystemEntities()) {
 		auto& mat = entity.getComponent<MaterialComponent>();
@@ -34,24 +36,33 @@ void ShadowSystem::render(const LightSystem& lights) {
 			mEntities.push_back(entity);}
 	}
 
-	for (auto& light: lights.getDirLights()) {
+	mShadowData.dirShadow.shadowMap = mDirShadowPass->getShadowMap();
+	if (const auto light = lights.getDirLight(); light) {
 		mDirShadowPass->render(mEntities, light->direction);
+		mShadowData.dirShadow.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
 	}
 
-	for (auto& light: lights.getPointLights()) {
-		mOmnidirShadowPass->render(mEntities, light->position);
+	if (lights.getPointLights().empty()) {
+		// We also have to set unused depth map, otherwise OpenGL binds it slot 0
+		mShadowData.omnidirShadows.emplace_back(SHADOW_OMNIDIRECTIONAL_FAR, mOmnidirShadowPass->getShadowMap());
+	} else {
+		for (auto& light: lights.getPointLights()) {
+			mOmnidirShadowPass->render(mEntities, light->position);
+			mShadowData.omnidirShadows.emplace_back(SHADOW_OMNIDIRECTIONAL_FAR, mOmnidirShadowPass->getShadowMap());
+		}
 	}
 
-	for (auto& light: lights.getSpotLights()) {
-		mPerspectiveShadowPass->render(mEntities, light->direction, light->position, light->cutOff.y);
+	if (lights.getSpotLights().empty()) {
+		// We also have to set unused depth map, otherwise OpenGL binds it slot 0
+		mShadowData.persShadows.emplace_back(
+			mPerspectiveShadowPass->getLightSpaceMatrix(),
+			mPerspectiveShadowPass->getShadowMap());
+	} else {
+		for (auto& light: lights.getSpotLights()) {
+			mPerspectiveShadowPass->render(mEntities, light->direction, light->position, light->cutOff.y);
+			mShadowData.persShadows.emplace_back(
+				mPerspectiveShadowPass->getLightSpaceMatrix(),
+				mPerspectiveShadowPass->getShadowMap());
+		}
 	}
-
-	mShadowData.shadowMap = !lights.getDirLights().empty()
-		                        ? mDirShadowPass->getShadowMap()
-		                        : mPerspectiveShadowPass->getShadowMap();
-	mShadowData.shadowCubemap = mOmnidirShadowPass->getShadowMap();
-	mShadowData.lightSpaceMatrix = !lights.getDirLights().empty()
-		                               ? mDirShadowPass->getLightSpaceMatrix()
-		                               : mPerspectiveShadowPass->getLightSpaceMatrix();
-	mShadowData.omniFarPlane = SHADOW_OMNIDIRECTIONAL_FAR;
 }

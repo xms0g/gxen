@@ -30,7 +30,7 @@ struct SpotLight {
 };
 
 #define MAX_DIR_LIGHTS  1
-#define MAX_POINT_LIGHTS 8
+#define MAX_POINT_LIGHTS 4
 #define MAX_SPOT_LIGHTS  4
 
 layout (std140) uniform LightBlock
@@ -43,6 +43,7 @@ layout (std140) uniform LightBlock
 
 uniform sampler2D shadowMap;
 uniform samplerCube shadowCubemap;
+uniform sampler2D persShadowMap;
 uniform float omniFarPlane;
 
 vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
@@ -139,7 +140,7 @@ vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec4 viewPos
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;
 
-    float shadow = calculatePerspectiveShadow(fs_in.FragPosLightSpace, normal, lightDir);
+    float shadow = calculatePerspectiveShadow(fs_in.FragPosPersLightSpace, normal, lightDir);
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + specular));
     return lighting;
 }
@@ -148,7 +149,7 @@ float calculateDirectionalShadow(vec4 fragPosLightSpace, vec3 normal, vec3 light
     // perform perspective divide
     vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
     if (projCoords.z > 1.0)
-    return 0.0;
+        return 0.0;
     // transform to [0,1] range
     projCoords = projCoords * 0.5 + 0.5;
     // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
@@ -173,11 +174,11 @@ float calculateDirectionalShadow(vec4 fragPosLightSpace, vec3 normal, vec3 light
 }
 
 vec3 gridSamplingDisk[20] = vec3[](
-vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
-vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
-vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
-vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
-vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
+    vec3(1, 1, 1), vec3(1, -1, 1), vec3(-1, -1, 1), vec3(-1, 1, 1),
+    vec3(1, 1, -1), vec3(1, -1, -1), vec3(-1, -1, -1), vec3(-1, 1, -1),
+    vec3(1, 1, 0), vec3(1, -1, 0), vec3(-1, -1, 0), vec3(-1, 1, 0),
+    vec3(1, 0, 1), vec3(-1, 0, 1), vec3(1, 0, -1), vec3(-1, 0, -1),
+    vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
 float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec4 viewPos) {
@@ -216,10 +217,10 @@ float calculatePerspectiveShadow(vec4 fragPosLightSpace, vec3 normal, vec3 light
     // PCF
     float shadow = 0.0;
     int samples = 2;
-    vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
+    vec2 texelSize = 1.0 / textureSize(persShadowMap, 0);
     for (int x = -samples; x <= samples; ++x) {
         for (int y = -samples; y <= samples; ++y) {
-            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
+            float pcfDepth = texture(persShadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - biasLocal > pcfDepth ? 1.0 : 0.0;
         }
     }

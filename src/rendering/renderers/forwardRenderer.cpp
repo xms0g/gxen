@@ -39,13 +39,11 @@ ForwardRenderer::ForwardRenderer() {
 	mIntermediateBuffer->unbind();
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-#define MAX_DIR_LIGHTS  1
-#define MAX_POINT_LIGHTS 8
+#define MAX_POINT_LIGHTS 4
 #define MAX_SPOT_LIGHTS  4
-	int totalLightBufferSize =
-			MAX_DIR_LIGHTS * sizeof(DirectionalLightComponent) +
-			MAX_POINT_LIGHTS * sizeof(PointLightComponent) +
-			MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);
+	int totalLightBufferSize = sizeof(DirectionalLightComponent) +
+	                           MAX_POINT_LIGHTS * sizeof(PointLightComponent) +
+	                           MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);
 
 	mLightUBO = std::make_unique<UniformBuffer>(totalLightBufferSize, 1);
 
@@ -129,19 +127,30 @@ void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
 		shader->activate();
 
 		int slot = SHADOWMAP_TEXTURE_SLOT;
-		shader->setMat4("lightSpaceMatrix", shadowData.lightSpaceMatrix);
+
+		shader->setMat4("lightSpaceMatrix", shadowData.dirShadow.lightSpaceMatrix);
 		shader->setInt("shadowMap", slot);
 		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, shadowData.shadowMap);
-
+		glBindTexture(GL_TEXTURE_2D, shadowData.dirShadow.shadowMap);
 		++slot;
 
-		shader->setFloat("omniFarPlane", shadowData.omniFarPlane);
-		shader->setInt("shadowCubemap", slot);
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowData.shadowCubemap);
+		for (const auto& shadow: shadowData.omnidirShadows) {
+			shader->setFloat("omniFarPlane", shadow.farPlane);
+			shader->setInt("shadowCubemap", slot);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, shadow.shadowMap);
+			++slot;
+		}
 
-		for (const auto& entity : entities) {
+		for (const auto& shadow: shadowData.persShadows) {
+			shader->setMat4("persLightSpaceMatrix", shadow.lightSpaceMatrix);
+			shader->setInt("persShadowMap", slot);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, shadow.shadowMap);
+			++slot;
+		}
+
+		for (const auto& entity: entities) {
 			opaquePass(entity, *shader);
 		}
 	}
@@ -272,14 +281,10 @@ void ForwardRenderer::updateLightUBO() const {
 	mLightUBO->bind();
 	int offset = 0;
 	// Directional lights
-	const auto& dirLights = mLightSystem->getDirLights();
-	const size_t dirCount = std::min(dirLights.size(), static_cast<size_t>(MAX_DIR_LIGHTS));
-	for (size_t i = 0; i < dirCount; i++) {
-		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
-		                   offset + i * sizeof(DirectionalLightComponent));
+	if (const auto& dirLight = mLightSystem->getDirLight(); dirLight) {
+		mLightUBO->setData(dirLight, sizeof(DirectionalLightComponent), offset + sizeof(DirectionalLightComponent));
 	}
-
-	offset += MAX_DIR_LIGHTS * sizeof(DirectionalLightComponent);
+	offset += sizeof(DirectionalLightComponent);
 
 	// Point lights
 	const auto& pointLights = mLightSystem->getPointLights();
@@ -299,7 +304,7 @@ void ForwardRenderer::updateLightUBO() const {
 
 	offset += MAX_SPOT_LIGHTS * sizeof(SpotLightComponent);
 
-	auto lightCount = glm::ivec4(dirCount, pointCount, spotCount, 0);
+	auto lightCount = glm::ivec4(1, pointCount, spotCount, 0);
 	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
 	mLightUBO->unbind();
 }

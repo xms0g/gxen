@@ -5,6 +5,7 @@ in VS_OUT
     vec3 Normal;
     vec3 FragPos;
     vec4 FragPosLightSpace;
+    vec4 FragPosPersLightSpace;
 } fs_in;
 
 #include "blinnPhong.glsl"
