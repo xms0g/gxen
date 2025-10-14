@@ -24,7 +24,7 @@ ShadowData& ShadowSystem::getShadowData() {
 	return mShadowData;
 }
 
-void ShadowSystem::calculateShadowMaps(const LightSystem& lights) {
+void ShadowSystem::shadowPass(const LightSystem& lights) {
 	mEntities.clear();
 	mShadowData.omnidirShadows.clear();
 	mShadowData.omnidirShadows.reserve(lights.getPointLights().size());

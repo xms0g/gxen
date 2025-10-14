@@ -15,7 +15,7 @@ public:
 
 	~OmnidirectionalShadowPass() override;
 
-	uint32_t getShadowMap() const;
+	[[nodiscard]] uint32_t getShadowMap() const;
 
 	void render(const std::vector<Entity>& entities, const glm::vec3& pos) const;
 

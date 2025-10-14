@@ -14,9 +14,9 @@ public:
 
 	~DirectionalShadowPass() override;
 
-	uint32_t getShadowMap() const;
+	[[nodiscard]] uint32_t getShadowMap() const;
 
-	glm::mat4 getLightSpaceMatrix() const;
+	[[nodiscard]] glm::mat4 getLightSpaceMatrix() const;
 
 	void render(const std::vector<Entity>& entities, const glm::vec3& dir);
 
