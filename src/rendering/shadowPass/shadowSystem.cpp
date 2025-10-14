@@ -27,7 +27,9 @@ ShadowData& ShadowSystem::getShadowData() {
 void ShadowSystem::render(const LightSystem& lights) {
 	mEntities.clear();
 	mShadowData.omnidirShadows.clear();
+	mShadowData.omnidirShadows.reserve(lights.getPointLights().size());
 	mShadowData.persShadows.clear();
+	mShadowData.persShadows.reserve(lights.getSpotLights().size());
 
 	for (auto& entity: getSystemEntities()) {
 		auto& mat = entity.getComponent<MaterialComponent>();
