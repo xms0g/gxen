@@ -281,8 +281,10 @@ void ForwardRenderer::updateLightUBO() const {
 	mLightUBO->bind();
 	int offset = 0;
 	// Directional lights
+	size_t dirCount = 0;
 	if (const auto& dirLight = mLightSystem->getDirLight(); dirLight) {
 		mLightUBO->setData(dirLight, sizeof(DirectionalLightComponent), offset + sizeof(DirectionalLightComponent));
+		dirCount = 1;
 	}
 	offset += sizeof(DirectionalLightComponent);
 
@@ -304,7 +306,7 @@ void ForwardRenderer::updateLightUBO() const {
 
 	offset += MAX_SPOT_LIGHTS * sizeof(SpotLightComponent);
 
-	auto lightCount = glm::ivec4(1, pointCount, spotCount, 0);
+	auto lightCount = glm::ivec4(dirCount, pointCount, spotCount, 0);
 	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
 	mLightUBO->unbind();
 }
