@@ -2,7 +2,7 @@
 in VS_OUT
 {
     vec2 TexCoord;
-    vec3 Normal;
+    mat3 TBN;
     vec3 FragPos;
     vec4 FragPosLightSpace;
     vec4 FragPosPersLightSpace;
@@ -14,10 +14,19 @@ in VS_OUT
 out vec4 fragColor;
 
 void main() {
+    vec3 N;
+    if (material.hasNormalMap) {
+        N = texture(material.texture_normal1, fs_in.TexCoord).rgb;
+        // transform normal vector to range [-1,1]
+        N = N * 2.0 - 1.0;
+        N = normalize(fs_in.TBN * N);
+    } else {
+        N = normalize(fs_in.TBN[2]);
+    }
     vec3 texColor = texture(material.texture_diffuse1, fs_in.TexCoord).rgb;
     // Create a mask: 0.0 if no lights, 1.0 if at least one light
     bool hasLights = lightCount.x > 0 || lightCount.y > 0 || lightCount.z > 0;
-    vec3 result = mix(texColor, calculateLights(fs_in.Normal, fs_in.FragPos, viewPos), float(hasLights));
+    vec3 result = mix(texColor, calculateLights(N, fs_in.FragPos, viewPos), float(hasLights));
 
     fragColor = vec4(result, 1.0);
 }

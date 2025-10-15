@@ -211,7 +211,7 @@ float calculatePerspectiveShadow(vec4 fragPosLightSpace, vec3 normal, vec3 light
     if (projCoords.x < 0.0 || projCoords.x > 1.0 ||
         projCoords.y < 0.0 || projCoords.y > 1.0 ||
         projCoords.z > 1.0)
-    return 0.0;
+        return 0.0;
     // simple bias based on normal and light direction (reduces peter-panning)
     float biasLocal = max(0.005 * (1.0 - dot(normal, lightDir)), 0.0005);
     // PCF

@@ -53,6 +53,7 @@ void RenderSystem::geometryPass(const Entity& entity, const Shader& shader) cons
 
 void RenderSystem::materialPass(const Entity& entity, const Shader& shader) const {
 	const auto& mtc = entity.getComponent<MaterialComponent>();
+	bool hasNormalMap{false};
 
 	if (mtc.flags & TwoSided) {
 		glDisable(GL_CULL_FACE);
@@ -75,21 +76,23 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 		std::string number;
 		std::string name = textures[i].type;
 
-		if (name == "texture_diffuse")
+		if (name == "texture_diffuse") {
 			number = std::to_string(diffuseCount++);
-		else if (name == "texture_specular")
+		} else if (name == "texture_specular") {
 			number = std::to_string(specularCount++);
-		else if (name == "texture_normal")
+		} else if (name == "texture_normal") {
 			number = std::to_string(normalCount++);
-		else if (name == "texture_height")
+			hasNormalMap = true;
+		} else if (name == "texture_height") {
 			number = std::to_string(heightCount++);
+		}
 
 		// now set the sampler to the correct texture unit
 		shader.setInt(std::string("material.").append(name).append(number), i);
 		// and finally bind the texture
 		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
-	glActiveTexture(GL_TEXTURE0);
+	shader.setBool("material.hasNormalMap", hasNormalMap);
 }
 
 void RenderSystem::drawPass(const Entity& entity) const {
