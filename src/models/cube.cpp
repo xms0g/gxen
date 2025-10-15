@@ -6,7 +6,9 @@
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
-Models::Cube::Cube(const char* texture) {
+Models::Cube::Cube(const char* diffuseTexture,
+				   const char* specularTexture,
+				   const char* normalTexture) {
 	constexpr float v[] = {
 		// Back face (-Z)
 		-0.5f,-0.5f,-0.5f,  0,0,-1, 0,0,
@@ -70,7 +72,7 @@ Models::Cube::Cube(const char* texture) {
 	std::vector<Vertex> vertices;
 
 	for (int i = 0; i < 8 * 24; i += 8) {
-		Vertex vertex;
+		Vertex vertex{};
 		vertex.position = glm::vec3(v[i], v[i + 1], v[i + 2]);
 		vertex.normal = glm::vec3(v[i + 3], v[i + 4], v[i + 5]);
 		vertex.texcoord = glm::vec2(v[i + 6], v[i + 7]);
@@ -80,11 +82,25 @@ Models::Cube::Cube(const char* texture) {
 
 	meshes.emplace_back(vertices, indices);
 
-	if (texture) {
+	if (diffuseTexture) {
 		textures.emplace_back(
-		texture::load(fs::path(ASSET_DIR + texture).c_str(), "texture_diffuse"),
+		texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str(), "texture_diffuse"),
 		"texture_diffuse",
-		texture);
+		diffuseTexture);
+	}
+
+	if (specularTexture) {
+		textures.emplace_back(
+			texture::load(fs::path(ASSET_DIR + specularTexture).c_str(), "texture_specular"),
+			"texture_specular",
+			specularTexture);
+	}
+
+	if (normalTexture) {
+		textures.emplace_back(
+			texture::load(fs::path(ASSET_DIR + normalTexture).c_str(), "texture_normal"),
+			"texture_normal",
+			normalTexture);
 	}
 }
 

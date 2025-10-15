@@ -8,7 +8,9 @@ struct Texture;
 namespace Models {
 class Plane {
 public:
-	explicit Plane(const char* diffuseTexture = nullptr, const char* specularTexture = nullptr);
+	explicit Plane(const char* diffuseTexture = nullptr,
+	               const char* specularTexture = nullptr,
+	               const char* normalTexture = nullptr);
 
 	~Plane();
 
