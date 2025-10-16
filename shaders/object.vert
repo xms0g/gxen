@@ -22,7 +22,7 @@ out VS_OUT
 } vs_out;
 
 void main() {
-    vec3 T = normalize(normalMatrix * aTangent);
+    vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
     vec3 N = normalize(normalMatrix * aNormal);
     T = normalize(T - dot(T, N) * N);
     vec3 B = cross(N, T);
