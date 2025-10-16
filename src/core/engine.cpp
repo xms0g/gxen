@@ -15,11 +15,11 @@
 #include "../rendering/skyboxSystem.h"
 #include "../rendering/shadowPass/shadowSystem.h"
 
-XEngine::XEngine() = default;
+Engine::Engine() = default;
 
-XEngine::~XEngine() = default;
+Engine::~Engine() = default;
 
-void XEngine::init(Registry* registry) {
+void Engine::init(Registry* registry) {
 	mRegistry = registry;
 
 	mWindow = std::make_unique<Window>();
@@ -51,12 +51,12 @@ void XEngine::init(Registry* registry) {
 	mInput = std::make_unique<Input>();
 }
 
-void XEngine::configure() const {
+void Engine::configure() const {
 	mForwardRenderer->configure(*mCamera);
 	mDebugRenderer->configure(mForwardRenderer->getCameraUBO());
 }
 
-void XEngine::run() {
+void Engine::run() {
 	while (isRunning) {
 		mWindow->clear(0.0f, 0.0f, 0.0f, 1.0f);
 

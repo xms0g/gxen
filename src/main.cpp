@@ -44,8 +44,8 @@ int main() {
 	Registry registry;
 
 	try {
-		XEngine xngn;
-		xngn.init(&registry);
+		Engine engine;
+		engine.init(&registry);
 
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
@@ -202,9 +202,9 @@ int main() {
 
 		registry.update();
 
-		xngn.configure();
+		engine.configure();
 
-		xngn.run();
+		engine.run();
 	} catch (std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}

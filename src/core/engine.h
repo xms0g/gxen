@@ -13,11 +13,11 @@ class Registry;
 class Input;
 class Camera;
 
-class XEngine {
+class Engine {
 public:
-    XEngine();
+    Engine();
 
-    ~XEngine();
+    ~Engine();
 
     void init(Registry* registry);
 
