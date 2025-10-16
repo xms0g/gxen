@@ -6,6 +6,7 @@
 #include "../../ECS/registry.h"
 #include "../../ECS/components/transform.hpp"
 #include "../../ECS/components/debug.hpp"
+#include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
 #include "../../rendering/postProcess.h"
@@ -56,11 +57,11 @@ void GuiPanels::renderDebugViewsPanel(const Entity& entity) {
 }
 
 void GuiPanels::renderLightPanel(const Entity& entity) {
-	if (!entity.hasComponent<SpotLightComponent>() && !entity.hasComponent<PointLightComponent>()) return;
-
 	ImGui::PushID(static_cast<int>(entity.id()));
 	if (ImGui::TreeNodeEx("Light", ImGuiTreeNodeFlags_DefaultOpen)) {
-		if (entity.hasComponent<SpotLightComponent>()) {
+		if (entity.hasComponent<DirectionalLightComponent>()) {
+			renderDirLight(entity);
+		}else if (entity.hasComponent<SpotLightComponent>()) {
 			renderSpotLight(entity);
 		} else if (entity.hasComponent<PointLightComponent>()) {
 			renderPointLight(entity);
@@ -68,6 +69,15 @@ void GuiPanels::renderLightPanel(const Entity& entity) {
 		ImGui::TreePop();
 	}
 	ImGui::PopID();
+}
+
+void GuiPanels::renderDirLight(const Entity& entity) {
+	auto& dir = entity.getComponent<DirectionalLightComponent>();
+
+	Ui::dragFloat4("Direction", dir.direction, 0.01f, 100);
+	Ui::colorField4("Ambient", dir.ambient, 0.01f, 100);
+	Ui::colorField4("Diffuse", dir.diffuse, 0.01f, 100);
+	Ui::colorField4("Specular", dir.specular, 0.01f, 100);
 }
 
 void GuiPanels::renderSpotLight(const Entity& entity) {

@@ -13,6 +13,8 @@ void renderDebugViewsPanel(const Entity& entity);
 
 void renderLightPanel(const Entity& entity);
 
+void renderDirLight(const Entity& entity);
+
 void renderSpotLight(const Entity& entity);
 
 void renderPointLight(const Entity& entity);
