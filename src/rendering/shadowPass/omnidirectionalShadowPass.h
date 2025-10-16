@@ -17,7 +17,7 @@ public:
 
 	[[nodiscard]] uint32_t getShadowMap() const;
 
-	void render(const std::vector<Entity>& entities, const glm::vec3& pos) const;
+	void render(const std::vector<Entity>& entities, const glm::vec4& position) const;
 
 private:
 	std::unique_ptr<FrameBuffer> mDepthMap;

@@ -26,8 +26,8 @@ glm::mat4 DirectionalShadowPass::getLightSpaceMatrix() const {
 	return mLightSpaceMatrix;
 }
 
-void DirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec3& dir) {
-	const glm::vec3 lightPos = -dir * 5.0f;
+void DirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec4& direction) {
+	const glm::vec3 lightPos = -glm::vec3(direction) * 5.0f;
 	const glm::mat4 lightProjection = glm::ortho(
 		SHADOW_DIRECTIONAL_LEFT,
 		SHADOW_DIRECTIONAL_RIGHT,
