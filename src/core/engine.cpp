@@ -23,7 +23,7 @@ void XEngine::init(Registry* registry) {
 	mRegistry = registry;
 
 	mWindow = std::make_unique<Window>();
-	mWindow->init("XEngine");
+	mWindow->init("GXen");
 
 	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
 	mGuiSystem = &registry->getSystem<GuiSystem>();
