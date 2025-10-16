@@ -7,22 +7,26 @@ in VS_OUT
 uniform sampler2D screenTexture;
 uniform int type;
 
-const float offset = 1.0 / 500.0;
 const float blur[9] = float[](
     1.0 / 16, 2.0 / 16, 1.0 / 16,
     2.0 / 16, 4.0 / 16, 2.0 / 16,
     1.0 / 16, 2.0 / 16, 1.0 / 16
 );
+
 const float edge[9] = float[](
     1, 1, 1,
     1,-8, 1,
     1, 1, 1
 );
+
 const float sharpen[9] = float[](
     -1, -1, -1,
     -1,  9, -1,
     -1, -1, -1
 );
+
+const float offset = 1.0 / 500.0;
+
 const vec2 offsets[9] = vec2[](
     vec2(-offset,  offset), // top-left
     vec2( 0.0f,    offset), // top-center
