@@ -63,8 +63,7 @@ void Engine::run() {
 		mDeltaTime = (SDL_GetTicks() - mMillisecsPreviousFrame) / 1000.0f;
 		mMillisecsPreviousFrame = SDL_GetTicks();
 
-		mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime,
-		                isRunning);
+		mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 
 		mCamera->update();
 		mLightSystem->update();
