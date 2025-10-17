@@ -53,6 +53,7 @@ void Engine::init(Registry* registry) {
 void Engine::configure() const {
 	mForwardRenderer->configure(*mCamera, mLightSystem->getLightUBO());
 	mDebugRenderer->configure(mForwardRenderer->getCameraUBO());
+	mShadowSystem->configure();
 }
 
 void Engine::run() {
@@ -74,8 +75,8 @@ void Engine::run() {
 
 		mForwardRenderer->beginSceneRender();
 		mSkyboxSystem->render(*mCamera);
-		mForwardRenderer->opaquePass(mShadowSystem->getShadowData());
-		mForwardRenderer->instancedPass(mShadowSystem->getShadowData());
+		mForwardRenderer->opaquePass(mShadowSystem->getShadowMaps());
+		mForwardRenderer->instancedPass();
 		mDebugRenderer->render();
 		mForwardRenderer->transparentPass();
 		mForwardRenderer->transparentInstancedPass(*mCamera);

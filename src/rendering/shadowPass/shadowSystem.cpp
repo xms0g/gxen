@@ -5,71 +5,71 @@
 #include "../shader.h"
 #include "../lightSystem.h"
 #include "../renderFlags.hpp"
+#include "../buffers/uniformBuffer.h"
 #include "../../config/config.hpp"
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
 #include "../../ECS/components/material.hpp"
+#include "../../ECS/components/shader.hpp"
 
 ShadowSystem::ShadowSystem() {
 	RequireComponent<MaterialComponent>();
+
 	mDirShadowPass = std::make_unique<DirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
 	mOmnidirShadowPass = std::make_unique<OmnidirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
 	mPerspectiveShadowPass = std::make_unique<PerspectiveShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
+
+	mShadowUBO = std::make_unique<UniformBuffer>(sizeof(ShadowData), 2);
+
+	mShadowMaps = {{
+			mDirShadowPass->getShadowMap(),
+			mOmnidirShadowPass->getShadowMap(),
+			mPerspectiveShadowPass->getShadowMap()
+	}};
 }
 
 ShadowSystem::~ShadowSystem() = default;
 
-ShadowData& ShadowSystem::getShadowData() {
-	return mShadowData;
+void ShadowSystem::configure() const {
+	for (auto& entity: getSystemEntities()) {
+		const auto& mat = entity.getComponent<MaterialComponent>();
+
+		if (mat.flags & Opaque) {
+			const auto& shader = entity.getComponent<ShaderComponent>().shader;
+			mShadowUBO->configure(shader->ID(), 2, "ShadowBlock");
+		}
+	}
 }
 
 void ShadowSystem::shadowPass(const LightSystem& lights) {
 	mEntities.clear();
-	mShadowData.dirShadows.clear();
-	mShadowData.dirShadows.reserve(lights.getDirLights().size());
-	mShadowData.omnidirShadows.clear();
-	mShadowData.omnidirShadows.reserve(lights.getPointLights().size());
-	mShadowData.persShadows.clear();
-	mShadowData.persShadows.reserve(lights.getSpotLights().size());
 
 	for (auto& entity: getSystemEntities()) {
-		auto& mat = entity.getComponent<MaterialComponent>();
+		const auto& mat = entity.getComponent<MaterialComponent>();
 
 		if (mat.flags & Opaque) {
 			mEntities.push_back(entity);
 		}
 	}
 
-	if (lights.getDirLights().empty()) {
-		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
-		mShadowData.dirShadows.emplace_back(glm::mat4(1.0f), mDirShadowPass->getShadowMap());
-	} else {
-		for (auto& light: lights.getDirLights()) {
-			mDirShadowPass->render(mEntities, light->direction);
-			mShadowData.dirShadows.emplace_back(mDirShadowPass->getLightSpaceMatrix(), mDirShadowPass->getShadowMap());
-		}
+	for (auto& light: lights.getDirLights()) {
+		mDirShadowPass->render(mEntities, light->direction);
+		mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
 	}
 
-	if (lights.getPointLights().empty()) {
-		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
-		mShadowData.omnidirShadows.emplace_back(0.0, mOmnidirShadowPass->getShadowMap());
-	} else {
-		for (auto& light: lights.getPointLights()) {
-			mOmnidirShadowPass->render(mEntities, light->position);
-			mShadowData.omnidirShadows.emplace_back(SHADOW_OMNIDIRECTIONAL_FAR, mOmnidirShadowPass->getShadowMap());
-		}
+	for (int i = 0; i < lights.getPointLights().size(); i++) {
+		const auto& light = lights.getPointLights()[i];
+		mOmnidirShadowPass->render(mEntities, light->position);
+		mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
 	}
 
-	if (lights.getSpotLights().empty()) {
-		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
-		mShadowData.persShadows.emplace_back(glm::mat4(1.0f), mPerspectiveShadowPass->getShadowMap());
-	} else {
-		for (auto& light: lights.getSpotLights()) {
-			mPerspectiveShadowPass->render(mEntities, light->direction, light->position, light->cutOff.y);
-			mShadowData.persShadows.emplace_back(
-				mPerspectiveShadowPass->getLightSpaceMatrix(),
-				mPerspectiveShadowPass->getShadowMap());
-		}
+	for (auto& light: lights.getSpotLights()) {
+		mPerspectiveShadowPass->render(mEntities, light->direction, light->position, light->cutOff.y);
+		mShadowData.persLightSpaceMatrix = mPerspectiveShadowPass->getLightSpaceMatrix();
 	}
+
+	mShadowUBO->bind();
+	mShadowUBO->setData(&mShadowData, sizeof(ShadowData), 0);
+	mShadowUBO->unbind();
 }

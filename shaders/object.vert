@@ -6,11 +6,10 @@ layout (location = 3) in vec3 aTangent;
 layout (location = 4) in vec3 aBitangent;
 
 #include "camera.glsl"
+#include "shadowMapping.glsl"
 
 uniform mat4 model;
 uniform mat3 normalMatrix;
-uniform mat4 lightSpaceMatrix;
-uniform mat4 persLightSpaceMatrix;
 
 out VS_OUT
 {

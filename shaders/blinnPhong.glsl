@@ -1,4 +1,5 @@
 #include "material.glsl"
+#include "shadowMapping.glsl"
 
 struct DirectionalLight {
     vec4 direction;
@@ -44,7 +45,6 @@ layout (std140) uniform LightBlock
 uniform sampler2D shadowMap;
 uniform samplerCube shadowCubemap;
 uniform sampler2D persShadowMap;
-uniform float omniFarPlane;
 
 vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir);
 vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec4 viewPos);
@@ -188,11 +188,11 @@ float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec4 viewPos) 
     float bias = 0.15;
     int samples = 20;
     float viewDistance = length(viewPos.xyz - fragPos);
-    float diskRadius = (1.0 + (viewDistance / omniFarPlane)) / 25.0;
+    float diskRadius = (1.0 + (viewDistance / omniFarPlanes.x)) / 25.0;
 
     for (int i = 0; i < samples; ++i) {
         float closestDepth = texture(shadowCubemap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
-        closestDepth *= omniFarPlane;   // undo mapping [0;1]
+        closestDepth *= omniFarPlanes.x;   // undo mapping [0;1]
         if (currentDepth - bias > closestDepth)
         shadow += 1.0;
     }

@@ -4,7 +4,6 @@
 #include "glm/glm.hpp"
 #include "renderSystem.h"
 
-struct ShadowData;
 class FrameBuffer;
 class UniformBuffer;
 class Window;
@@ -36,11 +35,11 @@ public:
 
 	void batchEntities(const Camera& camera);
 
-	void opaquePass(const ShadowData& shadowData);
+	void opaquePass(const std::array<uint32_t, 3>& shadowMaps);
 
 	void transparentPass();
 
-	void instancedPass(const ShadowData& shadowData);
+	void instancedPass();
 
 	void transparentInstancedPass(const Camera& camera);
 

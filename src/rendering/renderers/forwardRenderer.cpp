@@ -9,7 +9,6 @@
 #include "../renderFlags.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../buffers/uniformBuffer.h"
-#include "../shadowPass/shadowData.hpp"
 #include "../../mesh/mesh.h"
 #include "../../config/config.hpp"
 #include "../../core/camera.h"
@@ -18,10 +17,7 @@
 #include "../../ECS/components/material.hpp"
 #include "../../ECS/components/mesh.hpp"
 #include "../../ECS/components/shader.hpp"
-#include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/instance.hpp"
-#include "../../ECS/components/pointLight.hpp"
-#include "../../ECS/components/spotLight.hpp"
 #include "../../math/utils.hpp"
 
 ForwardRenderer::ForwardRenderer() {
@@ -38,7 +34,6 @@ ForwardRenderer::ForwardRenderer() {
 	mIntermediateBuffer->unbind();
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-
 
 	glGenBuffers(1, &mStaticInstanceVBO.buffer);
 	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
@@ -114,36 +109,26 @@ void ForwardRenderer::batchEntities(const Camera& camera) {
 	}
 }
 
-void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
+void ForwardRenderer::opaquePass(const std::array<uint32_t, 3>& shadowMaps) {
+	int slot = SHADOWMAP_TEXTURE_SLOT;
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
+	++slot;
+
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
+	++slot;
+
+	glActiveTexture(GL_TEXTURE0 + slot);
+	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
+
 	for (auto& [shader, entities]: mOpaqueBatches) {
 		shader->activate();
 
-		int slot = SHADOWMAP_TEXTURE_SLOT;
-		for (const auto& shadow: shadowData.dirShadows) {
-			shader->setMat4("lightSpaceMatrix", shadow.lightSpaceMatrix);
-			shader->setInt("shadowMap", slot);
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, shadow.shadowMap);
-			++slot;
-		}
-
-		for (const auto& shadow: shadowData.omnidirShadows) {
-			shader->setFloat("omniFarPlane", shadow.farPlane);
-			shader->setInt("shadowCubemap", slot);
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, shadow.shadowMap);
-			++slot;
-		}
-
-		for (const auto& shadow: shadowData.persShadows) {
-			shader->setMat4("persLightSpaceMatrix", shadow.lightSpaceMatrix);
-			shader->setInt("persShadowMap", slot);
-			glActiveTexture(GL_TEXTURE0 + slot);
-			glBindTexture(GL_TEXTURE_2D, shadow.shadowMap);
-			++slot;
-		}
-
 		for (const auto& entity: entities) {
+			shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+			shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+			shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 			opaquePass(entity, *shader);
 		}
 	}
@@ -168,7 +153,7 @@ void ForwardRenderer::transparentPass() {
 	mTransparentEntities.clear();
 }
 
-void ForwardRenderer::instancedPass(const ShadowData& shadowData) {
+void ForwardRenderer::instancedPass() {
 	for (const auto& entity: mInstancedEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
