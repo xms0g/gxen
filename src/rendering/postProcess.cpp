@@ -26,9 +26,9 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 PostProcess::~PostProcess() = default;
 
 
-void PostProcess::render(const GLuint sceneTexture) const {
+void PostProcess::render(const uint32_t sceneTexture) const {
 	int toggle = 0;
-	GLuint inputTex = sceneTexture;
+	uint32_t inputTex = sceneTexture;
 
 	for (const auto& effect: mEffects) {
 		if (!effect.enabled) continue;
@@ -47,13 +47,16 @@ void PostProcess::render(const GLuint sceneTexture) const {
 	}
 
 	mQuad->shader().activate();
+	mQuad->shader().setInt("screenTexture", 0);
 	draw(inputTex);
 }
 
-void PostProcess::draw(const GLuint sceneTexture) const {
+void PostProcess::draw(const uint32_t sceneTexture) const {
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mQuad->VAO());
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, sceneTexture);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glBindVertexArray(0);
+	glEnable(GL_DEPTH_TEST);
 }

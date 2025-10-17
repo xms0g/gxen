@@ -32,7 +32,7 @@ Models::Quad::Quad() {
 }
 
 Models::Quad::~Quad() {
-	glDeleteVertexArrays(1, &mVAO);
 	glDeleteBuffers(1, &mVBO);
+	glDeleteVertexArrays(1, &mVAO);
 }
 
