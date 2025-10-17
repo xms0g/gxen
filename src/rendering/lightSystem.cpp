@@ -12,6 +12,7 @@ LightSystem::LightSystem() {
 }
 
 void LightSystem::update() {
+	dirLights.clear();
 	pointLights.clear();
 	spotLights.clear();
 
@@ -24,7 +25,7 @@ void LightSystem::update() {
 
 		if (entity.hasComponent<DirectionalLightComponent>()) {
 			auto& light = entity.getComponent<DirectionalLightComponent>();
-			dirLight = &light;
+			dirLights.push_back(&light);
 		} else if (entity.hasComponent<PointLightComponent>()) {
 			auto& light = entity.getComponent<PointLightComponent>();
 			light.position = glm::vec4(tc.position, 1.0f);

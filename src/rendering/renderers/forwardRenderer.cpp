@@ -24,7 +24,6 @@
 #include "../../ECS/components/spotLight.hpp"
 #include "../../math/utils.hpp"
 
-
 ForwardRenderer::ForwardRenderer() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
@@ -39,6 +38,7 @@ ForwardRenderer::ForwardRenderer() {
 	mIntermediateBuffer->unbind();
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
+#define MAX_DIRECTIONAL_LIGHTS 1
 #define MAX_POINT_LIGHTS 4
 #define MAX_SPOT_LIGHTS  4
 	int totalLightBufferSize = sizeof(DirectionalLightComponent) +
@@ -127,12 +127,13 @@ void ForwardRenderer::opaquePass(const ShadowData& shadowData) {
 		shader->activate();
 
 		int slot = SHADOWMAP_TEXTURE_SLOT;
-
-		shader->setMat4("lightSpaceMatrix", shadowData.dirShadow.lightSpaceMatrix);
-		shader->setInt("shadowMap", slot);
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_2D, shadowData.dirShadow.shadowMap);
-		++slot;
+		for (const auto& shadow: shadowData.dirShadows) {
+			shader->setMat4("lightSpaceMatrix", shadow.lightSpaceMatrix);
+			shader->setInt("shadowMap", slot);
+			glActiveTexture(GL_TEXTURE0 + slot);
+			glBindTexture(GL_TEXTURE_2D, shadow.shadowMap);
+			++slot;
+		}
 
 		for (const auto& shadow: shadowData.omnidirShadows) {
 			shader->setFloat("omniFarPlane", shadow.farPlane);
@@ -281,12 +282,13 @@ void ForwardRenderer::updateLightUBO() const {
 	mLightUBO->bind();
 	int offset = 0;
 	// Directional lights
-	size_t dirCount = 0;
-	if (const auto& dirLight = mLightSystem->getDirLight(); dirLight) {
-		mLightUBO->setData(dirLight, sizeof(DirectionalLightComponent), offset + sizeof(DirectionalLightComponent));
-		dirCount = 1;
+	const auto& dirLights = mLightSystem->getDirLights();
+	const size_t dirCount = std::min(dirLights.size(), static_cast<size_t>(MAX_DIRECTIONAL_LIGHTS));
+	for (size_t i = 0; i < dirCount; i++) {
+		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
+		                   offset + i * sizeof(DirectionalLightComponent));
 	}
-	offset += sizeof(DirectionalLightComponent);
+	offset += MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLightComponent);
 
 	// Point lights
 	const auto& pointLights = mLightSystem->getPointLights();

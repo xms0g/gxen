@@ -30,7 +30,7 @@ struct ShadowData {
 		PersShadow(const glm::mat4& lsm, const uint32_t shadowMap): DirShadow{lsm, shadowMap} {}
 	};
 
-	DirShadow dirShadow;
+	std::vector<DirShadow> dirShadows;
 	std::vector<OmnidirShadow> omnidirShadows;
 	std::vector<PersShadow> persShadows;
 };

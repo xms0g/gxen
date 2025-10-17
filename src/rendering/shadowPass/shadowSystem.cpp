@@ -26,6 +26,8 @@ ShadowData& ShadowSystem::getShadowData() {
 
 void ShadowSystem::shadowPass(const LightSystem& lights) {
 	mEntities.clear();
+	mShadowData.dirShadows.clear();
+	mShadowData.dirShadows.reserve(lights.getDirLights().size());
 	mShadowData.omnidirShadows.clear();
 	mShadowData.omnidirShadows.reserve(lights.getPointLights().size());
 	mShadowData.persShadows.clear();
@@ -35,13 +37,18 @@ void ShadowSystem::shadowPass(const LightSystem& lights) {
 		auto& mat = entity.getComponent<MaterialComponent>();
 
 		if (mat.flags & Opaque) {
-			mEntities.push_back(entity);}
+			mEntities.push_back(entity);
+		}
 	}
 
-	mShadowData.dirShadow.shadowMap = mDirShadowPass->getShadowMap();
-	if (const auto light = lights.getDirLight(); light) {
-		mDirShadowPass->render(mEntities, light->direction);
-		mShadowData.dirShadow.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
+	if (lights.getDirLights().empty()) {
+		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
+		mShadowData.dirShadows.emplace_back(glm::mat4(1.0f), mDirShadowPass->getShadowMap());
+	} else {
+		for (auto& light: lights.getDirLights()) {
+			mDirShadowPass->render(mEntities, light->direction);
+			mShadowData.dirShadows.emplace_back(mDirShadowPass->getLightSpaceMatrix(), mDirShadowPass->getShadowMap());
+		}
 	}
 
 	if (lights.getPointLights().empty()) {
@@ -56,9 +63,7 @@ void ShadowSystem::shadowPass(const LightSystem& lights) {
 
 	if (lights.getSpotLights().empty()) {
 		// We also have to set the unused depth map, otherwise OpenGL binds it to slot 0
-		mShadowData.persShadows.emplace_back(
-			glm::mat4(1.0f),
-			mPerspectiveShadowPass->getShadowMap());
+		mShadowData.persShadows.emplace_back(glm::mat4(1.0f), mPerspectiveShadowPass->getShadowMap());
 	} else {
 		for (auto& light: lights.getSpotLights()) {
 			mPerspectiveShadowPass->render(mEntities, light->direction, light->position, light->cutOff.y);

@@ -10,13 +10,13 @@ public:
 	LightSystem();
 
 	[[nodiscard]] const std::vector<PointLightComponent*>& getPointLights() const  { return pointLights; }
-	[[nodiscard]] const DirectionalLightComponent* getDirLight() const { return dirLight; }
+	[[nodiscard]] const std::vector<DirectionalLightComponent*>& getDirLights() const { return dirLights; }
 	[[nodiscard]] const std::vector<SpotLightComponent*>& getSpotLights() const { return spotLights; }
 
 	void update();
 
 private:
+	std::vector<DirectionalLightComponent*> dirLights;
 	std::vector<PointLightComponent*> pointLights;
-	DirectionalLightComponent* dirLight;
 	std::vector<SpotLightComponent*> spotLights;
 };
