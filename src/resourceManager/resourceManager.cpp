@@ -140,7 +140,7 @@ void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextur
 			continue;
 
 		mTextures.emplace_back(
-			texture::load((mDirectory + str.C_Str()).c_str(), typeName),
+			texture::load((mDirectory + str.C_Str()).c_str()),
 			typeName,
 			str.C_Str());
 		// store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate mTextures.

@@ -33,7 +33,7 @@ Models::Window::Window(const char* texture) {
 
 	if (texture) {
 		textures.emplace_back(
-		texture::load(fs::path(ASSET_DIR + texture).c_str(), "texture_diffuse"),
+		texture::load(fs::path(ASSET_DIR + texture).c_str()),
 		"texture_diffuse",
 		texture);
 	}

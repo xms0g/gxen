@@ -3,7 +3,7 @@
 #include "glad/glad.h"
 #include "image/stb_image.h"
 
-uint32_t texture::load(const char* path, const std::string& type) {
+uint32_t texture::load(const char* path) {
     uint32_t textureID;
 
 	stbi_set_flip_vertically_on_load(true);

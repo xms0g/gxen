@@ -115,21 +115,21 @@ Models::Cube::Cube(const char* diffuseTexture,
 
 	if (diffuseTexture) {
 		textures.emplace_back(
-		texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str(), "texture_diffuse"),
+		texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str()),
 		"texture_diffuse",
 		diffuseTexture);
 	}
 
 	if (specularTexture) {
 		textures.emplace_back(
-			texture::load(fs::path(ASSET_DIR + specularTexture).c_str(), "texture_specular"),
+			texture::load(fs::path(ASSET_DIR + specularTexture).c_str()),
 			"texture_specular",
 			specularTexture);
 	}
 
 	if (normalTexture) {
 		textures.emplace_back(
-			texture::load(fs::path(ASSET_DIR + normalTexture).c_str(), "texture_normal"),
+			texture::load(fs::path(ASSET_DIR + normalTexture).c_str()),
 			"texture_normal",
 			normalTexture);
 	}

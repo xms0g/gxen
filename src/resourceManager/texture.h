@@ -9,7 +9,7 @@ struct Texture {
 };
 
 namespace texture {
-uint32_t load(const char* path, const std::string& type);
+uint32_t load(const char* path);
 
 uint32_t loadCubemap(const std::vector<std::string>& faces);
 }
