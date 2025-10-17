@@ -1,5 +1,5 @@
 #include "material.glsl"
-#include "shadowMapping.glsl"
+#include "shadow.glsl"
 
 struct DirectionalLight {
     vec4 direction;
