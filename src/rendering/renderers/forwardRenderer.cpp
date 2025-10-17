@@ -38,14 +38,7 @@ ForwardRenderer::ForwardRenderer() {
 	mIntermediateBuffer->unbind();
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-#define MAX_DIRECTIONAL_LIGHTS 1
-#define MAX_POINT_LIGHTS 4
-#define MAX_SPOT_LIGHTS  4
-	int totalLightBufferSize = sizeof(DirectionalLightComponent) +
-	                           MAX_POINT_LIGHTS * sizeof(PointLightComponent) +
-	                           MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);
 
-	mLightUBO = std::make_unique<UniformBuffer>(totalLightBufferSize, 1);
 
 	glGenBuffers(1, &mStaticInstanceVBO.buffer);
 	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
@@ -58,7 +51,7 @@ ForwardRenderer::~ForwardRenderer() = default;
 [[nodiscard]] uint32_t ForwardRenderer::getSceneWidth() const { return mSceneBuffer->width(); }
 [[nodiscard]] uint32_t ForwardRenderer::getSceneHeight() const { return mSceneBuffer->height(); }
 
-void ForwardRenderer::configure(const Camera& camera) {
+void ForwardRenderer::configure(const Camera& camera, const UniformBuffer& lightUBO) {
 	size_t requiredOpaqueGPUBufferSize = 0, requiredTransparentGPUBufferSize = 0;
 
 	// Calculate required GPU buffer sizes of opaque and transparent objects
@@ -90,7 +83,7 @@ void ForwardRenderer::configure(const Camera& camera) {
 		const auto& mat = entity.getComponent<MaterialComponent>();
 
 		mCameraUBO->configure(shader->ID(), 0, "CameraBlock");
-		mLightUBO->configure(shader->ID(), 1, "LightBlock");
+		lightUBO.configure(shader->ID(), 1, "LightBlock");
 
 		if (mat.flags & Instanced) {
 			const auto& ic = entity.getComponent<InstanceComponent>();
@@ -113,7 +106,6 @@ void ForwardRenderer::configure(const Camera& camera) {
 
 void ForwardRenderer::updateBuffers(const Camera& camera) const {
 	updateCameraUBO(camera);
-	updateLightUBO();
 }
 
 void ForwardRenderer::batchEntities(const Camera& camera) {
@@ -276,41 +268,6 @@ void ForwardRenderer::updateCameraUBO(const Camera& camera) const {
 	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
 	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
 	mCameraUBO->unbind();
-}
-
-void ForwardRenderer::updateLightUBO() const {
-	mLightUBO->bind();
-	int offset = 0;
-	// Directional lights
-	const auto& dirLights = mLightSystem->getDirLights();
-	const size_t dirCount = std::min(dirLights.size(), static_cast<size_t>(MAX_DIRECTIONAL_LIGHTS));
-	for (size_t i = 0; i < dirCount; i++) {
-		mLightUBO->setData(dirLights[i], sizeof(DirectionalLightComponent),
-		                   offset + i * sizeof(DirectionalLightComponent));
-	}
-	offset += MAX_DIRECTIONAL_LIGHTS * sizeof(DirectionalLightComponent);
-
-	// Point lights
-	const auto& pointLights = mLightSystem->getPointLights();
-	const size_t pointCount = std::min(pointLights.size(), static_cast<size_t>(MAX_POINT_LIGHTS));
-	for (size_t i = 0; i < pointCount; i++) {
-		mLightUBO->setData(pointLights[i], sizeof(PointLightComponent), offset + i * sizeof(PointLightComponent));
-	}
-
-	offset += MAX_POINT_LIGHTS * sizeof(PointLightComponent);
-
-	// Spot Lights
-	const auto& spotLights = mLightSystem->getSpotLights();
-	const size_t spotCount = std::min(spotLights.size(), static_cast<size_t>(MAX_SPOT_LIGHTS));
-	for (size_t i = 0; i < spotCount; i++) {
-		mLightUBO->setData(spotLights[i], sizeof(SpotLightComponent), offset + i * sizeof(SpotLightComponent));
-	}
-
-	offset += MAX_SPOT_LIGHTS * sizeof(SpotLightComponent);
-
-	auto lightCount = glm::ivec4(dirCount, pointCount, spotCount, 0);
-	mLightUBO->setData(glm::value_ptr(lightCount), sizeof(glm::ivec4), offset);
-	mLightUBO->unbind();
 }
 
 void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,

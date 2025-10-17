@@ -8,6 +8,7 @@
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
 #include "../rendering/shader.h"
+#include "../rendering/buffers/uniformBuffer.h"
 #include "../rendering/renderers/forwardRenderer.h"
 #include "../rendering/renderers/debugRenderer.h"
 #include "../rendering/lightSystem.h"
@@ -37,8 +38,6 @@ void Engine::init(Registry* registry) {
 	registry->addSystem<LightSystem>();
 	mLightSystem = &registry->getSystem<LightSystem>();
 
-	mForwardRenderer->setLightSystem(mLightSystem);
-
 	registry->addSystem<SkyboxSystem>();
 	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
 
@@ -52,7 +51,7 @@ void Engine::init(Registry* registry) {
 }
 
 void Engine::configure() const {
-	mForwardRenderer->configure(*mCamera);
+	mForwardRenderer->configure(*mCamera, mLightSystem->getLightUBO());
 	mDebugRenderer->configure(mForwardRenderer->getCameraUBO());
 }
 

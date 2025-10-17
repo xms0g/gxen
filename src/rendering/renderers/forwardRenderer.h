@@ -1,14 +1,12 @@
 #pragma once
 #include <memory>
 #include <unordered_map>
-
 #include "glm/glm.hpp"
 #include "renderSystem.h"
 
 struct ShadowData;
 class FrameBuffer;
 class UniformBuffer;
-class LightSystem;
 class Window;
 class Camera;
 class guiSystem;
@@ -32,9 +30,7 @@ public:
 
 	[[nodiscard]] const UniformBuffer& getCameraUBO() const { return *mCameraUBO; }
 
-	void setLightSystem(LightSystem* lightSystem) { mLightSystem = lightSystem; }
-
-	void configure(const Camera& camera);
+	void configure(const Camera& camera, const UniformBuffer& lightUBO);
 
 	void updateBuffers(const Camera& camera) const;
 
@@ -57,8 +53,6 @@ private:
 
 	void updateCameraUBO(const Camera& camera) const;
 
-	void updateLightUBO() const;
-
 	void prepareInstanceData(const Entity& entity,
 	                         const std::vector<glm::vec3>& positions,
 	                         size_t instanceSize,
@@ -74,13 +68,10 @@ private:
 		int offset{0};
 	} mDynamicInstanceVBO;
 
-	LightSystem* mLightSystem{};
-
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
 
 	std::unique_ptr<UniformBuffer> mCameraUBO;
-	std::unique_ptr<UniformBuffer> mLightUBO;
 
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
 	TransEntityBucket mTransparentEntities;
