@@ -93,9 +93,10 @@ void ForwardRenderer::configure(const Camera& camera, const UniformBuffer& light
 	mStaticInstanceVBO.offset = 0;
 	mDynamicInstanceVBO.offset = 0;
 
-	const glm::mat4 projectionMat = glm::perspective(glm::radians(camera.zoom()),
-	                                                 static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
-	                                                 ZNEAR, ZFAR);
+	const glm::mat4 projectionMat = glm::perspective(
+		glm::radians(camera.zoom()),
+		static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+		ZNEAR, ZFAR);
 
 	mCameraUBO->bind();
 	mCameraUBO->setData(glm::value_ptr(projectionMat), sizeof(glm::mat4), sizeof(glm::mat4));
@@ -113,16 +114,13 @@ void ForwardRenderer::batchEntities(const Camera& camera) {
 }
 
 void ForwardRenderer::opaquePass(const std::array<uint32_t, 3>& shadowMaps) {
-	int slot = SHADOWMAP_TEXTURE_SLOT;
-	glActiveTexture(GL_TEXTURE0 + slot);
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
-	++slot;
 
-	glActiveTexture(GL_TEXTURE0 + slot);
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
-	++slot;
 
-	glActiveTexture(GL_TEXTURE0 + slot);
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
 
 	for (auto& [shader, entities]: mOpaqueBatches) {
