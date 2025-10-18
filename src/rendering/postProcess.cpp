@@ -16,6 +16,11 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true}
 	}};
 
+	mQuad->shader().setInt("screenTexture", 0);
+	for (const auto& effect: mEffects) {
+		effect.shader->setInt("screenTexture", 0);
+	}
+
 	for (auto& pingPongBuffer: pingPongBuffers) {
 		pingPongBuffer = std::make_unique<FrameBuffer>(width, height);
 		pingPongBuffer->withTexture()
@@ -38,7 +43,6 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 
 		effect.shader->activate();
 		effect.shader->setInt("type", effect.type);
-		effect.shader->setInt("screenTexture", 0);
 
 		draw(inputTex);
 		inputTex = pingPongBuffers[toggle]->texture();
@@ -47,7 +51,6 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 	}
 
 	mQuad->shader().activate();
-	mQuad->shader().setInt("screenTexture", 0);
 	draw(inputTex);
 }
 
