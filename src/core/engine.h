@@ -15,24 +15,30 @@ class Camera;
 
 class Engine {
 public:
-    Engine();
+	Engine();
 
-    ~Engine();
+	~Engine();
 
-    void init(Registry* registry);
+	void init(Registry* registry);
 
 	void configure() const;
 
-    void run();
+	void run();
 
 private:
-    float mDeltaTime{};
-    uint32_t mMillisecsPreviousFrame{0};
-    // Engine
-    bool isRunning{true};
+	void preProcess() const;
 
-    Registry* mRegistry{};
-    ForwardRenderer* mForwardRenderer{};
+	void render() const;
+
+	void postProcess() const;
+
+	float mDeltaTime{};
+	uint32_t mMillisecsPreviousFrame{0};
+	// Engine
+	bool isRunning{true};
+
+	Registry* mRegistry{};
+	ForwardRenderer* mForwardRenderer{};
 	DebugRenderer* mDebugRenderer{};
 	GuiSystem* mGuiSystem{};
 	LightSystem* mLightSystem{};
@@ -42,5 +48,5 @@ private:
 	std::unique_ptr<PostProcess> mPostProcess;
 	std::unique_ptr<Window> mWindow;
 	std::unique_ptr<Camera> mCamera;
-    std::unique_ptr<Input> mInput;
+	std::unique_ptr<Input> mInput;
 };

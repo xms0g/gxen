@@ -65,29 +65,38 @@ void Engine::run() {
 
 		mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 
-		mCamera->update();
-		mLightSystem->update();
-		mShadowSystem->shadowPass(*mLightSystem);
-
-		mForwardRenderer->updateBuffers(*mCamera);
-		mForwardRenderer->batchEntities(*mCamera);
-
-		mForwardRenderer->beginSceneRender();
-		mSkyboxSystem->render(*mCamera);
-		mForwardRenderer->opaquePass(mShadowSystem->getShadowMaps());
-		mForwardRenderer->instancedPass();
-		mDebugRenderer->render();
-		mForwardRenderer->transparentPass();
-		mForwardRenderer->transparentInstancedPass(*mCamera);
-		mForwardRenderer->endSceneRender();
-
-		mPostProcess->render(mForwardRenderer->getIntermediateTexture());
-#ifdef DEBUG
-		mGuiSystem->update(mDeltaTime);
-		mGuiSystem->render(mPostProcess->effects());
-#endif
+		preProcess();
+		render();
+		postProcess();
 
 		// SDL swap buffers
 		mWindow->swapBuffer();
 	}
+}
+
+void Engine::preProcess() const {
+	mCamera->update();
+	mLightSystem->update();
+	mShadowSystem->shadowPass(*mLightSystem);
+	mForwardRenderer->updateBuffers(*mCamera);
+	mForwardRenderer->batchEntities(*mCamera);
+}
+
+void Engine::render() const {
+	mForwardRenderer->beginSceneRender();
+	mSkyboxSystem->render(*mCamera);
+	mForwardRenderer->opaquePass(mShadowSystem->getShadowMaps());
+	mForwardRenderer->instancedPass();
+	mDebugRenderer->render();
+	mForwardRenderer->transparentPass();
+	mForwardRenderer->transparentInstancedPass(*mCamera);
+	mForwardRenderer->endSceneRender();
+}
+
+void Engine::postProcess() const {
+	mPostProcess->render(mForwardRenderer->getIntermediateTexture());
+#ifdef DEBUG
+	mGuiSystem->update(mDeltaTime);
+	mGuiSystem->render(mPostProcess->effects());
+#endif
 }
