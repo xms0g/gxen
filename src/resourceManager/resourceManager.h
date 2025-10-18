@@ -18,8 +18,6 @@ public:
 
 	static ResourceManager& instance();
 
-	void loadModel(size_t entityID, const char* file);
-
 	[[nodiscard]] const std::vector<Mesh>* getMeshes(const size_t entityID) const {
 		return &mEntityMeshes.at(entityID);
 	}
@@ -27,6 +25,8 @@ public:
 	[[nodiscard]] const std::vector<Texture>* getTextures(const size_t entityID) const {
 		return &mEntityTextures.at(entityID);
 	}
+
+	void loadModel(size_t entityID, const char* file);
 
 private:
 	explicit ResourceManager() = default;
