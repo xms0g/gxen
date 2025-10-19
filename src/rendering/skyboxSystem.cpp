@@ -40,7 +40,7 @@ void SkyboxSystem::render(const Camera& camera) const {
 
 	// Draw
 	glDepthFunc(GL_LEQUAL);
-	glBindVertexArray(mc.meshes->front().VAO());
+	glBindVertexArray(mc.meshes->at(0).front().VAO());
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);

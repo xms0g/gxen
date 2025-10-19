@@ -4,7 +4,9 @@
 struct Texture;
 
 struct MaterialComponent {
-	const std::unordered_map<uint32_t, std::vector<Texture> >* textures;
+	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture>>;
+	const TextureMap* textures;
+
 	glm::vec3 color;
 	float shininess;
 	uint32_t flags;
@@ -12,7 +14,7 @@ struct MaterialComponent {
 	MaterialComponent() = default;
 
 	explicit MaterialComponent(
-		const std::unordered_map<uint32_t, std::vector<Texture> >* tex,
+		const TextureMap* tex,
 		const float s = 32.0f,
 		const uint32_t f = 1)
 		: textures(tex), color(1.0f), shininess(s), flags(f) {

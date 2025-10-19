@@ -1,7 +1,7 @@
 #include "mesh.h"
 #include "glad/glad.h"
 
-Mesh::Mesh(uint32_t materialID, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
+Mesh::Mesh(const uint32_t materialID, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
 	: mMaterialID(materialID),
 	  mVertices(std::move(vertices)),
 	  mIndices(std::move(indices)) {

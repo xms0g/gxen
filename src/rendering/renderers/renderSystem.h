@@ -1,6 +1,5 @@
 #pragma once
 #include <unordered_map>
-
 #include "../../ECS/system.hpp"
 
 struct Texture;
@@ -20,13 +19,13 @@ protected:
 
 	void drawPass(const Entity& entity, const Shader& shader) const;
 
-private:
+	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture>>;
 	void bindTextures(
 		uint32_t materialID,
-		const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh,
+		const TextureMap* texturesByMatID,
 		const Shader& shader) const;
 
 	void unbindTextures(
 		uint32_t materialID,
-		const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh) const;
+		const TextureMap* texturesByMatID) const;
 };

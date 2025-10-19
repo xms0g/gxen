@@ -158,15 +158,19 @@ void ForwardRenderer::instancedPass() {
 	for (const auto& entity: mInstancedEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
+		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
 
 		shader->activate();
 
 		materialPass(entity, *shader);
 
-		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
-			glBindVertexArray(mesh.VAO());
-			glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
-			                        GL_UNSIGNED_INT, 0, ic.positions->size());
+		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+			bindTextures(matID, texturesByMatID, *shader);
+			for (const auto& mesh: meshes) {
+				glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
+				                        GL_UNSIGNED_INT, 0, ic.positions->size());
+			}
+			unbindTextures(matID, texturesByMatID);
 		}
 	}
 
@@ -179,25 +183,31 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& mat = entity.getComponent<MaterialComponent>();
+		const auto& texturesByMatID = mat.textures;
 
 		auto positions = *ic.positions;
 
-		std::sort(positions.begin(), positions.end(),
-		          [&](const glm::vec3& a, const glm::vec3& b) {
-			          const float da = glm::length2(camera.position() - a);
-			          const float db = glm::length2(camera.position() - b);
-			          return da > db; // back to front
-		          });
+		std::sort(
+			positions.begin(), positions.end(),
+			[&](const glm::vec3& a, const glm::vec3& b) {
+				const float da = glm::length2(camera.position() - a);
+				const float db = glm::length2(camera.position() - b);
+				return da > db; // back to front
+			});
 
 		prepareInstanceData(entity, positions, positions.size() * sizeof(InstanceData), mat.flags);
 
 		shader->activate();
 		materialPass(entity, *shader);
 
-		for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
-			glBindVertexArray(mesh.VAO());
-			glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
-			                        GL_UNSIGNED_INT, 0, positions.size());
+		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+			bindTextures(matID, texturesByMatID, *shader);
+			for (const auto& mesh: meshes) {
+				glBindVertexArray(mesh.VAO());
+				glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
+				                        GL_UNSIGNED_INT, 0, positions.size());
+			}
+			unbindTextures(matID, texturesByMatID);
 		}
 	}
 
@@ -275,8 +285,10 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vecto
 	glBufferSubData(GL_ARRAY_BUFFER, offset, instanceSize, gpuData.data());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-	for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
-		mesh.enableInstanceAttributes(vbo, offset);
+	for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+		for (const auto& mesh: meshes) {
+			mesh.enableInstanceAttributes(vbo, offset);
+		}
 	}
 
 	if (flags & Transparent) {

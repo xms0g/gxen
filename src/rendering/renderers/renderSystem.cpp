@@ -66,23 +66,26 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 }
 
 void RenderSystem::drawPass(const Entity& entity, const Shader& shader) const {
-	const auto& texturesFromMesh = entity.getComponent<MaterialComponent>().textures;
+	const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
 
-	for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
-		bindTextures(mesh.materialID(), texturesFromMesh, shader);
-		glBindVertexArray(mesh.VAO());
-		glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
-		unbindTextures(mesh.materialID(), texturesFromMesh);
+	for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+		bindTextures(matID, texturesByMatID, shader);
+
+		for (const auto& mesh: meshes) {
+			glBindVertexArray(mesh.VAO());
+			glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+		}
+		unbindTextures(matID, texturesByMatID);
 	}
 }
 
 void RenderSystem::bindTextures(
 	const uint32_t materialID,
-	const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh,
+	const TextureMap* texturesByMatID,
 	const Shader& shader) const {
-	if (texturesFromMesh) {
+	if (texturesByMatID) {
 		bool hasNormalMap{false};
-		const auto& textures = texturesFromMesh->at(materialID);
+		const auto& textures = texturesByMatID->at(materialID);
 
 		uint32_t diffuseCount = 1, specularCount = 1, normalCount = 1, heightCount = 1;
 		for (int i = 0; i < textures.size(); i++) {
@@ -114,14 +117,13 @@ void RenderSystem::bindTextures(
 
 void RenderSystem::unbindTextures(
 	const uint32_t materialID,
-	const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh) const {
-	if (texturesFromMesh) {
-		const auto& textures = texturesFromMesh->at(materialID);
+	const TextureMap* texturesByMatID) const {
+	if (texturesByMatID) {
+		const auto& textures = texturesByMatID->at(materialID);
 
 		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, 0);
 		}
-		glActiveTexture(GL_TEXTURE0);
 	}
 }

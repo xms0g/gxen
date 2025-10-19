@@ -6,11 +6,13 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
+
 struct Texture;
 using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
+class Mesh;
+using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
 
 class Shader;
-class Mesh;
 
 class ResourceManager {
 public:
@@ -20,7 +22,7 @@ public:
 
 	static ResourceManager& instance();
 
-	[[nodiscard]] const std::vector<Mesh>* getMeshes(size_t entityID) const;
+	[[nodiscard]] const MeshMap* getMeshes(size_t entityID) const;
 
 	[[nodiscard]] const TextureMap* getTextures(size_t entityID) const;
 
@@ -39,9 +41,9 @@ private:
 	                          uint32_t materialID);
 
 	std::string mDirectory;
-	std::vector<Mesh> mMeshes;
-	TextureMap mTexturesFromMesh;
-	std::unordered_map<size_t, TextureMap> mTexturesFromEntity;
-	std::unordered_map<size_t, std::vector<Mesh> > mMeshesFromEntity;
+	TextureMap mTexturesByMatID;
+	MeshMap mMeshesByMatID;
+	std::unordered_map<size_t, TextureMap> mTexturesByEntity;
+	std::unordered_map<size_t, MeshMap > mMeshesByEntity;
 	std::unordered_set<std::string> mTexturesLoaded;
 };

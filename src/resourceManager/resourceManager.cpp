@@ -12,12 +12,12 @@ ResourceManager& ResourceManager::instance() {
 	return instance;
 }
 
-[[nodiscard]] const std::vector<Mesh>* ResourceManager::getMeshes(const size_t entityID) const {
-	return &mMeshesFromEntity.at(entityID);
+[[nodiscard]] const MeshMap* ResourceManager::getMeshes(const size_t entityID) const {
+	return &mMeshesByEntity.at(entityID);
 }
 
 [[nodiscard]] const TextureMap* ResourceManager::getTextures(const size_t entityID) const {
-	return &mTexturesFromEntity.at(entityID);
+	return &mTexturesByEntity.at(entityID);
 }
 
 void ResourceManager::loadModel(const size_t entityID, const char* file) {
@@ -39,10 +39,10 @@ void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
 
-	mMeshesFromEntity.emplace(entityID, mMeshes);
-	mTexturesFromEntity.emplace(entityID, mTexturesFromMesh);
-	mMeshes.clear();
-	mTexturesFromMesh.clear();
+	mMeshesByEntity.emplace(entityID, mMeshesByMatID);
+	mTexturesByEntity.emplace(entityID, mTexturesByMatID);
+	mMeshesByMatID.clear();
+	mTexturesByMatID.clear();
 	mTexturesLoaded.clear();
 }
 
@@ -51,8 +51,9 @@ void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
 	for (uint32_t i = 0; i < node->mNumMeshes; i++) {
 		// the node object only contains mIndices to index the actual objects in the scene.
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
-		aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-		mMeshes.push_back(processMesh(mesh, scene));
+		aiMesh* aMesh = scene->mMeshes[node->mMeshes[i]];
+		auto mesh = processMesh(aMesh, scene);
+		mMeshesByMatID[mesh.materialID()].push_back(mesh);
 	}
 	// after we've processed all of the mMeshes (if any) we then recursively process each of the children nodes
 	for (uint32_t i = 0; i < node->mNumChildren; i++) {
@@ -146,7 +147,7 @@ void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextur
 		if (mTexturesLoaded.contains(str.C_Str()))
 			continue;
 
-		mTexturesFromMesh[materialID].emplace_back(
+		mTexturesByMatID[materialID].emplace_back(
 			texture::load((mDirectory + str.C_Str()).c_str()),
 			typeName,
 			str.C_Str()
