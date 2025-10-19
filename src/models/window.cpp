@@ -39,3 +39,6 @@ Models::Window::Window(const char* texture) {
 		);
 	}
 }
+
+Models::Window::~Window() = default;
+

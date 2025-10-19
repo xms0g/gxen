@@ -11,6 +11,8 @@ class Window {
 public:
 	explicit Window(const char* texture = nullptr);
 
+	~Window();
+
 	using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
 	[[nodiscard]] const MeshMap* getMeshes() const { return &meshes; }
 
