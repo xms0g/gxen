@@ -83,7 +83,7 @@ void RenderSystem::bindTextures(
 	const uint32_t materialID,
 	const TextureMap* texturesByMatID,
 	const Shader& shader) const {
-	if (texturesByMatID) {
+	if (texturesByMatID && !texturesByMatID->empty()) {
 		bool hasNormalMap{false};
 		const auto& textures = texturesByMatID->at(materialID);
 
@@ -118,7 +118,7 @@ void RenderSystem::bindTextures(
 void RenderSystem::unbindTextures(
 	const uint32_t materialID,
 	const TextureMap* texturesByMatID) const {
-	if (texturesByMatID) {
+	if (texturesByMatID && !texturesByMatID->empty()) {
 		const auto& textures = texturesByMatID->at(materialID);
 
 		for (int i = 0; i < textures.size(); i++) {
