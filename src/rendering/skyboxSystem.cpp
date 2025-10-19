@@ -28,7 +28,7 @@ void SkyboxSystem::render(const Camera& camera) const {
 		ZNEAR, ZFAR);
 
 	shader->activate();
-	shader->setInt(mat.textures->front().type, 0);
+	shader->setInt(mat.textures->at(0).front().type, 0);
 	shader->setMat4("projection", projectionMat);
 
 	const auto view = glm::mat4(glm::mat3(camera.viewMatrix()));
@@ -36,7 +36,7 @@ void SkyboxSystem::render(const Camera& camera) const {
 
 	glActiveTexture(GL_TEXTURE0); // active proper texture unit before binding
 	// and finally bind the texture
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mat.textures->front().id);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, mat.textures->at(0).front().id);
 
 	// Draw
 	glDepthFunc(GL_LEQUAL);

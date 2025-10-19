@@ -1,18 +1,20 @@
 #pragma once
-#include <vector>
 #include "glm/glm.hpp"
 
 struct Texture;
 
 struct MaterialComponent {
-	const std::vector<Texture>* textures;
+	const std::unordered_map<uint32_t, std::vector<Texture> >* textures;
 	glm::vec3 color;
 	float shininess;
 	uint32_t flags;
 
 	MaterialComponent() = default;
 
-	explicit MaterialComponent(const std::vector<Texture>* tex, const float s = 32.0f, const uint32_t f = 1)
+	explicit MaterialComponent(
+		const std::unordered_map<uint32_t, std::vector<Texture> >* tex,
+		const float s = 32.0f,
+		const uint32_t f = 1)
 		: textures(tex), color(1.0f), shininess(s), flags(f) {
 	}
 

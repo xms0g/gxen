@@ -12,6 +12,14 @@ ResourceManager& ResourceManager::instance() {
 	return instance;
 }
 
+[[nodiscard]] const std::vector<Mesh>* ResourceManager::getMeshes(const size_t entityID) const {
+	return &mMeshesFromEntity.at(entityID);
+}
+
+[[nodiscard]] const TextureMap* ResourceManager::getTextures(const size_t entityID) const {
+	return &mTexturesFromEntity.at(entityID);
+}
+
 void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	// read file via ASSIMP
 	Assimp::Importer importer;
@@ -31,10 +39,10 @@ void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	// process ASSIMP's root node recursively
 	processNode(scene->mRootNode, scene);
 
-	mEntityMeshes.emplace(entityID, mMeshes);
-	mEntityTextures.emplace(entityID, mTextures);
+	mMeshesFromEntity.emplace(entityID, mMeshes);
+	mTexturesFromEntity.emplace(entityID, mTexturesFromMesh);
 	mMeshes.clear();
-	mTextures.clear();
+	mTexturesFromMesh.clear();
 	mTexturesLoaded.clear();
 }
 
@@ -56,7 +64,6 @@ Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// data to fill
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
-	std::vector<Texture> textures;
 
 	// walk through each of the mesh's mVertices
 	for (uint32_t i = 0; i < mesh->mNumVertices; i++) {
@@ -119,19 +126,19 @@ Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// normal: texture_normalN
 
 	// 1. diffuse maps
-	loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+	loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse", mesh->mMaterialIndex);
 	// 2. specular maps
-	loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+	loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular", mesh->mMaterialIndex);
 	// 3. normal maps
-	loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal");
+	loadMaterialTextures(material, aiTextureType_NORMALS, "texture_normal", mesh->mMaterialIndex);
 	// 4. height maps
-	loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height");
+	loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height", mesh->mMaterialIndex);
 	// return a mesh object created from the extracted mesh data
-	return {vertices, indices};
+	return {mesh->mMaterialIndex, vertices, indices};
 }
 
 void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextureType type,
-                                           const std::string& typeName) {
+                                           const std::string& typeName, const uint32_t materialID) {
 	for (uint32_t i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
@@ -139,10 +146,11 @@ void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextur
 		if (mTexturesLoaded.contains(str.C_Str()))
 			continue;
 
-		mTextures.emplace_back(
+		mTexturesFromMesh[materialID].emplace_back(
 			texture::load((mDirectory + str.C_Str()).c_str()),
 			typeName,
-			str.C_Str());
+			str.C_Str()
+		);
 		// store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate mTextures.
 		mTexturesLoaded.emplace(str.C_Str());
 	}

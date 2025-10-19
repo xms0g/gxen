@@ -1,6 +1,9 @@
 #pragma once
+#include <unordered_map>
+
 #include "../../ECS/system.hpp"
 
+struct Texture;
 class Camera;
 class Shader;
 
@@ -15,5 +18,15 @@ protected:
 
 	void materialPass(const Entity& entity, const Shader& shader) const;
 
-	void drawPass(const Entity& entity) const;
+	void drawPass(const Entity& entity, const Shader& shader) const;
+
+private:
+	void bindTextures(
+		uint32_t materialID,
+		const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh,
+		const Shader& shader) const;
+
+	void unbindTextures(
+		uint32_t materialID,
+		const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh) const;
 };

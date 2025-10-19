@@ -1,8 +1,10 @@
 #include "mesh.h"
 #include "glad/glad.h"
 
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<uint32_t>& indices) : mVertices(std::move(vertices)),
-                                                                            mIndices(std::move(indices)) {
+Mesh::Mesh(uint32_t materialID, std::vector<Vertex>& vertices, std::vector<uint32_t>& indices)
+	: mMaterialID(materialID),
+	  mVertices(std::move(vertices)),
+	  mIndices(std::move(indices)) {
 	// now that we have all the required data, set the vertex buffers and its attribute pointers.
 	// create vao
 	glGenVertexArrays(1, &mVAO);

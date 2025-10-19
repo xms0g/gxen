@@ -40,7 +40,7 @@ RenderSystem::RenderSystem() {
 void RenderSystem::opaquePass(const Entity& entity, const Shader& shader) const {
 	geometryPass(entity, shader);
 	materialPass(entity, shader);
-	drawPass(entity);
+	drawPass(entity, shader);
 }
 
 void RenderSystem::geometryPass(const Entity& entity, const Shader& shader) const {
@@ -53,7 +53,6 @@ void RenderSystem::geometryPass(const Entity& entity, const Shader& shader) cons
 
 void RenderSystem::materialPass(const Entity& entity, const Shader& shader) const {
 	const auto& mtc = entity.getComponent<MaterialComponent>();
-	bool hasNormalMap{false};
 
 	if (mtc.flags & TwoSided) {
 		glDisable(GL_CULL_FACE);
@@ -63,44 +62,66 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 
 	if (!mtc.textures) {
 		shader.setVec3("material.color", mtc.color);
-		return;
 	}
-
-	const auto textures = *mtc.textures;
-
-	uint32_t diffuseCount = 1, specularCount = 1, normalCount = 1, heightCount = 1;
-	for (int i = 0; i < textures.size(); i++) {
-		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
-
-		// retrieve texture number (the N in diffuse_textureN)
-		std::string number;
-		std::string name = textures[i].type;
-
-		if (name == "texture_diffuse") {
-			number = std::to_string(diffuseCount++);
-		} else if (name == "texture_specular") {
-			number = std::to_string(specularCount++);
-		} else if (name == "texture_normal") {
-			number = std::to_string(normalCount++);
-			hasNormalMap = true;
-		} else if (name == "texture_height") {
-			number = std::to_string(heightCount++);
-		}
-
-		// now set the sampler to the correct texture unit
-		shader.setInt(std::string("material.").append(name).append(number), i);
-		// and finally bind the texture
-		glBindTexture(GL_TEXTURE_2D, textures[i].id);
-	}
-	shader.setBool("material.hasNormalMap", hasNormalMap);
 }
 
-void RenderSystem::drawPass(const Entity& entity) const {
+void RenderSystem::drawPass(const Entity& entity, const Shader& shader) const {
+	const auto& texturesFromMesh = entity.getComponent<MaterialComponent>().textures;
+
 	for (const auto& mesh: *entity.getComponent<MeshComponent>().meshes) {
+		bindTextures(mesh.materialID(), texturesFromMesh, shader);
 		glBindVertexArray(mesh.VAO());
 		glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+		unbindTextures(mesh.materialID(), texturesFromMesh);
 	}
+}
 
-	if (!glIsEnabled(GL_CULL_FACE))
-		glEnable(GL_CULL_FACE);
+void RenderSystem::bindTextures(
+	const uint32_t materialID,
+	const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh,
+	const Shader& shader) const {
+	if (texturesFromMesh) {
+		bool hasNormalMap{false};
+		const auto& textures = texturesFromMesh->at(materialID);
+
+		uint32_t diffuseCount = 1, specularCount = 1, normalCount = 1, heightCount = 1;
+		for (int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+
+			// retrieve texture number (the N in diffuse_textureN)
+			std::string number;
+			std::string name = textures[i].type;
+
+			if (name == "texture_diffuse") {
+				number = std::to_string(diffuseCount++);
+			} else if (name == "texture_specular") {
+				number = std::to_string(specularCount++);
+			} else if (name == "texture_normal") {
+				number = std::to_string(normalCount++);
+				hasNormalMap = true;
+			} else if (name == "texture_height") {
+				number = std::to_string(heightCount++);
+			}
+
+			// now set the sampler to the correct texture unit
+			shader.setInt(std::string("material.").append(name).append(number), i);
+			// and finally bind the texture
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+		shader.setBool("material.hasNormalMap", hasNormalMap);
+	}
+}
+
+void RenderSystem::unbindTextures(
+	const uint32_t materialID,
+	const std::unordered_map<uint32_t, std::vector<Texture> >* texturesFromMesh) const {
+	if (texturesFromMesh) {
+		const auto& textures = texturesFromMesh->at(materialID);
+
+		for (int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+		glActiveTexture(GL_TEXTURE0);
+	}
 }

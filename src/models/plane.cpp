@@ -62,24 +62,25 @@ Models::Plane::Plane(const char* diffuseTexture,
 			                                                  f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z));
 	}
 
-	meshes.emplace_back(vertices, indices);
+	meshes.emplace_back(0, vertices, indices);
 
 	if (diffuseTexture) {
-		textures.emplace_back(
+		textures[0].emplace_back(
 			texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str()),
 			"texture_diffuse",
-			diffuseTexture);
+			diffuseTexture
+		);
 	}
 
 	if (specularTexture) {
-		textures.emplace_back(
+		textures[0].emplace_back(
 			texture::load(fs::path(ASSET_DIR + specularTexture).c_str()),
 			"texture_specular",
 			specularTexture);
 	}
 
 	if (normalTexture) {
-		textures.emplace_back(
+		textures[0].emplace_back(
 			texture::load(fs::path(ASSET_DIR + normalTexture).c_str()),
 			"texture_normal",
 			normalTexture);

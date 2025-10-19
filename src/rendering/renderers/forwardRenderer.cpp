@@ -169,8 +169,6 @@ void ForwardRenderer::instancedPass() {
 			                        GL_UNSIGNED_INT, 0, ic.positions->size());
 		}
 	}
-	if (!glIsEnabled(GL_CULL_FACE))
-		glEnable(GL_CULL_FACE);
 
 	mInstancedEntities.clear();
 }
@@ -204,8 +202,6 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 	}
 
 	glDepthMask(GL_TRUE);
-	if (!glIsEnabled(GL_CULL_FACE))
-		glEnable(GL_CULL_FACE);
 	mTransparentInstancedEntities.clear();
 	mDynamicInstanceVBO.offset = 0;
 }
@@ -213,6 +209,8 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 void ForwardRenderer::beginSceneRender() const {
 	mSceneBuffer->bind();
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }

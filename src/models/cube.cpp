@@ -1,50 +1,48 @@
 #include "cube.h"
-
-#include "cubemap.h"
 #include "../config/config.hpp"
 #include "../mesh/mesh.h"
 #include "../io/filesystem.hpp"
 #include "../resourceManager/texture.h"
 
 Models::Cube::Cube(const char* diffuseTexture,
-				   const char* specularTexture,
-				   const char* normalTexture) {
+                   const char* specularTexture,
+                   const char* normalTexture) {
 	constexpr float v[] = {
 		// Back face (-Z)
-		-0.5f,-0.5f,-0.5f,  0,0,-1, 0,0,
-		 0.5f,-0.5f,-0.5f,  0,0,-1, 1,0,
-		 0.5f, 0.5f,-0.5f,  0,0,-1, 1,1,
-		-0.5f, 0.5f,-0.5f,  0,0,-1, 0,1,
+		-0.5f, -0.5f, -0.5f, 0, 0, -1, 0, 0,
+		0.5f, -0.5f, -0.5f, 0, 0, -1, 1, 0,
+		0.5f, 0.5f, -0.5f, 0, 0, -1, 1, 1,
+		-0.5f, 0.5f, -0.5f, 0, 0, -1, 0, 1,
 
 		// Front face (+Z)
-		-0.5f,-0.5f, 0.5f,  0,0,1, 0,0,
-		 0.5f,-0.5f, 0.5f,  0,0,1, 1,0,
-		 0.5f, 0.5f, 0.5f,  0,0,1, 1,1,
-		-0.5f, 0.5f, 0.5f,  0,0,1, 0,1,
+		-0.5f, -0.5f, 0.5f, 0, 0, 1, 0, 0,
+		0.5f, -0.5f, 0.5f, 0, 0, 1, 1, 0,
+		0.5f, 0.5f, 0.5f, 0, 0, 1, 1, 1,
+		-0.5f, 0.5f, 0.5f, 0, 0, 1, 0, 1,
 
 		// Left face (-X)
-		-0.5f,-0.5f,-0.5f, -1,0,0, 0,0,
-		-0.5f, 0.5f,-0.5f, -1,0,0, 1,0,
-		-0.5f, 0.5f, 0.5f, -1,0,0, 1,1,
-		-0.5f,-0.5f, 0.5f, -1,0,0, 0,1,
+		-0.5f, -0.5f, -0.5f, -1, 0, 0, 0, 0,
+		-0.5f, 0.5f, -0.5f, -1, 0, 0, 1, 0,
+		-0.5f, 0.5f, 0.5f, -1, 0, 0, 1, 1,
+		-0.5f, -0.5f, 0.5f, -1, 0, 0, 0, 1,
 
 		// Right face (+X)
-		 0.5f,-0.5f,-0.5f,  1,0,0, 0,0,
-		 0.5f, 0.5f,-0.5f,  1,0,0, 1,0,
-		 0.5f, 0.5f, 0.5f,  1,0,0, 1,1,
-		 0.5f,-0.5f, 0.5f,  1,0,0, 0,1,
+		0.5f, -0.5f, -0.5f, 1, 0, 0, 0, 0,
+		0.5f, 0.5f, -0.5f, 1, 0, 0, 1, 0,
+		0.5f, 0.5f, 0.5f, 1, 0, 0, 1, 1,
+		0.5f, -0.5f, 0.5f, 1, 0, 0, 0, 1,
 
 		// Bottom face (-Y)
-		-0.5f,-0.5f,-0.5f,  0,-1,0, 0,0,
-		 0.5f,-0.5f,-0.5f,  0,-1,0, 1,0,
-		 0.5f,-0.5f, 0.5f,  0,-1,0, 1,1,
-		-0.5f,-0.5f, 0.5f,  0,-1,0, 0,1,
+		-0.5f, -0.5f, -0.5f, 0, -1, 0, 0, 0,
+		0.5f, -0.5f, -0.5f, 0, -1, 0, 1, 0,
+		0.5f, -0.5f, 0.5f, 0, -1, 0, 1, 1,
+		-0.5f, -0.5f, 0.5f, 0, -1, 0, 0, 1,
 
 		// Top face (+Y)
-		-0.5f, 0.5f,-0.5f,  0,1,0, 0,0,
-		 0.5f, 0.5f,-0.5f,  0,1,0, 1,0,
-		 0.5f, 0.5f, 0.5f,  0,1,0, 1,1,
-		-0.5f, 0.5f, 0.5f,  0,1,0, 0,1
+		-0.5f, 0.5f, -0.5f, 0, 1, 0, 0, 0,
+		0.5f, 0.5f, -0.5f, 0, 1, 0, 1, 0,
+		0.5f, 0.5f, 0.5f, 0, 1, 0, 1, 1,
+		-0.5f, 0.5f, 0.5f, 0, 1, 0, 0, 1
 	};
 
 	std::vector<uint32_t> indices = {
@@ -101,34 +99,35 @@ Models::Cube::Cube(const char* diffuseTexture,
 		float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
 
 		vertices[i0].tangent = vertices[i1].tangent = vertices[i2].tangent = glm::vec3(
-														  f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
-														  f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
-														  f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z));
+			                                              f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x),
+			                                              f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y),
+			                                              f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z));
 
 		vertices[i0].bitangent = vertices[i1].bitangent = vertices[i2].bitangent = glm::vec3(
-															  f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
-															  f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
-															  f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z));
+			                                                  f * (-deltaUV2.x * edge1.x + deltaUV1.x * edge2.x),
+			                                                  f * (-deltaUV2.x * edge1.y + deltaUV1.x * edge2.y),
+			                                                  f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z));
 	}
 
-	meshes.emplace_back(vertices, indices);
+	meshes.emplace_back(0, vertices, indices);
 
 	if (diffuseTexture) {
-		textures.emplace_back(
-		texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str()),
-		"texture_diffuse",
-		diffuseTexture);
+		textures[0].emplace_back(
+			texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str()),
+			"texture_diffuse",
+			diffuseTexture
+		);
 	}
 
 	if (specularTexture) {
-		textures.emplace_back(
+		textures[0].emplace_back(
 			texture::load(fs::path(ASSET_DIR + specularTexture).c_str()),
 			"texture_specular",
 			specularTexture);
 	}
 
 	if (normalTexture) {
-		textures.emplace_back(
+		textures[0].emplace_back(
 			texture::load(fs::path(ASSET_DIR + normalTexture).c_str()),
 			"texture_normal",
 			normalTexture);
@@ -136,4 +135,3 @@ Models::Cube::Cube(const char* diffuseTexture,
 }
 
 Models::Cube::~Cube() = default;
-

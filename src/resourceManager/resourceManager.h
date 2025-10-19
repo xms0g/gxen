@@ -7,6 +7,8 @@
 #include <assimp/postprocess.h>
 
 struct Texture;
+using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
+
 class Shader;
 class Mesh;
 
@@ -18,13 +20,9 @@ public:
 
 	static ResourceManager& instance();
 
-	[[nodiscard]] const std::vector<Mesh>* getMeshes(const size_t entityID) const {
-		return &mEntityMeshes.at(entityID);
-	}
+	[[nodiscard]] const std::vector<Mesh>* getMeshes(size_t entityID) const;
 
-	[[nodiscard]] const std::vector<Texture>* getTextures(const size_t entityID) const {
-		return &mEntityTextures.at(entityID);
-	}
+	[[nodiscard]] const TextureMap* getTextures(size_t entityID) const;
 
 	void loadModel(size_t entityID, const char* file);
 
@@ -37,12 +35,13 @@ private:
 
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
-	void loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const std::string& typeName);
+	void loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const std::string& typeName,
+	                          uint32_t materialID);
 
 	std::string mDirectory;
 	std::vector<Mesh> mMeshes;
-	std::vector<Texture> mTextures;
-	std::unordered_map<size_t, std::vector<Mesh> > mEntityMeshes;
-	std::unordered_map<size_t, std::vector<Texture> > mEntityTextures;
+	TextureMap mTexturesFromMesh;
+	std::unordered_map<size_t, TextureMap> mTexturesFromEntity;
+	std::unordered_map<size_t, std::vector<Mesh> > mMeshesFromEntity;
 	std::unordered_set<std::string> mTexturesLoaded;
 };

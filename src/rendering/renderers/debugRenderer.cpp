@@ -33,6 +33,6 @@ void DebugRenderer::render() const {
 		const auto& dbShader = mDebugShaders.at(db.mode);
 		dbShader->activate();
 		geometryPass(entity, *dbShader);
-		drawPass(entity);
+		drawPass(entity, *dbShader);
 	}
 }

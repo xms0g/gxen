@@ -7,18 +7,18 @@
 Models::Cubemap::Cubemap(const char* const f[]) {
 	constexpr float v[]= {
 		-1.0f,  1.0f, -1.0f,
-	    -1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f, -1.0f,
 		 1.0f, -1.0f, -1.0f,
 		 1.0f, -1.0f, -1.0f,
 		 1.0f,  1.0f, -1.0f,
-	    -1.0f,  1.0f, -1.0f,
-
-	    -1.0f, -1.0f,  1.0f,
-	    -1.0f, -1.0f, -1.0f,
-	    -1.0f,  1.0f, -1.0f,
 		-1.0f,  1.0f, -1.0f,
-	    -1.0f,  1.0f,  1.0f,
-	    -1.0f, -1.0f,  1.0f,
+
+		-1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
 		 1.0f, -1.0f, -1.0f,
 		 1.0f, -1.0f,  1.0f,
 		 1.0f,  1.0f,  1.0f,
@@ -26,26 +26,26 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 		 1.0f,  1.0f, -1.0f,
 		 1.0f, -1.0f, -1.0f,
 
-	    -1.0f, -1.0f,  1.0f,
-	    -1.0f,  1.0f,  1.0f,
-	 	 1.0f,  1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
+		-1.0f,  1.0f,  1.0f,
+		  1.0f,  1.0f,  1.0f,
 		 1.0f,  1.0f,  1.0f,
 		 1.0f, -1.0f,  1.0f,
-	    -1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f,  1.0f,
 
-	    -1.0f,  1.0f, -1.0f,
-	 	 1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f, -1.0f,
+		  1.0f,  1.0f, -1.0f,
 		 1.0f,  1.0f,  1.0f,
 		 1.0f,  1.0f,  1.0f,
-	    -1.0f,  1.0f,  1.0f,
-	    -1.0f,  1.0f, -1.0f,
+		-1.0f,  1.0f,  1.0f,
+		-1.0f,  1.0f, -1.0f,
 
-	    -1.0f, -1.0f, -1.0f,
-	    -1.0f, -1.0f,  1.0f,
+		-1.0f, -1.0f, -1.0f,
+		-1.0f, -1.0f,  1.0f,
 		 1.0f, -1.0f, -1.0f,
 		 1.0f, -1.0f, -1.0f,
-	    -1.0f, -1.0f,  1.0f,
-	 	 1.0f, -1.0f,  1.0f
+		-1.0f, -1.0f,  1.0f,
+		  1.0f, -1.0f,  1.0f
 	};
 
 	std::vector<Vertex> vertices;
@@ -56,7 +56,7 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 	}
 
 	std::vector<uint32_t> indices;
-	meshes.emplace_back(vertices, indices);
+	meshes.emplace_back(0, vertices, indices);
 
 	std::vector<std::string> faces;
 	faces.reserve(6);
@@ -65,10 +65,11 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 		faces.emplace_back(fs::path(ASSET_DIR + f[i]));
 	}
 
-	textures.emplace_back(
+	textures[0].emplace_back(
 		texture::loadCubemap(faces),
 		"skybox",
-		"skybox.jpg");
+		"skybox.jpg"
+	);
 }
 
 Models::Cubemap::~Cubemap() = default;
