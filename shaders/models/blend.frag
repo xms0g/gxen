@@ -9,5 +9,5 @@ in VS_OUT
 out vec4 fragColor;
 
 void main() {
-    fragColor = texture(material.texture_diffuse1, fs_in.TexCoord);
+    fragColor = texture(material.texture_diffuse, fs_in.TexCoord);
 }

@@ -87,27 +87,17 @@ void RenderSystem::bindTextures(
 		bool hasNormalMap{false};
 		const auto& textures = texturesByMatID->at(materialID);
 
-		uint32_t diffuseCount = 1, specularCount = 1, normalCount = 1, heightCount = 1;
 		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 
-			// retrieve texture number (the N in diffuse_textureN)
-			std::string number;
 			std::string name = textures[i].type;
 
-			if (name == "texture_diffuse") {
-				number = std::to_string(diffuseCount++);
-			} else if (name == "texture_specular") {
-				number = std::to_string(specularCount++);
-			} else if (name == "texture_normal") {
-				number = std::to_string(normalCount++);
+			if (name == "texture_normal") {
 				hasNormalMap = true;
-			} else if (name == "texture_height") {
-				number = std::to_string(heightCount++);
 			}
 
 			// now set the sampler to the correct texture unit
-			shader.setInt(std::string("material.").append(name).append(number), i);
+			shader.setInt(std::string("material.").append(name), i);
 			// and finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
