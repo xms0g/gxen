@@ -6,8 +6,7 @@ layout (location = 7) in mat4 aInstanceMatrix;
 layout (location = 11) in mat3 aInstanceNormalMatrix;
 
 #include "camera.glsl"
-
-uniform mat4 lightSpaceMatrix;
+#include "shadow.glsl"
 
 out VS_OUT
 {
@@ -15,6 +14,7 @@ out VS_OUT
     vec3 Normal;
     vec3 FragPos;
     vec4 FragPosLightSpace;
+    vec4 FragPosPersLightSpace;
 } vs_out;
 
 void main() {
@@ -23,6 +23,7 @@ void main() {
     vs_out.FragPos = worldPos.xyz;
     vs_out.Normal = aInstanceNormalMatrix * aNormal;
     vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
+    vs_out.FragPosPersLightSpace = persLightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
 
     gl_Position = projection * view  * worldPos;
 }
