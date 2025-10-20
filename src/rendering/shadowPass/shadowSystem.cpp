@@ -58,8 +58,9 @@ void ShadowSystem::shadowPass(const LightSystem& lights) {
 		mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
 	}
 
-	for (int i = 0; i < lights.getPointLights().size(); i++) {
-		const auto& light = lights.getPointLights()[i];
+	const auto& pointLights = lights.getPointLights();
+	for (int i = 0; i < pointLights.size(); i++) {
+		const auto& light = pointLights[i];
 		mOmnidirShadowPass->render(mEntities, light->position);
 		mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
 	}
