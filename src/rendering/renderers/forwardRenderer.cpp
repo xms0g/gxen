@@ -123,7 +123,7 @@ void ForwardRenderer::opaquePass(const std::array<uint32_t, 3>& shadowMaps) {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
 
-	for (auto& [shader, entities]: mOpaqueBatches) {
+	for (const auto& [shader, entities]: mOpaqueBatches) {
 		shader->activate();
 
 		for (const auto& entity: entities) {
@@ -144,7 +144,7 @@ void ForwardRenderer::transparentPass() {
 	          [](const auto& a, const auto& b) { return a.first > b.first; });
 
 	glDepthMask(GL_FALSE);
-	for (auto& [dist, entity]: mTransparentEntities) {
+	for (const auto& [dist, entity]: mTransparentEntities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
@@ -278,7 +278,7 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vecto
 
 	if (gpuData.empty()) return;
 
-	const GLuint vbo = flags & Transparent ? mDynamicInstanceVBO.buffer : mStaticInstanceVBO.buffer;
+	const uint32_t vbo = flags & Transparent ? mDynamicInstanceVBO.buffer : mStaticInstanceVBO.buffer;
 	const size_t offset = flags & Transparent ? mDynamicInstanceVBO.offset : mStaticInstanceVBO.offset;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
