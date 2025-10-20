@@ -59,6 +59,7 @@ void RenderSystem::materialPass(const Entity& entity, const Shader& shader) cons
 	}
 
 	shader.setFloat("material.shininess", mtc.shininess);
+	shader.setFloat("material.heightScale", mtc.heightScale);
 
 	if (!mtc.textures) {
 		shader.setVec3("material.color", mtc.color);
@@ -84,7 +85,7 @@ void RenderSystem::bindTextures(
 	const TextureMap* texturesByMatID,
 	const Shader& shader) const {
 	if (texturesByMatID && !texturesByMatID->empty()) {
-		bool hasNormalMap{false};
+		bool hasNormalMap{false}, hasHeightMap{false};
 		const auto& textures = texturesByMatID->at(materialID);
 
 		for (int i = 0; i < textures.size(); i++) {
@@ -96,12 +97,17 @@ void RenderSystem::bindTextures(
 				hasNormalMap = true;
 			}
 
+			if (name == "texture_height") {
+				hasHeightMap = true;
+			}
+
 			// now set the sampler to the correct texture unit
 			shader.setInt(std::string("material.").append(name), i);
 			// and finally bind the texture
 			glBindTexture(GL_TEXTURE_2D, textures[i].id);
 		}
 		shader.setBool("material.hasNormalMap", hasNormalMap);
+		shader.setBool("material.hasHeightMap", hasHeightMap);
 	}
 }
 
