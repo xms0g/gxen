@@ -10,7 +10,8 @@ class Cube {
 public:
 	explicit Cube(const char* diffuseTexture = nullptr,
 				   const char* specularTexture = nullptr,
-				   const char* normalTexture = nullptr);
+				   const char* normalTexture = nullptr,
+				   const char* heightTexture = nullptr);
 
 	~Cube();
 

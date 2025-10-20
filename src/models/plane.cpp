@@ -6,7 +6,8 @@
 
 Models::Plane::Plane(const char* diffuseTexture,
                      const char* specularTexture,
-                     const char* normalTexture) {
+                     const char* normalTexture,
+                     const char* heightTexture) {
 	constexpr float v[] = {
 		// Positions        // Normals		   // Texture Coords
 		5.0f, -0.5f, 5.0f, 0.0f, 1.0f, 0.0f, 2.0f, 0.0f, // top right
@@ -84,6 +85,13 @@ Models::Plane::Plane(const char* diffuseTexture,
 			texture::load(fs::path(ASSET_DIR + normalTexture).c_str()),
 			"texture_normal",
 			normalTexture);
+	}
+
+	if (heightTexture) {
+		textures[0].emplace_back(
+			texture::load(fs::path(ASSET_DIR + heightTexture).c_str()),
+			"texture_height",
+			heightTexture);
 	}
 }
 
