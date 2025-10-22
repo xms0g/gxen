@@ -16,7 +16,6 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true}
 	}};
 
-	mQuad->shader().setInt("screenTexture", 0);
 	for (const auto& effect: mEffects) {
 		effect.shader->setInt("screenTexture", 0);
 	}
