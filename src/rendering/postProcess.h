@@ -16,6 +16,7 @@ struct PostEffect {
 	std::string name;
 	std::shared_ptr<Shader> shader;
 	EffectType type{NONE};
+	float exposure{1.0f};
 	bool enabled{false};
 };
 
@@ -25,7 +26,7 @@ public:
 
 	~PostProcess();
 
-	std::array<PostEffect, 7>& effects() { return mEffects; }
+	std::array<PostEffect, 8>& effects() { return mEffects; }
 
 	void render(uint32_t sceneTexture) const;
 
@@ -34,5 +35,5 @@ private:
 
 	std::unique_ptr<Models::Quad> mQuad;
 	std::unique_ptr<FrameBuffer> pingPongBuffers[2];
-	std::array<PostEffect, 7> mEffects;
+	std::array<PostEffect, 8> mEffects;
 };

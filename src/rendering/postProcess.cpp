@@ -3,17 +3,21 @@
 #include "shader.h"
 #include "buffers/frameBuffer.h"
 #include "../models/quad.h"
+#include "../config/config.hpp"
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	const auto kernel = std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag");
 	mEffects = {{
-		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, false},
-		{"Sepia", std::make_shared<Shader>("models/quad.vert", "post-processing/sepia.frag"), NONE, false},
-		{"Edge Detection", kernel, EDGE,false},
-		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), NONE, false},
-		{"Sharpen", kernel, SHARPEN, false},
-		{"Blur", kernel, BLUR, false},
-		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE, true}
+		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, 0.0f, false},
+		{"Sepia", std::make_shared<Shader>("models/quad.vert", "post-processing/sepia.frag"), NONE, 0.0f, false},
+		{"Edge Detection", kernel, EDGE,0.0f,false},
+		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), NONE,0.0f, false},
+		{"Sharpen", kernel, SHARPEN,0.0f, false},
+		{"Blur", kernel, BLUR,0.0f, false},
+#ifdef HDR
+		{"Tone Mapping", std::make_shared<Shader>("models/quad.vert", "post-processing/toneMapping.frag"),NONE, 1.1f, false},
+#endif
+		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE,0.0f, true}
 	}};
 
 	for (const auto& effect: mEffects) {
@@ -42,6 +46,7 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 
 		effect.shader->activate();
 		effect.shader->setInt("type", effect.type);
+		effect.shader->setFloat("exposure", effect.exposure);
 
 		draw(inputTex);
 		inputTex = pingPongBuffers[toggle]->texture();
