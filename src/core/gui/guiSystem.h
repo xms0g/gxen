@@ -12,7 +12,7 @@ public:
 
 	void update(float dt);
 
-	void render(std::array<PostEffect, 7>& effects) const;
+	void render(std::array<PostEffect, 8>& effects) const;
 
 private:
 	void updateFpsCounter(float dt);

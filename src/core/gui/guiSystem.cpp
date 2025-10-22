@@ -27,7 +27,7 @@ void GuiSystem::update(const float dt) {
 	updateFpsCounter(dt);
 }
 
-void GuiSystem::render(std::array<PostEffect, 7>& effects) const {
+void GuiSystem::render(std::array<PostEffect, 8>& effects) const {
 	// Start the Dear ImGui frame
 	GuiBackend::newFrame();
 

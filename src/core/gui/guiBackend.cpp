@@ -63,3 +63,9 @@ void Ui::dragFloat4(const char* label, glm::vec4& value, const float speed, cons
 	ImGui::SameLine(sameLineOffset);
 	ImGui::DragFloat4(("##" + std::string(label) + "v").c_str(), glm::value_ptr(value), speed);
 }
+
+void Ui::sliderFloat(const char* label, float* value, const float sameLineOffset) {
+	ImGui::Text("%s", label);
+	ImGui::SameLine(sameLineOffset);
+	ImGui::SliderFloat(("##" + std::string(label) + "v").c_str(), value, 0.0f, 10.0f);
+}
