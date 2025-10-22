@@ -23,6 +23,8 @@ public:
 
 	FrameBuffer& withTextureMultisampled(int multisampledCount);
 
+	FrameBuffer& withTexture16F();
+
 	FrameBuffer& withTextureDepth();
 
 	FrameBuffer& withTextureCubemapDepth();

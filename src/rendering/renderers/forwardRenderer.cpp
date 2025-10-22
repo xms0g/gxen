@@ -27,6 +27,12 @@ ForwardRenderer::ForwardRenderer() {
 			.checkStatus();
 	mSceneBuffer->unbind();
 
+	mHDRBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+	mHDRBuffer->withTexture16F()
+			.withRenderBufferDepthStencil()
+			.checkStatus();
+	mHDRBuffer->unbind();
+
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
 	mIntermediateBuffer->withTexture()
 			.withRenderBufferDepthStencil()
@@ -42,7 +48,15 @@ ForwardRenderer::ForwardRenderer() {
 ForwardRenderer::~ForwardRenderer() = default;
 
 [[nodiscard]] uint32_t ForwardRenderer::getSceneTexture() const { return mSceneBuffer->texture(); }
-[[nodiscard]] uint32_t ForwardRenderer::getIntermediateTexture() const { return mIntermediateBuffer->texture(); }
+
+[[nodiscard]] uint32_t ForwardRenderer::getIntermediateTexture() const {
+#ifdef HDR
+	return mHDRBuffer->texture();
+#else
+	return mIntermediateBuffer->texture();
+#endif
+}
+
 [[nodiscard]] uint32_t ForwardRenderer::getSceneWidth() const { return mSceneBuffer->width(); }
 [[nodiscard]] uint32_t ForwardRenderer::getSceneHeight() const { return mSceneBuffer->height(); }
 
@@ -217,7 +231,11 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 }
 
 void ForwardRenderer::beginSceneRender() const {
+#ifdef HDR
+	mHDRBuffer->bind();
+#else
 	mSceneBuffer->bind();
+#endif
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -226,11 +244,15 @@ void ForwardRenderer::beginSceneRender() const {
 }
 
 void ForwardRenderer::endSceneRender() const {
+#ifdef HDR
+	mHDRBuffer->unbind();
+#else
 	mSceneBuffer->unbind();
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mIntermediateBuffer->width(),
-	                  mIntermediateBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+					  mIntermediateBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+#endif
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

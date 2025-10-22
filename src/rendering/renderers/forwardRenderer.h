@@ -68,6 +68,7 @@ private:
 	} mDynamicInstanceVBO;
 
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
+	std::unique_ptr<FrameBuffer> mHDRBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
 
 	std::unique_ptr<UniformBuffer> mCameraUBO;
