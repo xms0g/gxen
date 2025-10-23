@@ -2,13 +2,6 @@
 #include <string>
 #include <cstdint>
 
-#ifndef DEBUG
-#define DEBUG
-#endif
-#ifndef HDR
-#define HDR
-#endif
-
 const std::string SHADER_DIR = "shaders/";
 const std::string ASSET_DIR = "assets/";
 
