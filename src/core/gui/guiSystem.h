@@ -2,7 +2,7 @@
 #include "guiBackend.h"
 #include "../../ECS/system.hpp"
 
-struct PostEffect;
+struct IPostEffect;
 
 class GuiSystem final : public System {
 public:
@@ -12,7 +12,7 @@ public:
 
 	void update(float dt);
 
-	void render(std::array<PostEffect, 8>& effects) const;
+	void render(std::vector<std::shared_ptr<IPostEffect>>& effects) const;
 
 private:
 	void updateFpsCounter(float dt);

@@ -6,19 +6,19 @@
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	const auto kernel = std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag");
-	mEffects = {{
-		{"Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), NONE, 0.0f, false},
-		{"Sepia", std::make_shared<Shader>("models/quad.vert", "post-processing/sepia.frag"), NONE, 0.0f, false},
-		{"Edge Detection", kernel, EDGE,0.0f,false},
-		{"Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), NONE,0.0f, false},
-		{"Sharpen", kernel, SHARPEN,0.0f, false},
-		{"Blur", kernel, BLUR,0.0f, false},
-		{"Tone Mapping", std::make_shared<Shader>("models/quad.vert", "post-processing/toneMapping.frag"),NONE, 1.1f, false},
-		{"Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), NONE,0.0f, true}
-	}};
+	mEffects = {
+		std::make_shared<GreyScale>("Grayscale", std::make_shared<Shader>("models/quad.vert", "post-processing/grayscale.frag"), false),
+		std::make_shared<Sepia>("Sepia", std::make_shared<Shader>("models/quad.vert", "post-processing/sepia.frag"), false),
+		std::make_shared<Inverse>("Inverse", std::make_shared<Shader>("models/quad.vert", "post-processing/inverse.frag"), false),
+		std::make_shared<Kernel>("Edge Detection", kernel, false, EDGE),
+		std::make_shared<Kernel>("Sharpen", kernel, false, SHARPEN),
+		std::make_shared<Kernel>("Blur", kernel, false, BLUR),
+		std::make_shared<ToneMapping>("Tone Mapping", std::make_shared<Shader>("models/quad.vert", "post-processing/toneMapping.frag"), false, 1.1f),
+		std::make_shared<GammaCorrection>("Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), true)
+	};
 
 	for (const auto& effect: mEffects) {
-		effect.shader->setInt("screenTexture", 0);
+		effect->shader->setInt("screenTexture", 0);
 	}
 
 	for (auto& pingPongBuffer: pingPongBuffers) {
@@ -36,14 +36,13 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 	uint32_t inputTex = sceneTexture;
 
 	for (const auto& effect: mEffects) {
-		if (!effect.enabled) continue;
+		if (!effect->enabled) continue;
 
 		pingPongBuffers[toggle]->bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		effect.shader->activate();
-		effect.shader->setInt("type", effect.type);
-		effect.shader->setFloat("exposure", effect.exposure);
+		effect->shader->activate();
+		effect->applyUniforms();
 
 		draw(inputTex);
 		inputTex = pingPongBuffers[toggle]->texture();
@@ -64,3 +63,13 @@ void PostProcess::draw(const uint32_t sceneTexture) const {
 	glBindVertexArray(0);
 	glEnable(GL_DEPTH_TEST);
 }
+
+void ToneMapping::applyUniforms() const {
+	shader->setFloat("exposure", exposure);
+}
+
+void Kernel::applyUniforms() const {
+	shader->setInt("type", type);
+}
+
+

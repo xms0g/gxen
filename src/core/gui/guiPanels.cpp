@@ -100,13 +100,13 @@ void GuiPanels::renderPointLight(const Entity& entity) {
 	Ui::dragFloat4("Attenua", plc.attenuation, 0.01f, 100);
 }
 
-void GuiPanels::renderPostProcessPanel(std::array<PostEffect, 8>& effects) {
+void GuiPanels::renderPostProcessPanel(const std::vector<std::shared_ptr<IPostEffect>>& effects) {
 	if (ImGui::Begin("Post-Processing")) {
 		for (auto& effect: effects) {
-			ImGui::Checkbox(effect.name.c_str(), &effect.enabled);
+			ImGui::Checkbox(effect->name.c_str(), &effect->enabled);
 
-			if (effect.name == "Tone Mapping") {
-				Ui::sliderFloat("Exposure", &effect.exposure, 100.0f);
+			if (effect->name == "Tone Mapping") {
+				Ui::sliderFloat("Exposure", &std::dynamic_pointer_cast<ToneMapping>(effect)->exposure, 100.0f);
 			}
 		}
 	}

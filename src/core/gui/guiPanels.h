@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-struct PostEffect;
+struct IPostEffect;
 class Entity;
 
 namespace  GuiPanels {
@@ -19,6 +19,6 @@ void renderSpotLight(const Entity& entity);
 
 void renderPointLight(const Entity& entity);
 
-void renderPostProcessPanel(std::array<PostEffect, 8>& effects);
+void renderPostProcessPanel(const std::vector<std::shared_ptr<IPostEffect>>& effects);
 
 }
