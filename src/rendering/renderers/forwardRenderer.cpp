@@ -70,10 +70,11 @@ void ForwardRenderer::configure(const Camera& camera, const UniformBuffer& light
 		if (mat.flags & Instanced) {
 			const auto& ic = entity.getComponent<InstanceComponent>();
 
+			const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
 			if (mat.flags & Transparent) {
-				requiredTransparentGPUBufferSize += ic.positions->size() * sizeof(InstanceData);
+				requiredTransparentGPUBufferSize += instanceSize;
 			} else {
-				requiredOpaqueGPUBufferSize += ic.positions->size() * sizeof(InstanceData);
+				requiredOpaqueGPUBufferSize += instanceSize;
 			}
 		}
 	}
