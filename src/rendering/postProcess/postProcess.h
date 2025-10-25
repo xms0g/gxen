@@ -3,6 +3,7 @@
 #include <utility>
 #include <vector>
 #include <string>
+#include "IPostEffect.hpp"
 
 namespace Models {
 class Quad;
@@ -13,21 +14,7 @@ class Shader;
 
 enum EffectType { BLUR = 1, SHARPEN = 2, EDGE = 3 };
 
-struct IPostEffect {
-	std::string name;
-	std::shared_ptr<Shader> shader;
-	bool enabled{false};
 
-	IPostEffect() = default;
-
-	IPostEffect(std::string n, const std::shared_ptr<Shader>& s, const bool e) : name(std::move(n)), shader(s),
-		enabled(e) {
-	}
-
-	virtual ~IPostEffect() = default;
-
-	virtual void applyUniforms() const {}
-};
 
 struct GreyScale final : IPostEffect {
 	GreyScale(const std::string& n, const std::shared_ptr<Shader>& s, const bool e) : IPostEffect(n, s, e) {

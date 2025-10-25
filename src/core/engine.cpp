@@ -12,7 +12,7 @@
 #include "../rendering/renderers/forwardRenderer.h"
 #include "../rendering/renderers/debugRenderer.h"
 #include "../rendering/lightSystem.h"
-#include "../rendering/postProcess.h"
+#include "../rendering/postProcess/postProcess.h"
 #include "../rendering/skyboxSystem.h"
 #include "../rendering/shadowPass/shadowSystem.h"
 

@@ -1,8 +1,9 @@
 #include "postProcess.h"
 #include "glad/glad.h"
-#include "shader.h"
-#include "buffers/frameBuffer.h"
-#include "../models/quad.h"
+#include "../shader.h"
+#include "../buffers/frameBuffer.h"
+#include "../../models/quad.h"
+#include "bloom.h"
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	const auto kernel = std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag");
@@ -13,23 +14,29 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 		std::make_shared<Kernel>("Edge Detection", kernel, false, EDGE),
 		std::make_shared<Kernel>("Sharpen", kernel, false, SHARPEN),
 		std::make_shared<Kernel>("Blur", kernel, false, BLUR),
+		std::make_shared<Bloom>("Bloom", width, height, false),
 		std::make_shared<ToneMapping>("Tone Mapping", std::make_shared<Shader>("models/quad.vert", "post-processing/toneMapping.frag"), false, 1.1f),
 		std::make_shared<GammaCorrection>("Gamma Correction", std::make_shared<Shader>("models/quad.vert", "post-processing/gamma.frag"), true)
 	};
 
 	for (const auto& effect: mEffects) {
+		if (effect->name == "Bloom") continue;
+		effect->shader->activate();
 		effect->shader->setInt("screenTexture", 0);
 	}
 
 	for (auto& pingPongBuffer: pingPongBuffers) {
 		pingPongBuffer = std::make_unique<FrameBuffer>(width, height);
+#ifdef HDR
+		pingPongBuffer->withTexture16F()
+#else
 		pingPongBuffer->withTexture()
-				.checkStatus();
+#endif
+		.checkStatus();
 	}
 }
 
 PostProcess::~PostProcess() = default;
-
 
 void PostProcess::render(const uint32_t sceneTexture) const {
 	int toggle = 0;
@@ -41,12 +48,16 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 		pingPongBuffers[toggle]->bind();
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		effect->shader->activate();
-		effect->applyUniforms();
+		if (effect->name == "Bloom") {
+			inputTex = std::dynamic_pointer_cast<Bloom>(effect)->render(inputTex, mQuad->VAO());
+		} else {
+			effect->shader->activate();
+			effect->applyUniforms();
+			draw(inputTex);
+			inputTex = pingPongBuffers[toggle]->texture();
+			pingPongBuffers[toggle]->unbind();
+		}
 
-		draw(inputTex);
-		inputTex = pingPongBuffers[toggle]->texture();
-		pingPongBuffers[toggle]->unbind();
 		toggle = !toggle;
 	}
 

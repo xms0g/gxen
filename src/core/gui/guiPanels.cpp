@@ -9,7 +9,7 @@
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
-#include "../../rendering/postProcess.h"
+#include "../../rendering/postProcess/postProcess.h"
 
 void GuiPanels::renderGraphicsInfoPanel(const uint32_t fps) {
 	if (ImGui::Begin("Graphics")) {
