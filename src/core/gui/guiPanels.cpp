@@ -10,6 +10,9 @@
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
 #include "../../rendering/postProcess/postProcess.h"
+#include "../../rendering/postProcess/toneMapping.h"
+
+
 
 void GuiPanels::renderGraphicsInfoPanel(const uint32_t fps) {
 	if (ImGui::Begin("Graphics")) {

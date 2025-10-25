@@ -66,6 +66,10 @@ void Shader::setFloat(const std::string& name, const float value) const {
 	glUniform1f(glGetUniformLocation(mID, name.c_str()), value);
 }
 
+void Shader::setFloatArray(const std::string& name, const float* values, const uint32_t count) const {
+	glUniform1fv(glGetUniformLocation(mID, name.c_str()), count, values);
+}
+
 void Shader::setVec2(const std::string& name, const glm::vec2& value) const {
 	glUniform2fv(glGetUniformLocation(mID, name.c_str()), 1, &value[0]);
 }
