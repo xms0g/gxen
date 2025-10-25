@@ -2,7 +2,7 @@
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
 
-EdgeDetection::EdgeDetection(const std::string& name, bool enabled): IPostEffect(name, enabled) {
+EdgeDetection::EdgeDetection(const std::string& name, const bool enabled): IPostEffect(name, enabled) {
 	shader = std::make_unique<Shader>("models/quad.vert", "post-processing/kernel.frag");
 	shader->activate();
 	shader->setInt("screenTexture", 0);
