@@ -5,8 +5,6 @@ enum class DebugMode {
 	Wireframe
 };
 
-class Shader;
-
 struct DebugComponent {
 	DebugMode mode{DebugMode::None};
 
