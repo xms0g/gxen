@@ -12,7 +12,6 @@
 #include "../../models/quad.h"
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
-	const auto kernel = std::make_shared<Shader>("models/quad.vert", "post-processing/kernel.frag");
 	mEffects = {
 		std::make_shared<Grayscale>("Grayscale", false),
 		std::make_shared<Sepia>("Sepia", false),

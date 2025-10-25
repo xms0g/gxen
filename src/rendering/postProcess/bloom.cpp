@@ -33,6 +33,8 @@ uint32_t Bloom::render(const uint32_t sceneTexture,
                        const uint32_t VAO,
                        const std::unique_ptr<FrameBuffer>* renderTargets,
                        int& toggle) const {
+	(void) renderTargets;
+	(void) toggle;
 	int toggle_ = 0;
 	uint32_t inputTex = sceneTexture;
 
