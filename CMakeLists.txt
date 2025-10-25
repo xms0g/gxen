@@ -19,7 +19,7 @@ if(ASSIMP_FOUND)
     include_directories(${ASSIMP_INCLUDE_DIR})
 endif()
 
-option(DEBUG_ENABLED "Enable Debug mode" ON)
+option(DEBUG_ENABLED "Enable Debug mode" OFF)
 option(HDR_ENABLED "Enable HDR rendering" OFF)
 
 set(LIBS_INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/libs)
