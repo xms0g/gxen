@@ -29,9 +29,9 @@ private:
 		glm::mat4 persLightSpaceMatrix;
 		glm::vec4 omniFarPlanes;
 	};
-	ShadowData mShadowData;
+	ShadowData mShadowData{};
 
-	std::array<uint32_t, 3> mShadowMaps;
+	std::array<uint32_t, 3> mShadowMaps{};
 	std::vector<Entity> mEntities;
 	std::unique_ptr<DirectionalShadowPass> mDirShadowPass;
 	std::unique_ptr<OmnidirectionalShadowPass> mOmnidirShadowPass;
