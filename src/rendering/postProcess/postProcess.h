@@ -23,6 +23,6 @@ public:
 
 private:
 	std::unique_ptr<Models::Quad> mQuad;
-	std::unique_ptr<FrameBuffer> pingPongBuffers[2];
+	std::unique_ptr<FrameBuffer> renderTargets[2];
 	std::vector<std::shared_ptr<IPostEffect> > mEffects;
 };

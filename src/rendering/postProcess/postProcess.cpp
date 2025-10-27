@@ -23,12 +23,12 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 		std::make_shared<Gamma>("Gamma Correction", true)
 	};
 
-	for (auto& pingPongBuffer: pingPongBuffers) {
-		pingPongBuffer = std::make_unique<FrameBuffer>(width, height);
+	for (auto& target: renderTargets) {
+		target = std::make_unique<FrameBuffer>(width, height);
 #ifdef HDR
-		pingPongBuffer->withTexture16F()
+		target->withTexture16F()
 #else
-		pingPongBuffer->withTexture()
+		target->withTexture()
 #endif
 		.checkStatus();
 	}
@@ -43,7 +43,7 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 	for (const auto& effect: mEffects) {
 		if (!effect->enabled) continue;
 
-		inputTex = effect->render(inputTex, mQuad->VAO(), pingPongBuffers, toggle);
+		inputTex = effect->render(inputTex, mQuad->VAO(), renderTargets, toggle);
 	}
 
 	mQuad->shader().activate();
