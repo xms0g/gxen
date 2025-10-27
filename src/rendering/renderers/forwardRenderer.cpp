@@ -23,19 +23,19 @@
 ForwardRenderer::ForwardRenderer() {
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
-			.withRenderBufferDepthStencilMultisampled(MULTISAMPLED_COUNT)
+			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mSceneBuffer->unbind();
 
 	mHDRBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mHDRBuffer->withTexture16F()
-			.withRenderBufferDepthStencil()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mHDRBuffer->unbind();
 
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
 	mIntermediateBuffer->withTexture()
-			.withRenderBufferDepthStencil()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mIntermediateBuffer->unbind();
 

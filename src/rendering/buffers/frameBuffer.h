@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <vector>
 
 class FrameBuffer {
 public:
@@ -9,7 +10,8 @@ public:
 
 	[[nodiscard]] int width() const { return mWidth; }
 	[[nodiscard]] int height() const { return mHeight; }
-	[[nodiscard]] uint32_t texture() const { return mTextureID; }
+	[[nodiscard]] uint32_t texture() const { return mTextureIDs.front(); }
+	[[nodiscard]] std::vector<uint32_t>& textures() { return mTextureIDs; }
 
 	void bind() const;
 
@@ -33,9 +35,15 @@ public:
 
 	FrameBuffer& withTextureDepthStencilMultisampled(int multisampledCount);
 
+	FrameBuffer& withRenderBufferDepth(uint32_t depthFormat);
+
+	FrameBuffer& withRenderBufferDepthMultisampled(int multisampledCount, uint32_t depthFormat);
+
 	FrameBuffer& withRenderBufferDepthStencil();
 
 	FrameBuffer& withRenderBufferDepthStencilMultisampled(int multisampledCount);
+
+	FrameBuffer& configureAttachments();
 
 	void checkStatus();
 
@@ -44,5 +52,5 @@ private:
 	int mHeight{0};
 	uint32_t mFBO{0};
 	uint32_t mRBO{0};
-	uint32_t mTextureID{0};
+	std::vector<uint32_t> mTextureIDs;
 };
