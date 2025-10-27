@@ -23,9 +23,9 @@ private:
 
 	uint32_t blurPass(uint32_t sceneTexture, uint32_t VAO, int& toggle) const;
 
-	uint32_t combinePass(uint32_t sceneTexture, uint32_t bloomBlur, uint32_t VAO, const int& toggle) const;
+	[[nodiscard]] uint32_t combinePass(uint32_t sceneTexture, uint32_t bloomBlur, uint32_t VAO, const int& toggle) const;
 
-	std::unique_ptr<FrameBuffer> pingPongBuffers[2];
+	std::unique_ptr<FrameBuffer> mRenderTargets[2];
 	std::unique_ptr<Shader> brightFilter;
 	std::unique_ptr<Shader> blur;
 	std::unique_ptr<Shader> combine;

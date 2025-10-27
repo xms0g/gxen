@@ -1,6 +1,6 @@
 #include "postProcess.h"
 #include "grayscale.h"
-#include "Sepia.h"
+#include "sepia.h"
 #include "bloom.h"
 #include "blur.h"
 #include "gamma.h"
