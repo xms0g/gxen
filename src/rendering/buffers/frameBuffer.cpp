@@ -136,33 +136,6 @@ FrameBuffer& FrameBuffer::withTextureCubemapDepth() {
 	return *this;
 }
 
-FrameBuffer& FrameBuffer::withTextureDepthStencil() {
-	uint32_t textureID;
-	glGenTextures(1, &textureID);
-	mTextureIDs.push_back(textureID);
-
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(
-		GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, mWidth, mHeight, 0,
-		GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8, nullptr);
-
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, textureID, 0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	return *this;
-}
-
-FrameBuffer& FrameBuffer::withTextureDepthStencilMultisampled(const int multisampledCount) {
-	uint32_t textureID;
-	glGenTextures(1, &textureID);
-	mTextureIDs.push_back(textureID);
-
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
-	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGB, mWidth, mHeight, GL_TRUE);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D_MULTISAMPLE, textureID, 0);
-	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
-	return *this;
-}
-
 FrameBuffer& FrameBuffer::withRenderBufferDepth(const uint32_t depthFormat) {
 	glGenRenderbuffers(1, &mRBO);
 	glBindRenderbuffer(GL_RENDERBUFFER, mRBO);

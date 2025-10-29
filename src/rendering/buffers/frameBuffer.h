@@ -31,10 +31,6 @@ public:
 
 	FrameBuffer& withTextureCubemapDepth();
 
-	FrameBuffer& withTextureDepthStencil();
-
-	FrameBuffer& withTextureDepthStencilMultisampled(int multisampledCount);
-
 	FrameBuffer& withRenderBufferDepth(uint32_t depthFormat);
 
 	FrameBuffer& withRenderBufferDepthMultisampled(int multisampledCount, uint32_t depthFormat);
