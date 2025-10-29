@@ -50,8 +50,10 @@ FrameBuffer& FrameBuffer::withTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	const size_t idx = mTextureIDs.size() - 1;
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, GL_TEXTURE_2D, textureID, 0);
+	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
+	mAttachments.push_back(attachment);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, textureID, 0);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
 }
@@ -64,8 +66,10 @@ FrameBuffer& FrameBuffer::withTextureMultisampled(const int multisampledCount) {
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGBA, mWidth, mHeight, GL_TRUE);
 
-	const size_t idx = mTextureIDs.size() - 1;
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, GL_TEXTURE_2D_MULTISAMPLE, textureID, 0);
+	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
+	mAttachments.push_back(attachment);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D_MULTISAMPLE, textureID, 0);
+
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	return *this;
 }
@@ -80,8 +84,10 @@ FrameBuffer& FrameBuffer::withTexture16F() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	const size_t idx = mTextureIDs.size() - 1;
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + idx, GL_TEXTURE_2D, textureID, 0);
+	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
+	mAttachments.push_back(attachment);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, textureID, 0);
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
 }
@@ -200,7 +206,7 @@ FrameBuffer& FrameBuffer::configureAttachments() {
 		throw std::runtime_error("ERROR::FRAMEBUFFER::NO_TEXTURES_ATTACHED!\n");
 	}
 
-	glDrawBuffers(static_cast<int>(mTextureIDs.size()), mTextureIDs.data());
+	glDrawBuffers(static_cast<int>(mAttachments.size()), mAttachments.data());
 	return *this;
 }
 
