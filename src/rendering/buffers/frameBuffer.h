@@ -53,4 +53,5 @@ private:
 	uint32_t mFBO{0};
 	uint32_t mRBO{0};
 	std::vector<uint32_t> mTextureIDs;
+	std::vector<uint32_t> mAttachments;
 };
