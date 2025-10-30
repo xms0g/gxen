@@ -74,10 +74,11 @@ void main() {
         N = normalize(fs_in.TBN * N);
     }
 
-    vec3 texColor = texture(material.texture_diffuse, texCoord).rgb;
+    vec3 diffuse = texture(material.texture_diffuse, texCoord).rgb;
+    float specular = texture(material.texture_specular, texCoord).a;
     // Create a mask: 0.0 if no lights, 1.0 if at least one light
     bool hasLights = lightCount.x > 0 || lightCount.y > 0 || lightCount.z > 0;
-    vec3 result = mix(texColor, calculateLights(N, fs_in.FragPos, viewPos.xyz, fs_in.ViewDir, texCoord), float(hasLights));
+    vec3 result = mix(diffuse, calculateLights(N, fs_in.FragPos, viewPos.xyz, fs_in.ViewDir, fs_in.FragPosLightSpace, fs_in.FragPosPersLightSpace, diffuse, specular), float(hasLights));
 
     fragColor = vec4(result, 1.0);
 }
