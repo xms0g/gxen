@@ -17,17 +17,17 @@ Shader::Shader(const char* vs, const char* fs, const char* gs) {
 		const std::string geometryCode = gs ? preprocess(loadFile(gs), gs, includedFiles) : "";
 		includedFiles.clear();
 
-		const uint32_t vertex = compileShader(vertexCode, GL_VERTEX_SHADER);
-		const uint32_t fragment = compileShader(fragmentCode, GL_FRAGMENT_SHADER);
+		const uint32_t vertex = compileShader(vertexCode, vs, GL_VERTEX_SHADER);
+		const uint32_t fragment = compileShader(fragmentCode, fs, GL_FRAGMENT_SHADER);
 		uint32_t geometry = 0;
 
 		if (gs) {
-			geometry = compileShader(geometryCode, GL_GEOMETRY_SHADER);
+			geometry = compileShader(geometryCode, gs, GL_GEOMETRY_SHADER);
 		}
 
 		linkShader(vertex, fragment, geometry);
 	} catch (std::runtime_error& e) {
-		throw std::runtime_error(std::string("Shader error: ") + e.what());
+		throw std::runtime_error(std::string("Shader ") + e.what());
 	}
 }
 
@@ -146,7 +146,7 @@ std::string Shader::preprocess(const std::string& source, const char* fileName,
 	return result.str();
 }
 
-uint32_t Shader::compileShader(const std::string& source, const uint32_t type) {
+uint32_t Shader::compileShader(const std::string& source, const char* fn, const uint32_t type) {
 	const uint32_t shader = glCreateShader(type);
 	const char* code = source.c_str();
 
@@ -169,7 +169,7 @@ uint32_t Shader::compileShader(const std::string& source, const uint32_t type) {
 		// The program is useless now. So delete it.
 		glDeleteShader(shader);
 
-		throw std::runtime_error(std::string("Compilation error:") + "\n" + infoLog);
+		throw std::runtime_error(std::string("Compilation Error in ") + fn + "\n" + infoLog);
 	}
 
 	return shader;

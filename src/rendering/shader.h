@@ -54,7 +54,7 @@ private:
 
 	std::string preprocess(const std::string& source, const char* fileName, std::unordered_set<std::string>& includedFiles);
 
-	uint32_t compileShader(const std::string& source, uint32_t type);
+	uint32_t compileShader(const std::string& source, const char* fn, uint32_t type);
 
 	uint32_t linkShader(uint32_t vertex, uint32_t fragment, uint32_t geometry = 0);
 
