@@ -44,13 +44,13 @@ void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntiti
 
 	if (requiredOpaqueGPUBufferSize > 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO.buffer);
-		glBufferData(GL_ARRAY_BUFFER, requiredOpaqueGPUBufferSize, nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredOpaqueGPUBufferSize), nullptr, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
 	if (requiredTransparentGPUBufferSize > 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO.buffer);
-		glBufferData(GL_ARRAY_BUFFER, requiredTransparentGPUBufferSize, nullptr, GL_DYNAMIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredTransparentGPUBufferSize), nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
@@ -108,21 +108,34 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 	entities.clear();
 }
 
-void ForwardRenderer::instancedPass(std::vector<Entity>& entities) const {
+void ForwardRenderer::instancedPass(std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const {
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
+	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
+
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
+
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
+	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
+
 	for (const auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
 
 		shader->activate();
+		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+		shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
 		materialPass(entity, *shader);
 
 		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
 			bindTextures(matID, texturesByMatID, *shader);
 			for (const auto& mesh: meshes) {
-				glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
-				                        GL_UNSIGNED_INT, 0, ic.positions->size());
+				glBindVertexArray(mesh.VAO());
+				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
+				                        GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(ic.positions->size()));
 			}
 			unbindTextures(matID, texturesByMatID);
 		}
@@ -158,8 +171,8 @@ void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, co
 			bindTextures(matID, texturesByMatID, *shader);
 			for (const auto& mesh: meshes) {
 				glBindVertexArray(mesh.VAO());
-				glDrawElementsInstanced(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()),
-				                        GL_UNSIGNED_INT, 0, positions.size());
+				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
+				                        GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(positions.size()));
 			}
 			unbindTextures(matID, texturesByMatID);
 		}
@@ -207,7 +220,7 @@ void ForwardRenderer::drawPass(const Entity& entity, const Shader& shader) const
 
 		for (const auto& mesh: meshes) {
 			glBindVertexArray(mesh.VAO());
-			glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+			glDrawElements(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 		}
 		unbindTextures(matID, texturesByMatID);
 	}
@@ -272,10 +285,10 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vecto
 	if (gpuData.empty()) return;
 
 	const uint32_t vbo = flags & Transparent ? mDynamicInstanceVBO.buffer : mStaticInstanceVBO.buffer;
-	const size_t offset = flags & Transparent ? mDynamicInstanceVBO.offset : mStaticInstanceVBO.offset;
+	const int offset = flags & Transparent ? mDynamicInstanceVBO.offset : mStaticInstanceVBO.offset;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferSubData(GL_ARRAY_BUFFER, offset, instanceSize, gpuData.data());
+	glBufferSubData(GL_ARRAY_BUFFER, offset, static_cast<long>(instanceSize), gpuData.data());
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
@@ -285,8 +298,8 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vecto
 	}
 
 	if (flags & Transparent) {
-		mDynamicInstanceVBO.offset += instanceSize;
+		mDynamicInstanceVBO.offset += static_cast<int>(instanceSize);
 	} else {
-		mStaticInstanceVBO.offset += instanceSize;
+		mStaticInstanceVBO.offset += static_cast<int>(instanceSize);
 	}
 }

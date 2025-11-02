@@ -26,7 +26,7 @@ public:
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
 	void transparentPass(TransEntityBucket& entities) const;
 
-	void instancedPass(std::vector<Entity>& entities) const;
+	void instancedPass(std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const;
 
 	void transparentInstancedPass(std::vector<Entity>& entities, const Camera& camera);
 

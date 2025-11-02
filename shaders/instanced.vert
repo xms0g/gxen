@@ -11,17 +11,23 @@ layout (location = 11) in mat3 aInstanceNormalMatrix;
 out VS_OUT
 {
     vec2 TexCoord;
-    vec3 Normal;
+    mat3 TBN;
     vec3 FragPos;
     vec4 FragPosLightSpace;
     vec4 FragPosPersLightSpace;
+    vec3 ViewDir;
+    vec3 TangentViewDir;
 } vs_out;
 
 void main() {
     vs_out.TexCoord = aTexCoord;
+    vs_out.TBN = mat3(0.0);
+    vs_out.TBN[2] = aInstanceNormalMatrix * aNormal;
+
     vec4 worldPos = aInstanceMatrix * vec4(aPos, 1.0);
     vs_out.FragPos = worldPos.xyz;
-    vs_out.Normal = aInstanceNormalMatrix * aNormal;
+    vs_out.ViewDir = normalize(viewPos.xyz - vs_out.FragPos);
+    vs_out.TangentViewDir = normalize(transpose(vs_out.TBN) * vs_out.ViewDir);
     vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
     vs_out.FragPosPersLightSpace = persLightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
 
