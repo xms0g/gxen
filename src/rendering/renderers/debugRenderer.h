@@ -1,8 +1,6 @@
 #pragma once
-#include <unordered_map>
 #include "forwardRenderer.h"
 
-enum class DebugMode;
 class UniformBuffer;
 
 class DebugRenderer final : public ForwardRenderer {
@@ -14,5 +12,5 @@ public:
 	void render(std::vector<Entity>& entities) const;
 
 private:
-	std::unordered_map<DebugMode, std::shared_ptr<Shader> > mDebugShaders;
+	std::array<std::shared_ptr<Shader>, 3> mDebugShaders;
 };

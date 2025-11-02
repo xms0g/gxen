@@ -12,8 +12,6 @@
 #include "../../rendering/postProcess/postProcess.h"
 #include "../../rendering/postProcess/toneMapping.h"
 
-
-
 void GuiPanels::renderGraphicsInfoPanel(const uint32_t fps) {
 	if (ImGui::Begin("Graphics")) {
 		ImGui::Text("%s FPS", std::to_string(fps).c_str());
@@ -48,7 +46,7 @@ void GuiPanels::renderDebugViewsPanel(const Entity& entity) {
 	ImGui::PushID(static_cast<int>(entity.id()));
 	if (ImGui::TreeNodeEx("Debug Views", ImGuiTreeNodeFlags_DefaultOpen)) {
 		const char* modes[] = {"None", "Normals", "Wireframe"};
-		int currentMode = static_cast<int>(db.mode);
+		int currentMode = db.mode;
 		ImGui::Text("Mode");
 		ImGui::SameLine(70);
 		if (ImGui::Combo("##mode", &currentMode, modes, IM_ARRAYSIZE(modes))) {

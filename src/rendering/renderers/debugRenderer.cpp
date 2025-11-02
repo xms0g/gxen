@@ -6,19 +6,15 @@
 
 DebugRenderer::DebugRenderer() {
 	mDebugShaders = {
-		{
-			DebugMode::Normals,
-			std::make_shared<Shader>("debug/normal.vert", "debug/normal.frag", "debug/normal.geom")
-		},
-		{
-			DebugMode::Wireframe,
-			std::make_shared<Shader>("debug/wireframe.vert", "debug/wireframe.frag", "debug/wireframe.geom")
-		}
+		nullptr, // for None
+		std::make_shared<Shader>("debug/normal.vert", "debug/normal.frag", "debug/normal.geom"),
+		std::make_shared<Shader>("debug/wireframe.vert", "debug/wireframe.frag", "debug/wireframe.geom")
 	};
 }
 
 void DebugRenderer::configure(const UniformBuffer& cameraUBO) const {
-	for (const auto& [mode, shader]: mDebugShaders) {
+	for (const auto& shader: mDebugShaders) {
+		if (!shader) continue;
 		cameraUBO.configure(shader->ID(), 0, "CameraBlock");
 	}
 }
@@ -26,7 +22,7 @@ void DebugRenderer::configure(const UniformBuffer& cameraUBO) const {
 void DebugRenderer::render(std::vector<Entity>& entities) const {
 	for (const auto& entity: entities) {
 		const auto& db = entity.getComponent<DebugComponent>();
-		if (db.mode == DebugMode::None)
+		if (db.mode == None)
 			continue;
 
 		const auto& dbShader = mDebugShaders.at(db.mode);

@@ -1,15 +1,12 @@
 #pragma once
-enum class DebugMode {
+enum DebugMode: uint32_t {
 	None,
 	Normals,
 	Wireframe
 };
 
 struct DebugComponent {
-	DebugMode mode{DebugMode::None};
+	DebugMode mode{None};
 
 	DebugComponent() = default;
-
-	explicit DebugComponent(const DebugMode m) : mode(m) {
-	}
 };
