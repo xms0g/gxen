@@ -1,6 +1,11 @@
 #pragma once
 #include <memory>
+#include <unordered_map>
+#include "../ECS/system.hpp"
 
+class Shader;
+class FrameBuffer;
+class UniformBuffer;
 class Camera;
 class Registry;
 class ForwardRenderer;
@@ -12,25 +17,50 @@ class SkyboxSystem;
 class ShadowSystem;
 class PostProcess;
 
-class RenderPipeline {
+class RenderPipeline final : public System {
 public:
 	explicit RenderPipeline(Registry* registry);
 
-	~RenderPipeline();
+	~RenderPipeline() override;
 
 	PostProcess& postProcess() const;
 
 	void configure(const Camera& camera) const;
 
-	void render(const Camera& camera) const;
+	void batchEntities(const Camera& camera);
+
+	void render(const Camera& camera);
 
 private:
-	ForwardRenderer* mForwardRenderer{};
-	DeferredRenderer* mDeferredRenderer{};
+	void updateBuffers(const Camera& camera) const;
+
+	void beginSceneRender() const;
+
+	void endSceneRender() const;
+
+	void batchEntities(const Entity& entity, const Camera& camera);
+	// Systems
+	//DeferredRenderer* mDeferredRenderer{};
 	DebugRenderer* mDebugRenderer{};
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
 	ShadowSystem* mShadowSystem{};
 
+	std::unique_ptr<ForwardRenderer> mForwardRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
+
+	// Framebuffers
+	std::unique_ptr<FrameBuffer> mSceneBuffer;
+	std::unique_ptr<FrameBuffer> mHDRBuffer;
+	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
+	std::unique_ptr<UniformBuffer> mCameraUBO;
+
+	// Render queue
+	struct {
+		using TransEntityBucket = std::vector<std::pair<float, Entity> >;
+		TransEntityBucket transparentEntities;
+		std::vector<Entity> transparentInstancedEntities;
+		std::vector<Entity> opaqueInstancedEntities;
+		std::unordered_map<Shader*, std::vector<Entity>> opaqueBatches;
+	} renderQueue;
 };

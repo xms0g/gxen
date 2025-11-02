@@ -28,7 +28,7 @@ private:
 
 	Registry* mRegistry{};
 	GuiSystem* mGuiSystem{};
-	std::unique_ptr<RenderPipeline> mRenderPipeline;
+	RenderPipeline* mRenderPipeline{};
 	std::unique_ptr<Window> mWindow;
 	std::unique_ptr<Camera> mCamera;
 	std::unique_ptr<Input> mInput;

@@ -24,12 +24,15 @@ void Engine::init(Registry* registry) {
 	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
 	mGuiSystem = &registry->getSystem<GuiSystem>();
 
+	registry->addSystem<RenderPipeline>(registry);
+	mRenderPipeline = &registry->getSystem<RenderPipeline>();
+
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
 	mInput = std::make_unique<Input>();
-	mRenderPipeline = std::make_unique<RenderPipeline>(registry);
 }
 
 void Engine::configure() const {
+	mRenderPipeline->batchEntities(*mCamera);
 	mRenderPipeline->configure(*mCamera);
 }
 
@@ -42,6 +45,7 @@ void Engine::run() {
 
 		mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 		mCamera->update();
+		mRenderPipeline->batchEntities(*mCamera);
 		mRenderPipeline->render(*mCamera);
 #ifdef DEBUG
 		mGuiSystem->update(mDeltaTime);

@@ -21,62 +21,27 @@
 #include "../../math/utils.hpp"
 
 ForwardRenderer::ForwardRenderer() {
-	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
-			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
-			.checkStatus();
-	mSceneBuffer->unbind();
-
-	mHDRBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-	mHDRBuffer->withTexture16F()
-			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
-			.checkStatus();
-	mHDRBuffer->unbind();
-
-	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
-	mIntermediateBuffer->withTexture()
-			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
-			.checkStatus();
-	mIntermediateBuffer->unbind();
-
-	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-
 	glGenBuffers(1, &mStaticInstanceVBO.buffer);
 	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
 }
 
 ForwardRenderer::~ForwardRenderer() = default;
 
-[[nodiscard]] uint32_t ForwardRenderer::getSceneTexture() const { return mSceneBuffer->texture(); }
-
-[[nodiscard]] uint32_t ForwardRenderer::getIntermediateTexture() const {
-#ifdef HDR
-	return mHDRBuffer->texture();
-#else
-	return mIntermediateBuffer->texture();
-#endif
-}
-
-[[nodiscard]] uint32_t ForwardRenderer::getSceneWidth() const { return mSceneBuffer->width(); }
-[[nodiscard]] uint32_t ForwardRenderer::getSceneHeight() const { return mSceneBuffer->height(); }
-
-void ForwardRenderer::configure(const Camera& camera, const UniformBuffer& lightUBO) {
+void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntities,
+                                const std::vector<Entity>& transparentInstancedEntities) {
 	size_t requiredOpaqueGPUBufferSize = 0, requiredTransparentGPUBufferSize = 0;
 
 	// Calculate required GPU buffer sizes of opaque and transparent objects
-	for (const auto& entity: getSystemEntities()) {
-		const auto& mat = entity.getComponent<MaterialComponent>();
+	for (const auto& entity: opaqueInstancedEntities) {
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
+		requiredOpaqueGPUBufferSize += instanceSize;
+	}
 
-		if (mat.flags & Instanced) {
-			const auto& ic = entity.getComponent<InstanceComponent>();
-
-			const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
-			if (mat.flags & Transparent) {
-				requiredTransparentGPUBufferSize += instanceSize;
-			} else {
-				requiredOpaqueGPUBufferSize += instanceSize;
-			}
-		}
+	for (const auto& entity: transparentInstancedEntities) {
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
+		requiredTransparentGPUBufferSize += instanceSize;
 	}
 
 	if (requiredOpaqueGPUBufferSize > 0) {
@@ -91,44 +56,20 @@ void ForwardRenderer::configure(const Camera& camera, const UniformBuffer& light
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
-	for (const auto& entity: getSystemEntities()) {
-		const auto& shader = entity.getComponent<ShaderComponent>().shader;
+	for (const auto& entity: opaqueInstancedEntities) {
 		const auto& mat = entity.getComponent<MaterialComponent>();
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
 
-		mCameraUBO->configure(shader->ID(), 0, "CameraBlock");
-		lightUBO.configure(shader->ID(), 1, "LightBlock");
-
-		if (mat.flags & Instanced) {
-			const auto& ic = entity.getComponent<InstanceComponent>();
-			const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
-
-			prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
-		}
+		prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
 	}
+
 	mStaticInstanceVBO.offset = 0;
 	mDynamicInstanceVBO.offset = 0;
-
-	const glm::mat4 projectionMat = glm::perspective(
-		glm::radians(camera.zoom()),
-		static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
-		ZNEAR, ZFAR);
-
-	mCameraUBO->bind();
-	mCameraUBO->setData(glm::value_ptr(projectionMat), sizeof(glm::mat4), sizeof(glm::mat4));
-	mCameraUBO->unbind();
 }
 
-void ForwardRenderer::updateBuffers(const Camera& camera) const {
-	updateCameraUBO(camera);
-}
-
-void ForwardRenderer::batchEntities(const Camera& camera) {
-	for (const auto& entity: getSystemEntities()) {
-		batchEntities(entity, camera);
-	}
-}
-
-void ForwardRenderer::opaquePass(const std::array<uint32_t, 3>& shadowMaps) {
+void ForwardRenderer::opaquePass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+                                 const std::array<uint32_t, 3>& shadowMaps) const {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
 
@@ -138,39 +79,39 @@ void ForwardRenderer::opaquePass(const std::array<uint32_t, 3>& shadowMaps) {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
 
-	for (const auto& [shader, entities]: mOpaqueBatches) {
+	for (const auto& [shader, entities]: opaqueBatches) {
 		shader->activate();
+		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+		shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
 		for (const auto& entity: entities) {
-			shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-			shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
-			shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 			opaquePass(entity, *shader);
 		}
 	}
 
-	mOpaqueBatches.clear();
+	opaqueBatches.clear();
 }
 
-void ForwardRenderer::transparentPass() {
-	if (mTransparentEntities.empty()) return;
+void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
+	if (entities.empty()) return;
 
-	std::sort(mTransparentEntities.begin(), mTransparentEntities.end(),
+	std::sort(entities.begin(), entities.end(),
 	          [](const auto& a, const auto& b) { return a.first > b.first; });
 
 	glDepthMask(GL_FALSE);
-	for (const auto& [dist, entity]: mTransparentEntities) {
+	for (const auto& [dist, entity]: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
 		opaquePass(entity, *shader);
 	}
 	glDepthMask(GL_TRUE);
-	mTransparentEntities.clear();
+	entities.clear();
 }
 
-void ForwardRenderer::instancedPass() {
-	for (const auto& entity: mInstancedEntities) {
+void ForwardRenderer::instancedPass(std::vector<Entity>& entities) const {
+	for (const auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
@@ -189,12 +130,12 @@ void ForwardRenderer::instancedPass() {
 		}
 	}
 
-	mInstancedEntities.clear();
+	entities.clear();
 }
 
-void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
+void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, const Camera& camera) {
 	glDepthMask(GL_FALSE);
-	for (auto& entity: mTransparentInstancedEntities) {
+	for (auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& mat = entity.getComponent<MaterialComponent>();
@@ -227,64 +168,8 @@ void ForwardRenderer::transparentInstancedPass(const Camera& camera) {
 	}
 
 	glDepthMask(GL_TRUE);
-	mTransparentInstancedEntities.clear();
+	entities.clear();
 	mDynamicInstanceVBO.offset = 0;
-}
-
-void ForwardRenderer::beginSceneRender() const {
-#ifdef HDR
-	mHDRBuffer->bind();
-#else
-	mSceneBuffer->bind();
-#endif
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
-	glCullFace(GL_BACK);
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-}
-
-void ForwardRenderer::endSceneRender() const {
-#ifdef HDR
-	mHDRBuffer->unbind();
-#else
-	mSceneBuffer->unbind();
-	mSceneBuffer->bindForRead();
-	mIntermediateBuffer->bindForDraw();
-	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mIntermediateBuffer->width(),
-					  mIntermediateBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
-#endif
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-}
-
-void ForwardRenderer::batchEntities(const Entity& entity, const Camera& camera) {
-	const auto& mat = entity.getComponent<MaterialComponent>();
-
-	if (mat.flags & Instanced) {
-		if (mat.flags & Transparent) {
-			mTransparentInstancedEntities.push_back(entity);
-		} else
-			mInstancedEntities.push_back(entity);
-	} else {
-		if (mat.flags & Transparent) {
-			const auto& tc = entity.getComponent<TransformComponent>();
-			float distance = glm::length2(camera.position() - tc.position);
-			mTransparentEntities.emplace_back(distance, entity);
-		} else {
-			auto& shader = *entity.getComponent<ShaderComponent>().shader;
-			mOpaqueBatches[&shader].push_back(entity);
-		}
-	}
-}
-
-void ForwardRenderer::updateCameraUBO(const Camera& camera) const {
-	auto view = camera.viewMatrix();
-	auto viewPos = glm::vec4(camera.position(), 1.0);
-
-	mCameraUBO->bind();
-	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
-	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
-	mCameraUBO->unbind();
 }
 
 void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
