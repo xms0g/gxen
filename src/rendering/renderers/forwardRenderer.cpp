@@ -4,11 +4,8 @@
 #include <SDL.h>
 #include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
-#include "../lightSystem.h"
 #include "../shader.h"
 #include "../renderFlags.hpp"
-#include "../buffers/frameBuffer.h"
-#include "../buffers/uniformBuffer.h"
 #include "../../mesh/mesh.h"
 #include "../../config/config.hpp"
 #include "../../core/camera.h"

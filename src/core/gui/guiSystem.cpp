@@ -27,7 +27,7 @@ void GuiSystem::update(const float dt) {
 	updateFpsCounter(dt);
 }
 
-void GuiSystem::render(std::vector<std::shared_ptr<IPostEffect>>& effects) const {
+void GuiSystem::render(const std::vector<std::shared_ptr<IPostEffect>>& effects) const {
 	// Start the Dear ImGui frame
 	GuiBackend::newFrame();
 

@@ -1,9 +1,10 @@
 #pragma once
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "glm/glm.hpp"
-#include "../../ECS/system.hpp"
 
+class Shader;
 class UniformBuffer;
 class PerspectiveShadowPass;
 class OmnidirectionalShadowPass;
@@ -11,17 +12,17 @@ class DirectionalShadowPass;
 class LightSystem;
 class Entity;
 
-class ShadowSystem final : public System {
+class ShadowManager {
 public:
-	ShadowSystem();
+	ShadowManager();
 
-	~ShadowSystem() override;
+	~ShadowManager();
 
 	std::array<uint32_t, 3>& getShadowMaps() { return mShadowMaps; }
 
-	void configure() const;
+	void configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches) const;
 
-	void shadowPass(const LightSystem& lights);
+	void shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights);
 
 private:
 	struct alignas(16) ShadowData {
@@ -29,10 +30,10 @@ private:
 		glm::mat4 persLightSpaceMatrix;
 		glm::vec4 omniFarPlanes;
 	};
+
 	ShadowData mShadowData{};
 
 	std::array<uint32_t, 3> mShadowMaps{};
-	std::vector<Entity> mEntities;
 	std::unique_ptr<DirectionalShadowPass> mDirShadowPass;
 	std::unique_ptr<OmnidirectionalShadowPass> mOmnidirShadowPass;
 	std::unique_ptr<PerspectiveShadowPass> mPerspectiveShadowPass;

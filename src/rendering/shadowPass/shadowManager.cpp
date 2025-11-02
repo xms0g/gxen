@@ -1,0 +1,60 @@
+#include "shadowManager.h"
+#include "directionalShadowPass.h"
+#include "omnidirectionalShadowPass.h"
+#include "perspectiveShadowPass.h"
+#include "../shader.h"
+#include "../lightSystem.h"
+#include "../buffers/uniformBuffer.h"
+#include "../../config/config.hpp"
+#include "../../ECS/components/directionalLight.hpp"
+#include "../../ECS/components/pointLight.hpp"
+#include "../../ECS/components/spotLight.hpp"
+
+ShadowManager::ShadowManager() {
+	mDirShadowPass = std::make_unique<DirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
+	mOmnidirShadowPass = std::make_unique<OmnidirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
+	mPerspectiveShadowPass = std::make_unique<PerspectiveShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
+
+	mShadowUBO = std::make_unique<UniformBuffer>(sizeof(ShadowData), 2);
+
+	mShadowMaps = {
+		{
+			mDirShadowPass->getShadowMap(),
+			mOmnidirShadowPass->getShadowMap(),
+			mPerspectiveShadowPass->getShadowMap()
+		}
+	};
+}
+
+ShadowManager::~ShadowManager() = default;
+
+void ShadowManager::configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches) const {
+	for (auto& [shader, entities]: opaqueBatches) {
+		mShadowUBO->configure(shader->ID(), 2, "ShadowBlock");
+	}
+}
+
+void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights) {
+	for (auto& [shader, entities]: opaqueBatches) {
+		for (auto& light: lights.getDirLights()) {
+			mDirShadowPass->render(entities, light->direction);
+			mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
+		}
+
+		const auto& pointLights = lights.getPointLights();
+		for (int i = 0; i < pointLights.size(); i++) {
+			const auto& light = pointLights[i];
+			mOmnidirShadowPass->render(entities, light->position);
+			mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
+		}
+
+		for (auto& light: lights.getSpotLights()) {
+			mPerspectiveShadowPass->render(entities, light->direction, light->position, light->cutOff.y);
+			mShadowData.persLightSpaceMatrix = mPerspectiveShadowPass->getLightSpaceMatrix();
+		}
+	}
+
+	mShadowUBO->bind();
+	mShadowUBO->setData(&mShadowData, sizeof(ShadowData), 0);
+	mShadowUBO->unbind();
+}

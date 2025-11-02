@@ -6,8 +6,6 @@
 
 struct Texture;
 class Entity;
-class FrameBuffer;
-class UniformBuffer;
 class Window;
 class Camera;
 class guiSystem;

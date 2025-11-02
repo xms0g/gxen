@@ -14,7 +14,7 @@
 #include "../rendering/lightSystem.h"
 #include "../rendering/postProcess/postProcess.h"
 #include "../rendering/skyboxSystem.h"
-#include "../rendering/shadowPass/shadowSystem.h"
+#include "../rendering/shadowPass/shadowManager.h"
 #include "../rendering/buffers/uniformBuffer.h"
 #include "../core/camera.h"
 #include "../ECS/components/debug.hpp"
@@ -54,9 +54,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	registry->addSystem<SkyboxSystem>();
 	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
 
-	registry->addSystem<ShadowSystem>();
-	mShadowSystem = &registry->getSystem<ShadowSystem>();
-
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
 			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
@@ -77,6 +74,7 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
+	mShadowManager = std::make_unique<ShadowManager>();
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
 	mDebugRenderer = std::make_unique<DebugRenderer>();
 	mPostProcess = std::make_unique<PostProcess>(mSceneBuffer->width(), mSceneBuffer->height());
@@ -91,7 +89,7 @@ void RenderPipeline::configure(const Camera& camera) const {
 	                            renderQueue.transparentInstancedEntities);
 	//mDeferredRenderer->configure(mLightSystem->getLightUBO());
 	mDebugRenderer->configure(*mCameraUBO);
-	mShadowSystem->configure();
+	mShadowManager->configure(renderQueue.opaqueBatches);
 
 	// Uniform buffer configuration
 	for (const auto& entity: getSystemEntities()) {
@@ -119,15 +117,15 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 
 void RenderPipeline::render(const Camera& camera) {
 	mLightSystem->update();
-	mShadowSystem->shadowPass(*mLightSystem);
+	mShadowManager->shadowPass(renderQueue.opaqueBatches, *mLightSystem);
 	updateBuffers(camera);
 
 	beginSceneRender();
 	mSkyboxSystem->render(camera);
 	//mDeferredRenderer->geometryPass();
 	//mDeferredRenderer->lightingPass(mShadowSystem->getShadowMaps());
-	mForwardRenderer->opaquePass(renderQueue.opaqueBatches, mShadowSystem->getShadowMaps());
-	mForwardRenderer->instancedPass(renderQueue.transparentInstancedEntities);
+	mForwardRenderer->opaquePass(renderQueue.opaqueBatches, mShadowManager->getShadowMaps());
+	mForwardRenderer->instancedPass(renderQueue.opaqueInstancedEntities);
 	mDebugRenderer->render(renderQueue.debugEntities);
 	mForwardRenderer->transparentPass(renderQueue.transparentEntities);
 	mForwardRenderer->transparentInstancedPass(renderQueue.transparentInstancedEntities, camera);

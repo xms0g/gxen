@@ -12,7 +12,7 @@ public:
 
 	void update(float dt);
 
-	void render(std::vector<std::shared_ptr<IPostEffect>>& effects) const;
+	void render(const std::vector<std::shared_ptr<IPostEffect>>& effects) const;
 
 private:
 	void updateFpsCounter(float dt);

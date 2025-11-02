@@ -14,7 +14,7 @@ class DebugRenderer;
 class GuiSystem;
 class LightSystem;
 class SkyboxSystem;
-class ShadowSystem;
+class ShadowManager;
 class PostProcess;
 
 class RenderPipeline final : public System {
@@ -23,7 +23,7 @@ public:
 
 	~RenderPipeline() override;
 
-	PostProcess& postProcess() const;
+	[[nodiscard]] PostProcess& postProcess() const;
 
 	void configure(const Camera& camera) const;
 
@@ -43,8 +43,8 @@ private:
 	//DeferredRenderer* mDeferredRenderer{};
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
-	ShadowSystem* mShadowSystem{};
 
+	std::unique_ptr<ShadowManager> mShadowManager;
 	std::unique_ptr<DebugRenderer> mDebugRenderer;
 	std::unique_ptr<ForwardRenderer> mForwardRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
