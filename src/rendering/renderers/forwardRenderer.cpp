@@ -105,7 +105,8 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 	glDepthMask(GL_TRUE);
 }
 
-void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const {
+void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
+                                    const std::array<uint32_t, 3>& shadowMaps) const {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
 
@@ -221,10 +222,9 @@ void ForwardRenderer::drawPass(const Entity& entity, const Shader& shader) const
 	}
 }
 
-void ForwardRenderer::bindTextures(
-	const uint32_t materialID,
-	const TextureMap* texturesByMatID,
-	const Shader& shader) const {
+void ForwardRenderer::bindTextures(const uint32_t materialID,
+                                   const TextureMap* texturesByMatID,
+                                   const Shader& shader) const {
 	if (texturesByMatID && !texturesByMatID->empty()) {
 		bool hasNormalMap{false}, hasHeightMap{false};
 		const auto& textures = texturesByMatID->at(materialID);
@@ -252,9 +252,8 @@ void ForwardRenderer::bindTextures(
 	}
 }
 
-void ForwardRenderer::unbindTextures(
-	const uint32_t materialID,
-	const TextureMap* texturesByMatID) const {
+void ForwardRenderer::unbindTextures(const uint32_t materialID,
+                                     const TextureMap* texturesByMatID) const {
 	if (texturesByMatID && !texturesByMatID->empty()) {
 		const auto& textures = texturesByMatID->at(materialID);
 
@@ -265,8 +264,10 @@ void ForwardRenderer::unbindTextures(
 	}
 }
 
-void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
-                                          const size_t instanceSize, const uint32_t flags) {
+void ForwardRenderer::prepareInstanceData(const Entity& entity,
+                                          const std::vector<glm::vec3>& positions,
+                                          const size_t instanceSize,
+                                          const uint32_t flags) {
 	const auto& tc = entity.getComponent<TransformComponent>();
 
 	std::vector<InstanceData> gpuData;
