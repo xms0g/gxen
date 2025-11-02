@@ -20,15 +20,15 @@ public:
 	void configure(const std::vector<Entity>& opaqueInstancedEntities,
 	               const std::vector<Entity>& transparentInstancedEntities);
 
-	void opaquePass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+	void opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
 	                const std::array<uint32_t, 3>& shadowMaps) const;
 
 	using TransEntityBucket = std::vector<std::pair<float, Entity> >;
 	void transparentPass(TransEntityBucket& entities) const;
 
-	void instancedPass(std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const;
+	void instancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const;
 
-	void transparentInstancedPass(std::vector<Entity>& entities, const Camera& camera);
+	void transparentInstancedPass(const std::vector<Entity>& entities, const Camera& camera);
 
 protected:
 	void opaquePass(const Entity& entity, const Shader& shader) const;

@@ -25,6 +25,9 @@
 #include "../ECS/components/instance.hpp"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
+	RequireComponent<MeshComponent>();
+	RequireComponent<ShaderComponent>();
+	RequireComponent<TransformComponent>();
 	// glad: load all OpenGL function pointers
 	// ---------------------------------------
 	if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
@@ -42,9 +45,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 
-	RequireComponent<MeshComponent>();
-	RequireComponent<ShaderComponent>();
-	RequireComponent<TransformComponent>();
 	// registry->addSystem<DeferredRenderer>();
 	// mDeferredRenderer = &registry->getSystem<DeferredRenderer>();
 
@@ -85,8 +85,7 @@ RenderPipeline::~RenderPipeline() = default;
 PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 
 void RenderPipeline::configure(const Camera& camera) const {
-	mForwardRenderer->configure(renderQueue.opaqueInstancedEntities,
-	                            renderQueue.transparentInstancedEntities);
+	mForwardRenderer->configure(renderQueue.opaqueInstancedEntities, renderQueue.transparentInstancedEntities);
 	//mDeferredRenderer->configure(mLightSystem->getLightUBO());
 	mDebugRenderer->configure(*mCameraUBO);
 	mShadowManager->configure(renderQueue.opaqueBatches);
@@ -125,7 +124,7 @@ void RenderPipeline::render(const Camera& camera) {
 	//mDeferredRenderer->geometryPass();
 	//mDeferredRenderer->lightingPass(mShadowSystem->getShadowMaps());
 	mForwardRenderer->opaquePass(renderQueue.opaqueBatches, mShadowManager->getShadowMaps());
-	mForwardRenderer->instancedPass(renderQueue.opaqueInstancedEntities);
+	mForwardRenderer->instancedPass(renderQueue.opaqueInstancedEntities, mShadowManager->getShadowMaps());
 	mDebugRenderer->render(renderQueue.debugEntities);
 	mForwardRenderer->transparentPass(renderQueue.transparentEntities);
 	mForwardRenderer->transparentInstancedPass(renderQueue.transparentInstancedEntities, camera);
@@ -183,8 +182,9 @@ void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 	if (mat.flags & Instanced) {
 		if (mat.flags & Transparent) {
 			renderQueue.transparentInstancedEntities.push_back(entity);
-		} else
+		} else {
 			renderQueue.opaqueInstancedEntities.push_back(entity);
+		}
 	} else {
 		if (mat.flags & Transparent) {
 			const auto& tc = entity.getComponent<TransformComponent>();

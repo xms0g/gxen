@@ -66,7 +66,7 @@ void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntiti
 	mDynamicInstanceVBO.offset = 0;
 }
 
-void ForwardRenderer::opaquePass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
@@ -87,8 +87,6 @@ void ForwardRenderer::opaquePass(std::unordered_map<Shader*, std::vector<Entity>
 			opaquePass(entity, *shader);
 		}
 	}
-
-	opaqueBatches.clear();
 }
 
 void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
@@ -105,10 +103,9 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 		opaquePass(entity, *shader);
 	}
 	glDepthMask(GL_TRUE);
-	entities.clear();
 }
 
-void ForwardRenderer::instancedPass(std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const {
+void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
 
@@ -140,11 +137,9 @@ void ForwardRenderer::instancedPass(std::vector<Entity>& entities, const std::ar
 			unbindTextures(matID, texturesByMatID);
 		}
 	}
-
-	entities.clear();
 }
 
-void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, const Camera& camera) {
+void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities, const Camera& camera) {
 	glDepthMask(GL_FALSE);
 	for (auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
@@ -152,7 +147,7 @@ void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, co
 		const auto& mat = entity.getComponent<MaterialComponent>();
 		const auto& texturesByMatID = mat.textures;
 
-		auto positions = *ic.positions;
+		auto& positions = *ic.positions;
 
 		std::sort(
 			positions.begin(), positions.end(),
@@ -165,6 +160,7 @@ void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, co
 		prepareInstanceData(entity, positions, positions.size() * sizeof(InstanceData), mat.flags);
 
 		shader->activate();
+
 		materialPass(entity, *shader);
 
 		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
@@ -179,7 +175,6 @@ void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, co
 	}
 
 	glDepthMask(GL_TRUE);
-	entities.clear();
 	mDynamicInstanceVBO.offset = 0;
 }
 

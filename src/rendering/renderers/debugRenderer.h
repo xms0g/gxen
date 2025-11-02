@@ -9,7 +9,7 @@ public:
 
 	void configure(const UniformBuffer& cameraUBO) const;
 
-	void render(std::vector<Entity>& entities) const;
+	void render(const std::vector<Entity>& entities) const;
 
 private:
 	std::array<std::shared_ptr<Shader>, 3> mDebugShaders;

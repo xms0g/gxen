@@ -19,7 +19,7 @@ void DebugRenderer::configure(const UniformBuffer& cameraUBO) const {
 	}
 }
 
-void DebugRenderer::render(std::vector<Entity>& entities) const {
+void DebugRenderer::render(const std::vector<Entity>& entities) const {
 	for (const auto& entity: entities) {
 		const auto& db = entity.getComponent<DebugComponent>();
 		if (db.mode == None)
@@ -30,5 +30,4 @@ void DebugRenderer::render(std::vector<Entity>& entities) const {
 		geometryPass(entity, *dbShader);
 		drawPass(entity, *dbShader);
 	}
-	entities.clear();
 }
