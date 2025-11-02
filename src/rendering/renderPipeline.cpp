@@ -1,5 +1,7 @@
 #include "renderPipeline.h"
+#include <SDL.h>
 #include "glm/gtc/type_ptr.hpp"
+#include "glm/gtx/norm.hpp"
 #include "shader.h"
 #include "renderFlags.hpp"
 #include "buffers/frameBuffer.h"
@@ -15,23 +17,36 @@
 #include "../rendering/shadowPass/shadowSystem.h"
 #include "../rendering/buffers/uniformBuffer.h"
 #include "../core/camera.h"
+#include "../ECS/components/debug.hpp"
 #include "../ECS/components/transform.hpp"
 #include "../ECS/components/material.hpp"
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/instance.hpp"
-#include "glm/gtx/norm.hpp"
-
 
 RenderPipeline::RenderPipeline(Registry* registry) {
+	// glad: load all OpenGL function pointers
+	// ---------------------------------------
+	if (!gladLoadGLLoader(SDL_GL_GetProcAddress)) {
+		throw std::runtime_error(std::string("ERROR::RENDERER::FAILED_TO_INIT_GLAD"));
+	}
+
+	// configure global opengl state
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	glEnable(GL_CULL_FACE);
+	glCullFace(GL_BACK);
+	glFrontFace(GL_CCW);
+
 	RequireComponent<MeshComponent>();
 	RequireComponent<ShaderComponent>();
 	RequireComponent<TransformComponent>();
 	// registry->addSystem<DeferredRenderer>();
 	// mDeferredRenderer = &registry->getSystem<DeferredRenderer>();
-
-	registry->addSystem<DebugRenderer>();
-	mDebugRenderer = &registry->getSystem<DebugRenderer>();
 
 	registry->addSystem<LightSystem>();
 	mLightSystem = &registry->getSystem<LightSystem>();
@@ -63,6 +78,7 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
+	mDebugRenderer = std::make_unique<DebugRenderer>();
 	mPostProcess = std::make_unique<PostProcess>(mSceneBuffer->width(), mSceneBuffer->height());
 }
 
@@ -112,7 +128,7 @@ void RenderPipeline::render(const Camera& camera) {
 	//mDeferredRenderer->lightingPass(mShadowSystem->getShadowMaps());
 	mForwardRenderer->opaquePass(renderQueue.opaqueBatches, mShadowSystem->getShadowMaps());
 	mForwardRenderer->instancedPass(renderQueue.transparentInstancedEntities);
-	mDebugRenderer->render();
+	mDebugRenderer->render(renderQueue.debugEntities);
 	mForwardRenderer->transparentPass(renderQueue.transparentEntities);
 	mForwardRenderer->transparentInstancedPass(renderQueue.transparentInstancedEntities, camera);
 	endSceneRender();
@@ -160,6 +176,10 @@ void RenderPipeline::endSceneRender() const {
 }
 
 void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
+	if (entity.hasComponent<DebugComponent>()) {
+		renderQueue.debugEntities.push_back(entity);
+	}
+
 	const auto& mat = entity.getComponent<MaterialComponent>();
 
 	if (mat.flags & Instanced) {

@@ -19,6 +19,7 @@
 #include "../../ECS/components/shader.hpp"
 #include "../../ECS/components/instance.hpp"
 #include "../../math/utils.hpp"
+#include "../../resourceManager/texture.h"
 
 ForwardRenderer::ForwardRenderer() {
 	glGenBuffers(1, &mStaticInstanceVBO.buffer);
@@ -170,6 +171,93 @@ void ForwardRenderer::transparentInstancedPass(std::vector<Entity>& entities, co
 	glDepthMask(GL_TRUE);
 	entities.clear();
 	mDynamicInstanceVBO.offset = 0;
+}
+
+void ForwardRenderer::opaquePass(const Entity& entity, const Shader& shader) const {
+	geometryPass(entity, shader);
+	materialPass(entity, shader);
+	drawPass(entity, shader);
+}
+
+void ForwardRenderer::geometryPass(const Entity& entity, const Shader& shader) const {
+	const auto& tc = entity.getComponent<TransformComponent>();
+
+	auto [model, normal] = math::computeModelMatrices(tc.position, tc.rotation, tc.scale);
+	shader.setMat4("model", model);
+	shader.setMat3("normalMatrix", normal);
+}
+
+void ForwardRenderer::materialPass(const Entity& entity, const Shader& shader) const {
+	const auto& mtc = entity.getComponent<MaterialComponent>();
+
+	if (mtc.flags & TwoSided) {
+		glDisable(GL_CULL_FACE);
+	}
+
+	shader.setFloat("material.shininess", mtc.shininess);
+	shader.setFloat("material.heightScale", mtc.heightScale);
+
+	if (!mtc.textures) {
+		shader.setVec3("material.color", mtc.color);
+	}
+}
+
+void ForwardRenderer::drawPass(const Entity& entity, const Shader& shader) const {
+	const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
+
+	for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+		bindTextures(matID, texturesByMatID, shader);
+
+		for (const auto& mesh: meshes) {
+			glBindVertexArray(mesh.VAO());
+			glDrawElements(GL_TRIANGLES, static_cast<uint32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+		}
+		unbindTextures(matID, texturesByMatID);
+	}
+}
+
+void ForwardRenderer::bindTextures(
+	const uint32_t materialID,
+	const TextureMap* texturesByMatID,
+	const Shader& shader) const {
+	if (texturesByMatID && !texturesByMatID->empty()) {
+		bool hasNormalMap{false}, hasHeightMap{false};
+		const auto& textures = texturesByMatID->at(materialID);
+
+		for (int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+
+			std::string name = textures[i].type;
+
+			if (name == "texture_normal") {
+				hasNormalMap = true;
+			}
+
+			if (name == "texture_height") {
+				hasHeightMap = true;
+			}
+
+			// now set the sampler to the correct texture unit
+			shader.setInt(std::string("material.").append(name), i);
+			// and finally bind the texture
+			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		}
+		shader.setBool("material.hasNormalMap", hasNormalMap);
+		shader.setBool("material.hasHeightMap", hasHeightMap);
+	}
+}
+
+void ForwardRenderer::unbindTextures(
+	const uint32_t materialID,
+	const TextureMap* texturesByMatID) const {
+	if (texturesByMatID && !texturesByMatID->empty()) {
+		const auto& textures = texturesByMatID->at(materialID);
+
+		for (int i = 0; i < textures.size(); i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		}
+	}
 }
 
 void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,

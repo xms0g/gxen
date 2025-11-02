@@ -1,17 +1,17 @@
 #pragma once
 #include <unordered_map>
-#include "renderSystem.h"
+#include "forwardRenderer.h"
 
 enum class DebugMode;
 class UniformBuffer;
 
-class DebugRenderer final : public RenderSystem {
+class DebugRenderer final : public ForwardRenderer {
 public:
 	DebugRenderer();
 
 	void configure(const UniformBuffer& cameraUBO) const;
 
-	void render() const;
+	void render(std::vector<Entity>& entities) const;
 
 private:
 	std::unordered_map<DebugMode, std::shared_ptr<Shader> > mDebugShaders;

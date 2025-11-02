@@ -2,10 +2,9 @@
 #include "../shader.h"
 #include "../buffers/uniformBuffer.h"
 #include "../../ECS/components/debug.hpp"
+#include "../../ECS/entity.hpp"
 
 DebugRenderer::DebugRenderer() {
-	RequireComponent<DebugComponent>();
-
 	mDebugShaders = {
 		{
 			DebugMode::Normals,
@@ -24,8 +23,8 @@ void DebugRenderer::configure(const UniformBuffer& cameraUBO) const {
 	}
 }
 
-void DebugRenderer::render() const {
-	for (const auto& entity: getSystemEntities()) {
+void DebugRenderer::render(std::vector<Entity>& entities) const {
+	for (const auto& entity: entities) {
 		const auto& db = entity.getComponent<DebugComponent>();
 		if (db.mode == DebugMode::None)
 			continue;
@@ -35,4 +34,5 @@ void DebugRenderer::render() const {
 		geometryPass(entity, *dbShader);
 		drawPass(entity, *dbShader);
 	}
+	entities.clear();
 }

@@ -1,18 +1,18 @@
 #pragma once
 #include <memory>
 #include "glm/glm.hpp"
-#include "../renderers/renderSystem.h"
+#include "../renderers/forwardRenderer.h"
 
 class Entity;
 class Shader;
 class LightSystem;
 class FrameBuffer;
 
-class DirectionalShadowPass final : public RenderSystem {
+class DirectionalShadowPass final : public ForwardRenderer {
 public:
 	DirectionalShadowPass(int mapWidth, int mapHeight);
 
-	~DirectionalShadowPass() override;
+	~DirectionalShadowPass();
 
 	[[nodiscard]] uint32_t getShadowMap() const;
 

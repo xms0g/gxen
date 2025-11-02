@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 #include "glm/glm.hpp"
-#include "../renderers/renderSystem.h"
+#include "../renderers/forwardRenderer.h"
 
 class LightSystem;
 class UniformBuffer;
@@ -9,11 +9,11 @@ class Entity;
 class Shader;
 class FrameBuffer;
 
-class OmnidirectionalShadowPass final : public RenderSystem {
+class OmnidirectionalShadowPass final : public ForwardRenderer {
 public:
 	OmnidirectionalShadowPass(int mapWidth, int mapHeight);
 
-	~OmnidirectionalShadowPass() override;
+	~OmnidirectionalShadowPass();
 
 	[[nodiscard]] uint32_t getShadowMap() const;
 

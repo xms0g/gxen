@@ -1,18 +1,18 @@
 #pragma once
 #include <memory>
 #include "glm/glm.hpp"
-#include "../renderers/renderSystem.h"
+#include "../renderers/forwardRenderer.h"
 
 class Entity;
 class Shader;
 class LightSystem;
 class FrameBuffer;
 
-class PerspectiveShadowPass final : public RenderSystem {
+class PerspectiveShadowPass final : public ForwardRenderer {
 public:
 	PerspectiveShadowPass(int mapWidth, int mapHeight);
 
-	~PerspectiveShadowPass() override;
+	~PerspectiveShadowPass();
 
 	[[nodiscard]] uint32_t getShadowMap() const;
 

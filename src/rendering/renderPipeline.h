@@ -41,11 +41,11 @@ private:
 	void batchEntities(const Entity& entity, const Camera& camera);
 	// Systems
 	//DeferredRenderer* mDeferredRenderer{};
-	DebugRenderer* mDebugRenderer{};
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
 	ShadowSystem* mShadowSystem{};
 
+	std::unique_ptr<DebugRenderer> mDebugRenderer;
 	std::unique_ptr<ForwardRenderer> mForwardRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
 
@@ -61,6 +61,7 @@ private:
 		TransEntityBucket transparentEntities;
 		std::vector<Entity> transparentInstancedEntities;
 		std::vector<Entity> opaqueInstancedEntities;
+		std::vector<Entity> debugEntities;
 		std::unordered_map<Shader*, std::vector<Entity>> opaqueBatches;
 	} renderQueue;
 };
