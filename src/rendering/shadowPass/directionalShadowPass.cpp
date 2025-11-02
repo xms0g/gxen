@@ -48,7 +48,8 @@ void DirectionalShadowPass::render(const std::vector<Entity>& entities, const gl
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 	for (const auto& entity: entities) {
-		opaquePass(entity, *mDepthShader);
+		geometryPass(entity, *mDepthShader);
+		drawPass(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);

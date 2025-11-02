@@ -51,7 +51,8 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 	mDepthShader->setVec3("lightPos", position);
 
 	for (const auto& entity: entities) {
-		opaquePass(entity, *mDepthShader);
+		geometryPass(entity, *mDepthShader);
+		drawPass(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);

@@ -26,7 +26,9 @@ glm::mat4 PerspectiveShadowPass::getLightSpaceMatrix() const {
 	return mLightSpaceMatrix;
 }
 
-void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const glm::vec4& direction, const glm::vec4& position,
+void PerspectiveShadowPass::render(const std::vector<Entity>& entities,
+                                   const glm::vec4& direction,
+                                   const glm::vec4& position,
                                    const float fovy) {
 	const glm::mat4 lightProjection = glm::perspective(
 		fovy,
@@ -48,7 +50,8 @@ void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const gl
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 	for (const auto& entity: entities) {
-		opaquePass(entity, *mDepthShader);
+		geometryPass(entity, *mDepthShader);
+		drawPass(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);
