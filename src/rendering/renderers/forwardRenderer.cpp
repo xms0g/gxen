@@ -15,7 +15,7 @@
 #include "../../ECS/components/mesh.hpp"
 #include "../../ECS/components/shader.hpp"
 #include "../../ECS/components/instance.hpp"
-#include "../../math/utils.hpp"
+#include "../../math/matrixUtils.hpp"
 #include "../../resourceManager/texture.h"
 
 ForwardRenderer::ForwardRenderer() {
