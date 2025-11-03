@@ -5,9 +5,11 @@
 #include "../lightSystem.h"
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
+#include "../renderers/forwardRenderer.h"
 #include "../../config/config.hpp"
 
-OmnidirectionalShadowPass::OmnidirectionalShadowPass(int mapWidth, int mapHeight) {
+OmnidirectionalShadowPass::OmnidirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight)
+	: mForwardRenderer(fr) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
 	mDepthMap->withTextureCubemapDepth()
 			.checkStatus();
@@ -32,12 +34,12 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 
 	const auto pos = glm::vec3(position);
 	std::vector<glm::mat4> shadowTransforms;
-	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(1.0f, 0.0f, 0.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(-1.0f, 0.0f, 0.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(-1.0f, 0.0f, 0.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 1.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, -1.0f, 0.0f),glm::vec3(0.0f, 0.0f, -1.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, -1.0f, 0.0f), glm::vec3(0.0f, 0.0f, -1.0f)));
 	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, 1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
-	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, -1.0f),glm::vec3(0.0f, -1.0f, 0.0f)));
+	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
 	mDepthShader->activate();
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -51,8 +53,8 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 	mDepthShader->setVec3("lightPos", position);
 
 	for (const auto& entity: entities) {
-		geometryPass(entity, *mDepthShader);
-		drawPass(entity, *mDepthShader);
+		mForwardRenderer.geometryPass(entity, *mDepthShader);
+		mForwardRenderer.drawPass(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);

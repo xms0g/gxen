@@ -1,17 +1,18 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include "glm/glm.hpp"
-#include "../renderers/forwardRenderer.h"
 
+class ForwardRenderer;
 class LightSystem;
 class UniformBuffer;
 class Entity;
 class Shader;
 class FrameBuffer;
 
-class OmnidirectionalShadowPass final : public ForwardRenderer {
+class OmnidirectionalShadowPass {
 public:
-	OmnidirectionalShadowPass(int mapWidth, int mapHeight);
+	OmnidirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight);
 
 	~OmnidirectionalShadowPass();
 
@@ -20,6 +21,7 @@ public:
 	void render(const std::vector<Entity>& entities, const glm::vec4& position) const;
 
 private:
+	const ForwardRenderer& mForwardRenderer;
 	std::unique_ptr<FrameBuffer> mDepthMap;
 	std::unique_ptr<Shader> mDepthShader;
 };

@@ -5,15 +5,16 @@
 #include "../shader.h"
 #include "../lightSystem.h"
 #include "../buffers/uniformBuffer.h"
+#include "../renderers/forwardRenderer.h"
 #include "../../config/config.hpp"
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
 
-ShadowManager::ShadowManager() {
-	mDirShadowPass = std::make_unique<DirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
-	mOmnidirShadowPass = std::make_unique<OmnidirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
-	mPerspectiveShadowPass = std::make_unique<PerspectiveShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
+ShadowManager::ShadowManager(const ForwardRenderer& fr) {
+	mDirShadowPass = std::make_unique<DirectionalShadowPass>(fr, SHADOW_WIDTH, SHADOW_HEIGHT);
+	mOmnidirShadowPass = std::make_unique<OmnidirectionalShadowPass>(fr, SHADOW_WIDTH, SHADOW_HEIGHT);
+	mPerspectiveShadowPass = std::make_unique<PerspectiveShadowPass>(fr, SHADOW_WIDTH, SHADOW_HEIGHT);
 
 	mShadowUBO = std::make_unique<UniformBuffer>(sizeof(ShadowData), 2);
 

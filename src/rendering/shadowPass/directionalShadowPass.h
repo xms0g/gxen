@@ -1,16 +1,17 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include "glm/glm.hpp"
-#include "../renderers/forwardRenderer.h"
 
+class ForwardRenderer;
 class Entity;
 class Shader;
 class LightSystem;
 class FrameBuffer;
 
-class DirectionalShadowPass final : public ForwardRenderer {
+class DirectionalShadowPass {
 public:
-	DirectionalShadowPass(int mapWidth, int mapHeight);
+	DirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight);
 
 	~DirectionalShadowPass();
 
@@ -22,6 +23,7 @@ public:
 
 private:
 	glm::mat4 mLightSpaceMatrix{};
+	const ForwardRenderer& mForwardRenderer;
 	std::unique_ptr<FrameBuffer> mDepthMap;
 	std::unique_ptr<Shader> mDepthShader;
 };

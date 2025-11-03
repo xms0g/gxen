@@ -5,9 +5,11 @@
 #include "../lightSystem.h"
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
+#include "../renderers/forwardRenderer.h"
 #include "../../config/config.hpp"
 
-DirectionalShadowPass::DirectionalShadowPass(int mapWidth, int mapHeight) {
+DirectionalShadowPass::DirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight)
+	: mForwardRenderer(fr) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
 	mDepthMap->withTextureDepth()
 			.checkStatus();
@@ -48,8 +50,8 @@ void DirectionalShadowPass::render(const std::vector<Entity>& entities, const gl
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 	for (const auto& entity: entities) {
-		geometryPass(entity, *mDepthShader);
-		drawPass(entity, *mDepthShader);
+		mForwardRenderer.geometryPass(entity, *mDepthShader);
+		mForwardRenderer.drawPass(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);

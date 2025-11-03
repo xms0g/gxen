@@ -30,14 +30,14 @@ public:
 
 	void transparentInstancedPass(const std::vector<Entity>& entities, const Camera& camera);
 
-protected:
-	void opaquePass(const Entity& entity, const Shader& shader) const;
-
 	void geometryPass(const Entity& entity, const Shader& shader) const;
 
-	void materialPass(const Entity& entity, const Shader& shader) const;
-
 	void drawPass(const Entity& entity, const Shader& shader) const;
+
+private:
+	void opaquePass(const Entity& entity, const Shader& shader) const;
+
+	void materialPass(const Entity& entity, const Shader& shader) const;
 
 	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
 	void bindTextures(
@@ -49,7 +49,6 @@ protected:
 		uint32_t materialID,
 		const TextureMap* texturesByMatID) const;
 
-private:
 	void prepareInstanceData(const Entity& entity,
 	                         const std::vector<glm::vec3>& positions,
 	                         size_t instanceSize,

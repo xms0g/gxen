@@ -74,8 +74,8 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
-	mShadowManager = std::make_unique<ShadowManager>();
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
+	mShadowManager = std::make_unique<ShadowManager>(*mForwardRenderer);
 	mDebugRenderer = std::make_unique<DebugRenderer>();
 	mPostProcess = std::make_unique<PostProcess>(mSceneBuffer->width(), mSceneBuffer->height());
 }

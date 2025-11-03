@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include "glm/glm.hpp"
 
+class ForwardRenderer;
 class Shader;
 class UniformBuffer;
 class PerspectiveShadowPass;
@@ -14,7 +15,7 @@ class Entity;
 
 class ShadowManager {
 public:
-	ShadowManager();
+	ShadowManager(const ForwardRenderer& fr);
 
 	~ShadowManager();
 
