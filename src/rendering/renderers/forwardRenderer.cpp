@@ -10,6 +10,7 @@
 #include "../../config/config.hpp"
 #include "../../core/camera.h"
 #include "../../ECS/registry.h"
+#include "../../ECS/components/bv.hpp"
 #include "../../ECS/components/transform.hpp"
 #include "../../ECS/components/material.hpp"
 #include "../../ECS/components/mesh.hpp"
@@ -84,6 +85,9 @@ void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<E
 		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
 		for (const auto& entity: entities) {
+			if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
+				continue;
+
 			opaquePass(entity, *shader);
 		}
 	}
@@ -97,6 +101,9 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 
 	glDepthMask(GL_FALSE);
 	for (const auto& [dist, entity]: entities) {
+		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
+			continue;
+
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		shader->activate();
@@ -117,6 +124,9 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
 
 	for (const auto& entity: entities) {
+		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
+			continue;
+
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
@@ -143,6 +153,9 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities, const Camera& camera) {
 	glDepthMask(GL_FALSE);
 	for (auto& entity: entities) {
+		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
+			continue;
+
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& mat = entity.getComponent<MaterialComponent>();

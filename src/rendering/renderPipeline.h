@@ -9,7 +9,6 @@ class UniformBuffer;
 class Camera;
 class Registry;
 class ForwardRenderer;
-class DeferredRenderer;
 class DebugRenderer;
 class GuiSystem;
 class LightSystem;
@@ -33,6 +32,8 @@ public:
 
 private:
 	void updateBuffers(const Camera& camera) const;
+
+	void frustumCullingPass(const Camera& camera) const;
 
 	void beginSceneRender() const;
 

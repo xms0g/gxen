@@ -13,14 +13,13 @@ class BoundingVolume {
 public:
 	virtual ~BoundingVolume() = default;
 
-	[[nodiscard]] virtual bool isOnOrForwardPlane(const Plane& plane) const = 0;
-
 	[[nodiscard]] virtual bool isOnFrustum(const Frustum& camFrustum,
-										   const glm::vec3& position,
-										   const glm::vec3& rotation,
-										   const glm::vec3& scale) const = 0;
+	                                       const glm::vec3& position,
+	                                       const glm::vec3& rotation,
+	                                       const glm::vec3& scale) const = 0;
 
-	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum) const;
+protected:
+	[[nodiscard]] virtual bool isOnOrForwardPlane(const Plane& plane) const = 0;
 };
 
 class Sphere final : public BoundingVolume {
@@ -35,12 +34,13 @@ public:
 
 	~Sphere() override = default;
 
-	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
-
 	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum,
-								   const glm::vec3& position,
-								   const glm::vec3& rotation,
-								   const glm::vec3& scale) const override;
+	                               const glm::vec3& position,
+	                               const glm::vec3& rotation,
+	                               const glm::vec3& scale) const override;
+
+private:
+	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
 };
 
 class AABB final : public BoundingVolume {
@@ -61,14 +61,16 @@ public:
 
 	~AABB() override = default;
 
-	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
-
 	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum,
-								   const glm::vec3& position,
-								   const glm::vec3& rotation,
-								   const glm::vec3& scale) const override;
+	                               const glm::vec3& position,
+	                               const glm::vec3& rotation,
+	                               const glm::vec3& scale) const override;
+
+private:
+	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
 };
 
-Sphere generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh>>& meshesByMatID);
-AABB generateAABB(const std::unordered_map<uint32_t, std::vector<Mesh>>& meshesByMatID);
+Sphere generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh> >& meshesByMatID);
+
+AABB generateAABB(const std::unordered_map<uint32_t, std::vector<Mesh> >& meshesByMatID);
 }

@@ -9,7 +9,6 @@
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
 #include "../rendering/renderers/forwardRenderer.h"
-#include "../rendering/renderers/deferredRenderer.h"
 #include "../rendering/renderers/debugRenderer.h"
 #include "../rendering/lightSystem.h"
 #include "../rendering/postProcess/postProcess.h"
@@ -22,8 +21,9 @@
 #include "../ECS/components/material.hpp"
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
-#include "../ECS/components/instance.hpp"
+#include "../ECS/components/bv.hpp"
 #include "../math/frustum.hpp"
+#include "../math/boundingVolume.h"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -116,10 +116,11 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 }
 
 void RenderPipeline::render(const Camera& camera) {
+	frustumCullingPass(camera);
+
 	mLightSystem->update();
 	mShadowManager->shadowPass(renderQueue.opaqueBatches, *mLightSystem);
 	updateBuffers(camera);
-	const math::Frustum& frustum = camera.frustum();
 
 	beginSceneRender();
 	mSkyboxSystem->render(camera);
@@ -146,6 +147,38 @@ void RenderPipeline::updateBuffers(const Camera& camera) const {
 	mCameraUBO->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
 	mCameraUBO->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
 	mCameraUBO->unbind();
+}
+
+void RenderPipeline::frustumCullingPass(const Camera& camera) const {
+	const math::Frustum& frustum = camera.frustum();
+
+	auto cullEntity = [&](const Entity& entity) {
+		auto& bvc = entity.getComponent<BoundingVolumeComponent>();
+		const auto& tc = entity.getComponent<TransformComponent>();
+		bvc.isVisible = bvc.bv->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
+	};
+
+	for (const auto& [shader, entities]: renderQueue.opaqueBatches) {
+		for (const auto& entity: entities) {
+			cullEntity(entity);
+		}
+	}
+
+	for (const auto& entity: renderQueue.opaqueInstancedEntities) {
+		cullEntity(entity);
+	}
+
+	for (const auto& [dis, entity]: renderQueue.transparentEntities) {
+		cullEntity(entity);
+	}
+
+	for (const auto& entity: renderQueue.transparentInstancedEntities) {
+		cullEntity(entity);
+	}
+
+	for (const auto& entity: renderQueue.debugEntities) {
+		cullEntity(entity);
+	}
 }
 
 void RenderPipeline::beginSceneRender() const {

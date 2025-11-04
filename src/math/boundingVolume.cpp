@@ -4,26 +4,15 @@
 #include "matrix.hpp"
 #include "../mesh/mesh.h"
 
-bool math::BoundingVolume::isOnFrustum(const Frustum& camFrustum) const {
-	return isOnOrForwardPlane(camFrustum.leftFace) &&
-	       isOnOrForwardPlane(camFrustum.rightFace) &&
-	       isOnOrForwardPlane(camFrustum.topFace) &&
-	       isOnOrForwardPlane(camFrustum.bottomFace) &&
-	       isOnOrForwardPlane(camFrustum.nearFace) &&
-	       isOnOrForwardPlane(camFrustum.farFace);
-}
-
-bool math::Sphere::isOnOrForwardPlane(const Plane& plane) const {
-	return plane.computeSignedDistanceToPlan(mCenter) > -mRadius;
-}
-
 bool math::Sphere::isOnFrustum(const Frustum& camFrustum,
                                const glm::vec3& position,
                                const glm::vec3& rotation,
                                const glm::vec3& scale) const {
 	const glm::mat4 modelMatrix = computeModelMatrix(position, rotation, scale);
 	const glm::vec3 globalScale = {
-		glm::length(modelMatrix[0]), glm::length(modelMatrix[1]), glm::length(modelMatrix[2])
+		glm::length(modelMatrix[0]),
+		glm::length(modelMatrix[1]),
+		glm::length(modelMatrix[2])
 	};
 
 	//Get our global center with process it with the global model matrix of our transform
@@ -44,11 +33,8 @@ bool math::Sphere::isOnFrustum(const Frustum& camFrustum,
 	       globalSphere.isOnOrForwardPlane(camFrustum.bottomFace);
 }
 
-bool math::AABB::isOnOrForwardPlane(const Plane& plane) const {
-	const float r = extents.x * std::abs(plane.normal.x) + extents.y * std::abs(plane.normal.y) +
-	                extents.z * std::abs(plane.normal.z);
-
-	return -r <= plane.computeSignedDistanceToPlan(center);
+bool math::Sphere::isOnOrForwardPlane(const Plane& plane) const {
+	return plane.computeSignedDistanceToPlan(mCenter) > -mRadius;
 }
 
 bool math::AABB::isOnFrustum(const Frustum& camFrustum,
@@ -82,6 +68,13 @@ bool math::AABB::isOnFrustum(const Frustum& camFrustum,
 	       globalAABB.isOnOrForwardPlane(camFrustum.bottomFace) &&
 	       globalAABB.isOnOrForwardPlane(camFrustum.nearFace) &&
 	       globalAABB.isOnOrForwardPlane(camFrustum.farFace);
+}
+
+bool math::AABB::isOnOrForwardPlane(const Plane& plane) const {
+	const float r = extents.x * std::abs(plane.normal.x) + extents.y * std::abs(plane.normal.y) +
+					extents.z * std::abs(plane.normal.z);
+
+	return -r <= plane.computeSignedDistanceToPlan(center);
 }
 
 math::Sphere math::generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh>>& meshesByMatID) {

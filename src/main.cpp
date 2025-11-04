@@ -122,9 +122,9 @@ int main() {
 
 		suzanne.addComponent<ShaderComponent>(object);
 
-		// suzanne.addComponent<BoundingVolumeComponent>(
-		// std::make_shared<math::AABB>(
-		// 	math::generateAABB(*ResourceManager::instance().getMeshes(suzanne.id()))));
+		suzanne.addComponent<BoundingVolumeComponent>(
+		std::make_shared<math::AABB>(
+			math::generateAABB(*ResourceManager::instance().getMeshes(suzanne.id()))));
 
 		//suzanne.addComponent<InstanceComponent>(&pos1);
 
