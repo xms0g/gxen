@@ -38,6 +38,8 @@ void Camera::update() {
 	// normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 	mRight = glm::normalize(glm::cross(mFront, mWorldUp));
 	mUp = glm::normalize(glm::cross(mRight, mFront));
+
+	generateFrustum();
 }
 
 void Camera::processKeyboard(const CameraMovement direction, const float deltaTime) {
@@ -72,4 +74,17 @@ void Camera::processMouseScroll(float yoffset) {
 		mZoom = 1.0f;
 	if (mZoom > 45.0f)
 		mZoom = 45.0f;
+}
+
+void Camera::generateFrustum() {
+	const float halfVSide = ZFAR * tanf(glm::radians(mZoom) * 0.5f);
+	const float halfHSide = halfVSide * (static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT));
+	const glm::vec3 frontMultFar = ZFAR * mFront;
+
+	mFrustum.nearFace = {mPosition + ZNEAR * mFront, mFront};
+	mFrustum.farFace = {mPosition + frontMultFar, -mFront};
+	mFrustum.rightFace = {mPosition, glm::cross(frontMultFar - mRight * halfHSide, mUp)};
+	mFrustum.leftFace = {mPosition, glm::cross(mUp, frontMultFar + mRight * halfHSide)};
+	mFrustum.topFace = {mPosition, glm::cross(mRight, frontMultFar - mUp * halfVSide)};
+	mFrustum.bottomFace = {mPosition, glm::cross(frontMultFar + mUp * halfVSide, mRight)};
 }

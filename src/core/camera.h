@@ -2,6 +2,7 @@
 #include "glm/glm.hpp"
 #include "glm/ext/matrix_transform.hpp"
 #include "../config/config.hpp"
+#include "../math/frustum.hpp"
 
 enum CameraMovement {
     FORWARD,
@@ -19,6 +20,8 @@ public:
 
     void update();
 
+	const math::Frustum& frustum() const { return mFrustum; }
+
     [[nodiscard]] glm::mat4 viewMatrix() const { return glm::lookAt(mPosition, mPosition + mFront, mUp); }
 
     [[nodiscard]] float zoom() const { return mZoom; }
@@ -34,6 +37,9 @@ public:
     void processMouseScroll(float yoffset);
 
 private:
+	void generateFrustum();
+
+	math::Frustum mFrustum;
     // camera Attributes
     glm::vec3 mPosition{};
     glm::vec3 mFront;

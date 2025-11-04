@@ -23,6 +23,7 @@
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/instance.hpp"
+#include "../math/frustum.hpp"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -118,6 +119,7 @@ void RenderPipeline::render(const Camera& camera) {
 	mLightSystem->update();
 	mShadowManager->shadowPass(renderQueue.opaqueBatches, *mLightSystem);
 	updateBuffers(camera);
+	const math::Frustum& frustum = camera.frustum();
 
 	beginSceneRender();
 	mSkyboxSystem->render(camera);
