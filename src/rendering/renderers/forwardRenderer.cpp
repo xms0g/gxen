@@ -15,7 +15,7 @@
 #include "../../ECS/components/mesh.hpp"
 #include "../../ECS/components/shader.hpp"
 #include "../../ECS/components/instance.hpp"
-#include "../../math/matrixUtils.hpp"
+#include "../../math/matrix.hpp"
 #include "../../resourceManager/texture.h"
 
 ForwardRenderer::ForwardRenderer() {
@@ -188,7 +188,9 @@ void ForwardRenderer::opaquePass(const Entity& entity, const Shader& shader) con
 void ForwardRenderer::geometryPass(const Entity& entity, const Shader& shader) const {
 	const auto& tc = entity.getComponent<TransformComponent>();
 
-	auto [model, normal] = math::computeModelMatrices(tc.position, tc.rotation, tc.scale);
+	const glm::mat4 model = math::computeModelMatrix(tc.position, tc.rotation, tc.scale);
+	const glm::mat3 normal = math::computeNormalMatrix(model);
+
 	shader.setMat4("model", model);
 	shader.setMat3("normalMatrix", normal);
 }
@@ -274,7 +276,8 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity,
 	gpuData.reserve(positions.size());
 
 	for (auto& pos: positions) {
-		auto [model, normal] = math::computeModelMatrices(pos, tc.rotation, tc.scale);
+		const glm::mat4 model = math::computeModelMatrix(tc.position, tc.rotation, tc.scale);
+		const glm::mat3 normal = math::computeNormalMatrix(model);
 		gpuData.emplace_back(model, normal);
 	}
 
