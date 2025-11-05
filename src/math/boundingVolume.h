@@ -24,9 +24,6 @@ protected:
 
 class Sphere final : public BoundingVolume {
 public:
-	glm::vec3 mCenter{0.f, 0.f, 0.f};
-	float mRadius{0.f};
-
 	Sphere() = default;
 
 	Sphere(const glm::vec3& center, const float radius) : mCenter(center), mRadius(radius) {
@@ -41,13 +38,13 @@ public:
 
 private:
 	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
+
+	glm::vec3 mCenter{0.f, 0.f, 0.f};
+	float mRadius{0.f};
 };
 
 class AABB final : public BoundingVolume {
 public:
-	glm::vec3 center{0.f, 0.f, 0.f};
-	glm::vec3 extents{0.f, 0.f, 0.f};
-
 	AABB() = default;
 
 	AABB(const glm::vec3& min, const glm::vec3& max)
@@ -68,6 +65,9 @@ public:
 
 private:
 	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
+
+	glm::vec3 center{0.f, 0.f, 0.f};
+	glm::vec3 extents{0.f, 0.f, 0.f};
 };
 
 Sphere generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh> >& meshesByMatID);
