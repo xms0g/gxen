@@ -18,26 +18,24 @@ ShadowManager::ShadowManager(const ForwardRenderer& fr) {
 
 	mShadowUBO = std::make_unique<UniformBuffer>(sizeof(ShadowData), 2);
 
-	mShadowMaps = {
-		{
+	mShadowMaps = {{
 			mDirShadowPass->getShadowMap(),
 			mOmnidirShadowPass->getShadowMap(),
 			mPerspectiveShadowPass->getShadowMap()
-		}
-	};
+	}};
 }
 
 ShadowManager::~ShadowManager() = default;
 
 void ShadowManager::configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches) const {
-	for (auto& [shader, entities]: opaqueBatches) {
+	for (const auto& [shader, entities]: opaqueBatches) {
 		mShadowUBO->configure(shader->ID(), 2, "ShadowBlock");
 	}
 }
 
 void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights) {
-	for (auto& [shader, entities]: opaqueBatches) {
-		for (auto& light: lights.getDirLights()) {
+	for (const auto& [shader, entities]: opaqueBatches) {
+		for (const auto& light: lights.getDirLights()) {
 			mDirShadowPass->render(entities, light->direction);
 			mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
 		}
@@ -49,7 +47,7 @@ void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >
 			mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
 		}
 
-		for (auto& light: lights.getSpotLights()) {
+		for (const auto& light: lights.getSpotLights()) {
 			mPerspectiveShadowPass->render(entities, light->direction, light->position, light->cutOff.y);
 			mShadowData.persLightSpaceMatrix = mPerspectiveShadowPass->getLightSpaceMatrix();
 		}

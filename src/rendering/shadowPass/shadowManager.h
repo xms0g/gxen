@@ -15,7 +15,7 @@ class Entity;
 
 class ShadowManager {
 public:
-	ShadowManager(const ForwardRenderer& fr);
+	explicit ShadowManager(const ForwardRenderer& fr);
 
 	~ShadowManager();
 
