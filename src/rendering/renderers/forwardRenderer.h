@@ -28,7 +28,7 @@ public:
 
 	void instancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps) const;
 
-	void transparentInstancedPass(const std::vector<Entity>& entities, const Camera& camera);
+	void transparentInstancedPass(const std::vector<Entity>& entities);
 
 	void geometryPass(const Entity& entity, const Shader& shader) const;
 

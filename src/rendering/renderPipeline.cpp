@@ -22,6 +22,7 @@
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/bv.hpp"
+#include "../ECS/components/instance.hpp"
 #include "../math/frustum.hpp"
 #include "../math/boundingVolume.h"
 
@@ -130,7 +131,7 @@ void RenderPipeline::render(const Camera& camera) {
 	mForwardRenderer->instancedPass(renderQueue.opaqueInstancedEntities, mShadowManager->getShadowMaps());
 	mDebugRenderer->render(renderQueue.debugEntities);
 	mForwardRenderer->transparentPass(renderQueue.transparentEntities);
-	mForwardRenderer->transparentInstancedPass(renderQueue.transparentInstancedEntities, camera);
+	mForwardRenderer->transparentInstancedPass(renderQueue.transparentInstancedEntities);
 	endSceneRender();
 #ifdef HDR
 	mPostProcess->render(mHDRBuffer->texture());
@@ -216,6 +217,12 @@ void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 
 	if (mat.flags & Instanced) {
 		if (mat.flags & Transparent) {
+			const auto& positions = entity.getComponent<InstanceComponent>().positions;
+			std::sort(positions->begin(), positions->end(), [&](const glm::vec3& a, const glm::vec3& b) {
+					const float da = glm::length2(camera.position() - a);
+					const float db = glm::length2(camera.position() - b);
+					return da > db; // back to front
+			});
 			renderQueue.transparentInstancedEntities.push_back(entity);
 		} else {
 			renderQueue.opaqueInstancedEntities.push_back(entity);
