@@ -11,7 +11,7 @@ class FrameBuffer;
 
 class PerspectiveShadowPass {
 public:
-	PerspectiveShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight);
+	PerspectiveShadowPass(int mapWidth, int mapHeight);
 
 	~PerspectiveShadowPass();
 
@@ -22,7 +22,6 @@ public:
 	void render(const std::vector<Entity>& entities, const glm::vec4& direction, const glm::vec4& position, float fovy);
 
 private:
-	const ForwardRenderer& mForwardRenderer;
 	glm::mat4 mLightSpaceMatrix{};
 	std::unique_ptr<FrameBuffer> mDepthMap;
 	std::unique_ptr<Shader> mDepthShader;

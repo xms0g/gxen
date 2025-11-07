@@ -3,7 +3,7 @@
 
 class UniformBuffer;
 
-class DebugRenderer final : public ForwardRenderer {
+class DebugRenderer {
 public:
 	DebugRenderer();
 

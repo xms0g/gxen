@@ -5,11 +5,10 @@
 #include "../lightSystem.h"
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
-#include "../renderers/forwardRenderer.h"
+#include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
 
-OmnidirectionalShadowPass::OmnidirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight)
-	: mForwardRenderer(fr) {
+OmnidirectionalShadowPass::OmnidirectionalShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
 	mDepthMap->withTextureCubemapDepth()
 			.checkStatus();
@@ -53,8 +52,8 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 	mDepthShader->setVec3("lightPos", position);
 
 	for (const auto& entity: entities) {
-		mForwardRenderer.geometryPass(entity, *mDepthShader);
-		mForwardRenderer.drawPass(entity, *mDepthShader);
+		RenderCommon::setupTransform(entity, *mDepthShader);
+		RenderCommon::drawMeshes(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);

@@ -12,7 +12,7 @@ class FrameBuffer;
 
 class OmnidirectionalShadowPass {
 public:
-	OmnidirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight);
+	OmnidirectionalShadowPass(int mapWidth, int mapHeight);
 
 	~OmnidirectionalShadowPass();
 
@@ -21,7 +21,6 @@ public:
 	void render(const std::vector<Entity>& entities, const glm::vec4& position) const;
 
 private:
-	const ForwardRenderer& mForwardRenderer;
 	std::unique_ptr<FrameBuffer> mDepthMap;
 	std::unique_ptr<Shader> mDepthShader;
 };

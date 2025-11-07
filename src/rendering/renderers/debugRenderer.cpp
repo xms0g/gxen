@@ -1,4 +1,5 @@
 #include "debugRenderer.h"
+#include "renderCommon.h"
 #include "../shader.h"
 #include "../buffers/uniformBuffer.h"
 #include "../../ECS/components/debug.hpp"
@@ -25,9 +26,9 @@ void DebugRenderer::render(const std::vector<Entity>& entities) const {
 		if (db.mode == None)
 			continue;
 
-		const auto& dbShader = mDebugShaders.at(db.mode);
-		dbShader->activate();
-		geometryPass(entity, *dbShader);
-		drawPass(entity, *dbShader);
+		const auto& dbgShader = mDebugShaders.at(db.mode);
+		dbgShader->activate();
+		RenderCommon::setupTransform(entity, *dbgShader);
+		RenderCommon::drawMeshes(entity, *dbgShader);
 	}
 }

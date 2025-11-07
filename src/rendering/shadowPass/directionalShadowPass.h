@@ -11,7 +11,7 @@ class FrameBuffer;
 
 class DirectionalShadowPass {
 public:
-	DirectionalShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight);
+	DirectionalShadowPass(int mapWidth, int mapHeight);
 
 	~DirectionalShadowPass();
 
@@ -23,7 +23,6 @@ public:
 
 private:
 	glm::mat4 mLightSpaceMatrix{};
-	const ForwardRenderer& mForwardRenderer;
 	std::unique_ptr<FrameBuffer> mDepthMap;
 	std::unique_ptr<Shader> mDepthShader;
 };

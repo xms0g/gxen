@@ -5,11 +5,10 @@
 #include "../lightSystem.h"
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
-#include "../renderers/forwardRenderer.h"
+#include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
 
-PerspectiveShadowPass::PerspectiveShadowPass(const ForwardRenderer& fr, int mapWidth, int mapHeight)
-	: mForwardRenderer(fr) {
+PerspectiveShadowPass::PerspectiveShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
 	mDepthMap->withTextureDepth()
 			.checkStatus();
@@ -52,8 +51,8 @@ void PerspectiveShadowPass::render(const std::vector<Entity>& entities,
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 	for (const auto& entity: entities) {
-		mForwardRenderer.geometryPass(entity, *mDepthShader);
-		mForwardRenderer.drawPass(entity, *mDepthShader);
+		RenderCommon::setupTransform(entity, *mDepthShader);
+		RenderCommon::drawMeshes(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);
