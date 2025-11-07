@@ -11,7 +11,7 @@ public:
 	[[nodiscard]] int width() const { return mWidth; }
 	[[nodiscard]] int height() const { return mHeight; }
 	[[nodiscard]] uint32_t texture() const { return mTextureIDs.front(); }
-	[[nodiscard]] std::vector<uint32_t>& textures() { return mTextureIDs; }
+	[[nodiscard]] const std::vector<uint32_t>& textures() const { return mTextureIDs; }
 
 	void bind() const;
 
@@ -19,7 +19,7 @@ public:
 
 	void bindForDraw() const;
 
-	void unbind();
+	void unbind() const;
 
 	FrameBuffer& withTexture();
 

@@ -34,7 +34,7 @@ void FrameBuffer::bindForDraw() const {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, mFBO);
 }
 
-void FrameBuffer::unbind() {
+void FrameBuffer::unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
