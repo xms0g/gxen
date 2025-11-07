@@ -57,7 +57,7 @@ private:
 		uint32_t buffer{};
 		int offset{0};
 	};
-	InstanceVBO mStaticInstanceVBO, mDynamicInstanceVBO;
+	InstanceVBO mOpaqueInstanceVBO, mTransparentInstanceVBO;
 
-	void prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo, uint32_t usage);
+	void prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo);
 };

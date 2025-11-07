@@ -8,7 +8,6 @@
 #include "../renderFlags.hpp"
 #include "../../mesh/mesh.h"
 #include "../../config/config.hpp"
-#include "../../core/camera.h"
 #include "../../ECS/registry.h"
 #include "../../ECS/components/bv.hpp"
 #include "../../ECS/components/transform.hpp"
@@ -20,16 +19,16 @@
 #include "../../resourceManager/texture.h"
 
 ForwardRenderer::ForwardRenderer() {
-	glGenBuffers(1, &mStaticInstanceVBO.buffer);
-	glGenBuffers(1, &mDynamicInstanceVBO.buffer);
+	glGenBuffers(1, &mOpaqueInstanceVBO.buffer);
+	glGenBuffers(1, &mTransparentInstanceVBO.buffer);
 }
 
 ForwardRenderer::~ForwardRenderer() = default;
 
 void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntities,
                                 const std::vector<Entity>& transparentInstancedEntities) {
-	prepareInstanceBuffer(opaqueInstancedEntities, mStaticInstanceVBO, GL_STATIC_DRAW);
-	prepareInstanceBuffer(transparentInstancedEntities, mDynamicInstanceVBO, GL_DYNAMIC_DRAW);
+	prepareInstanceBuffer(opaqueInstancedEntities, mOpaqueInstanceVBO);
+	prepareInstanceBuffer(transparentInstancedEntities, mTransparentInstanceVBO);
 }
 
 void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
@@ -132,7 +131,6 @@ void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entiti
 	}
 
 	glDepthMask(GL_TRUE);
-	mDynamicInstanceVBO.offset = 0;
 }
 
 void ForwardRenderer::opaquePass(const Entity& entity, const Shader& shader) const {
@@ -239,8 +237,8 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity,
 
 	if (gpuData.empty()) return;
 
-	const uint32_t vbo = flags & Transparent ? mDynamicInstanceVBO.buffer : mStaticInstanceVBO.buffer;
-	const int offset = flags & Transparent ? mDynamicInstanceVBO.offset : mStaticInstanceVBO.offset;
+	const uint32_t vbo = flags & Transparent ? mTransparentInstanceVBO.buffer : mOpaqueInstanceVBO.buffer;
+	const int offset = flags & Transparent ? mTransparentInstanceVBO.offset : mOpaqueInstanceVBO.offset;
 
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	glBufferSubData(GL_ARRAY_BUFFER, offset, static_cast<long>(instanceSize), gpuData.data());
@@ -253,13 +251,13 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity,
 	}
 
 	if (flags & Transparent) {
-		mDynamicInstanceVBO.offset += static_cast<int>(instanceSize);
+		mTransparentInstanceVBO.offset += static_cast<int>(instanceSize);
 	} else {
-		mStaticInstanceVBO.offset += static_cast<int>(instanceSize);
+		mOpaqueInstanceVBO.offset += static_cast<int>(instanceSize);
 	}
 }
 
-void ForwardRenderer::prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo, const uint32_t usage) {
+void ForwardRenderer::prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo) {
 	size_t requiredGPUBufferSize = 0;
 
 	for (const auto& entity: entities) {
@@ -270,7 +268,7 @@ void ForwardRenderer::prepareInstanceBuffer(const std::vector<Entity>& entities,
 
 	if (requiredGPUBufferSize > 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo.buffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredGPUBufferSize), nullptr, usage);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredGPUBufferSize), nullptr, GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 
