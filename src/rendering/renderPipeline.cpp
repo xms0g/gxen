@@ -114,6 +114,9 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 	for (const auto& entity: getSystemEntities()) {
 		batchEntities(entity, camera);
 	}
+
+	std::sort(renderQueue.transparentEntities.begin(), renderQueue.transparentEntities.end(),
+		  [](const auto& a, const auto& b) { return a.first > b.first; });
 }
 
 void RenderPipeline::render(const Camera& camera) {

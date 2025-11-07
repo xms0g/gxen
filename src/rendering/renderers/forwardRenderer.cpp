@@ -61,9 +61,6 @@ void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<E
 void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 	if (entities.empty()) return;
 
-	std::sort(entities.begin(), entities.end(),
-	          [](const auto& a, const auto& b) { return a.first > b.first; });
-
 	glDepthMask(GL_FALSE);
 	for (const auto& [dist, entity]: entities) {
 		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
