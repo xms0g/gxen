@@ -50,10 +50,12 @@ private:
 	std::unique_ptr<ForwardRenderer> mForwardRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
 
-	// Framebuffers
+	// Frame Buffers
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mHDRBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
+
+	// Uniform Buffers
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 
 	// Render queue

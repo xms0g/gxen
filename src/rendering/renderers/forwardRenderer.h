@@ -53,14 +53,11 @@ private:
 	                         const std::vector<glm::vec3>& positions,
 	                         size_t instanceSize,
 	                         uint32_t flags);
-
-	struct {
+	struct InstanceVBO {
 		uint32_t buffer{};
 		int offset{0};
-	} mStaticInstanceVBO;
+	};
+	InstanceVBO mStaticInstanceVBO, mDynamicInstanceVBO;
 
-	struct {
-		uint32_t buffer{};
-		int offset{0};
-	} mDynamicInstanceVBO;
+	void prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo, uint32_t usage);
 };

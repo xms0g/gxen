@@ -28,43 +28,8 @@ ForwardRenderer::~ForwardRenderer() = default;
 
 void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntities,
                                 const std::vector<Entity>& transparentInstancedEntities) {
-	size_t requiredOpaqueGPUBufferSize = 0, requiredTransparentGPUBufferSize = 0;
-
-	// Calculate required GPU buffer sizes of opaque and transparent objects
-	for (const auto& entity: opaqueInstancedEntities) {
-		const auto& ic = entity.getComponent<InstanceComponent>();
-		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
-		requiredOpaqueGPUBufferSize += instanceSize;
-	}
-
-	for (const auto& entity: transparentInstancedEntities) {
-		const auto& ic = entity.getComponent<InstanceComponent>();
-		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
-		requiredTransparentGPUBufferSize += instanceSize;
-	}
-
-	if (requiredOpaqueGPUBufferSize > 0) {
-		glBindBuffer(GL_ARRAY_BUFFER, mStaticInstanceVBO.buffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredOpaqueGPUBufferSize), nullptr, GL_STATIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	if (requiredTransparentGPUBufferSize > 0) {
-		glBindBuffer(GL_ARRAY_BUFFER, mDynamicInstanceVBO.buffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredTransparentGPUBufferSize), nullptr, GL_DYNAMIC_DRAW);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	for (const auto& entity: opaqueInstancedEntities) {
-		const auto& mat = entity.getComponent<MaterialComponent>();
-		const auto& ic = entity.getComponent<InstanceComponent>();
-		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
-
-		prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
-	}
-
-	mStaticInstanceVBO.offset = 0;
-	mDynamicInstanceVBO.offset = 0;
+	prepareInstanceBuffer(opaqueInstancedEntities, mStaticInstanceVBO, GL_STATIC_DRAW);
+	prepareInstanceBuffer(transparentInstancedEntities, mDynamicInstanceVBO, GL_DYNAMIC_DRAW);
 }
 
 void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
@@ -124,9 +89,6 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
 
 	for (const auto& entity: entities) {
-		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
-			continue;
-
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
@@ -153,9 +115,6 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities, const Camera& camera) {
 	glDepthMask(GL_FALSE);
 	for (auto& entity: entities) {
-		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
-			continue;
-
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& mat = entity.getComponent<MaterialComponent>();
@@ -289,7 +248,7 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity,
 	gpuData.reserve(positions.size());
 
 	for (auto& pos: positions) {
-		const glm::mat4 model = math::computeModelMatrix(tc.position, tc.rotation, tc.scale);
+		const glm::mat4 model = math::computeModelMatrix(pos, tc.rotation, tc.scale);
 		const glm::mat3 normal = math::computeNormalMatrix(model);
 		gpuData.emplace_back(model, normal);
 	}
@@ -314,4 +273,30 @@ void ForwardRenderer::prepareInstanceData(const Entity& entity,
 	} else {
 		mStaticInstanceVBO.offset += static_cast<int>(instanceSize);
 	}
+}
+
+void ForwardRenderer::prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo, const uint32_t usage) {
+	size_t requiredGPUBufferSize = 0;
+
+	for (const auto& entity: entities) {
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
+		requiredGPUBufferSize += instanceSize;
+	}
+
+	if (requiredGPUBufferSize > 0) {
+		glBindBuffer(GL_ARRAY_BUFFER, vbo.buffer);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredGPUBufferSize), nullptr, usage);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+
+	for (const auto& entity: entities) {
+		const auto& mat = entity.getComponent<MaterialComponent>();
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
+
+		prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
+	}
+
+	vbo.offset = 0;
 }
