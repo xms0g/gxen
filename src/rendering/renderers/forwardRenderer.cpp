@@ -33,14 +33,10 @@ void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntiti
 
 void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
-	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
-
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
-
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
-	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
+	for (uint32_t i = 0; i < 3; ++i) {
+		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
+		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);
+	}
 
 	for (const auto& [shader, entities]: opaqueBatches) {
 		shader->activate();
@@ -79,14 +75,10 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 
 void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
                                     const std::array<uint32_t, 3>& shadowMaps) const {
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
-	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
-
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
-
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
-	glBindTexture(GL_TEXTURE_2D, shadowMaps[2]);
+	for (uint32_t i = 0; i < 3; ++i) {
+		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
+		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);
+	}
 
 	for (const auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;

@@ -221,6 +221,7 @@ void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 	if (mat.flags & Instanced) {
 		if (mat.flags & Transparent) {
 			const auto& positions = entity.getComponent<InstanceComponent>().positions;
+
 			std::sort(positions->begin(), positions->end(), [&](const glm::vec3& a, const glm::vec3& b) {
 					const float da = glm::length2(camera.position() - a);
 					const float db = glm::length2(camera.position() - b);

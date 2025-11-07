@@ -34,8 +34,8 @@ void RenderCommon::drawMeshes(const Entity& entity, const Shader& shader) {
 }
 
 void RenderCommon::bindTextures(const uint32_t materialID,
-								   const TextureMap* texturesByMatID,
-								   const Shader& shader) {
+                                const TextureMap* texturesByMatID,
+                                const Shader& shader) {
 	if (texturesByMatID && !texturesByMatID->empty()) {
 		bool hasNormalMap{false}, hasHeightMap{false};
 		const auto& textures = texturesByMatID->at(materialID);
@@ -64,7 +64,7 @@ void RenderCommon::bindTextures(const uint32_t materialID,
 }
 
 void RenderCommon::unbindTextures(const uint32_t materialID,
-									 const TextureMap* texturesByMatID) {
+                                  const TextureMap* texturesByMatID) {
 	if (texturesByMatID && !texturesByMatID->empty()) {
 		const auto& textures = texturesByMatID->at(materialID);
 
