@@ -31,8 +31,6 @@ public:
 	void transparentInstancedPass(const std::vector<Entity>& entities) const;
 
 private:
-	void materialPass(const Entity& entity, const Shader& shader) const;
-
 	void prepareInstanceData(const Entity& entity,
 	                         const std::vector<glm::vec3>& positions,
 	                         size_t instanceSize,

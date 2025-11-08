@@ -41,7 +41,6 @@ private:
 
 	void batchEntities(const Entity& entity, const Camera& camera);
 	// Systems
-	//DeferredRenderer* mDeferredRenderer{};
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
 
@@ -66,5 +65,5 @@ private:
 		std::vector<Entity> opaqueInstancedEntities;
 		std::vector<Entity> debugEntities;
 		std::unordered_map<Shader*, std::vector<Entity>> opaqueBatches;
-	} renderQueue;
+	} renderQueues;
 };

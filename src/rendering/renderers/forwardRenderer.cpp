@@ -49,7 +49,7 @@ void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<E
 				continue;
 
 			RenderCommon::setupTransform(entity, *shader);
-			materialPass(entity, *shader);
+			RenderCommon::setupMaterial(entity, *shader);
 			RenderCommon::drawMeshes(entity, *shader);
 		}
 	}
@@ -67,7 +67,7 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 
 		shader->activate();
 		RenderCommon::setupTransform(entity, *shader);
-		materialPass(entity, *shader);
+		RenderCommon::setupMaterial(entity, *shader);
 		RenderCommon::drawMeshes(entity, *shader);
 	}
 	glDepthMask(GL_TRUE);
@@ -82,22 +82,22 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 
 	for (const auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& ic = entity.getComponent<InstanceComponent>();
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
+		const size_t instanceCount = entity.getComponent<InstanceComponent>().positions->size();
 
 		shader->activate();
 		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
 		shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
 		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
-		materialPass(entity, *shader);
+		RenderCommon::setupMaterial(entity, *shader);
 
 		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
 			RenderCommon::bindTextures(matID, texturesByMatID, *shader);
 			for (const auto& mesh: meshes) {
 				glBindVertexArray(mesh.VAO());
 				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
-				                        GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(ic.positions->size()));
+				                        GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(instanceCount));
 			}
 			RenderCommon::unbindTextures(matID, texturesByMatID);
 		}
@@ -113,7 +113,7 @@ void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entiti
 
 		shader->activate();
 
-		materialPass(entity, *shader);
+		RenderCommon::setupMaterial(entity, *shader);
 
 		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
 			RenderCommon::bindTextures(matID, texturesByMatID, *shader);
@@ -127,21 +127,6 @@ void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entiti
 	}
 
 	glDepthMask(GL_TRUE);
-}
-
-void ForwardRenderer::materialPass(const Entity& entity, const Shader& shader) const {
-	const auto& mtc = entity.getComponent<MaterialComponent>();
-
-	if (mtc.flags & TwoSided) {
-		glDisable(GL_CULL_FACE);
-	}
-
-	shader.setFloat("material.shininess", mtc.shininess);
-	shader.setFloat("material.heightScale", mtc.heightScale);
-
-	if (!mtc.textures) {
-		shader.setVec3("material.color", mtc.color);
-	}
 }
 
 void ForwardRenderer::prepareInstanceData(const Entity& entity,

@@ -9,6 +9,8 @@ class Entity;
 namespace RenderCommon {
 void setupTransform(const Entity& entity, const Shader& shader);
 
+void setupMaterial(const Entity& entity, const Shader& shader);
+
 void drawMeshes(const Entity& entity, const Shader& shader);
 
 using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;

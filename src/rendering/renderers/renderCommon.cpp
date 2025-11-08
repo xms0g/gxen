@@ -1,6 +1,7 @@
 #include "renderCommon.h"
 #include "glad/glad.h"
 #include "../shader.h"
+#include "../renderFlags.hpp"
 #include "../../mesh/mesh.h"
 #include "../../math/matrix.hpp"
 #include "../../ECS/entity.hpp"
@@ -17,6 +18,21 @@ void RenderCommon::setupTransform(const Entity& entity, const Shader& shader) {
 
 	shader.setMat4("model", model);
 	shader.setMat3("normalMatrix", normal);
+}
+
+void RenderCommon::setupMaterial(const Entity& entity, const Shader& shader) {
+	const auto& mtc = entity.getComponent<MaterialComponent>();
+
+	if (mtc.flags & TwoSided) {
+		glDisable(GL_CULL_FACE);
+	}
+
+	shader.setFloat("material.shininess", mtc.shininess);
+	shader.setFloat("material.heightScale", mtc.heightScale);
+
+	if (!mtc.textures) {
+		shader.setVec3("material.color", mtc.color);
+	}
 }
 
 void RenderCommon::drawMeshes(const Entity& entity, const Shader& shader) {

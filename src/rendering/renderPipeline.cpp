@@ -47,9 +47,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
 
-	// registry->addSystem<DeferredRenderer>();
-	// mDeferredRenderer = &registry->getSystem<DeferredRenderer>();
-
 	registry->addSystem<LightSystem>();
 	mLightSystem = &registry->getSystem<LightSystem>();
 
@@ -87,10 +84,9 @@ RenderPipeline::~RenderPipeline() = default;
 PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 
 void RenderPipeline::configure(const Camera& camera) const {
-	mForwardRenderer->configure(renderQueue.opaqueInstancedEntities, renderQueue.transparentInstancedEntities);
-	//mDeferredRenderer->configure(mLightSystem->getLightUBO());
+	mForwardRenderer->configure(renderQueues.opaqueInstancedEntities, renderQueues.transparentInstancedEntities);
 	mDebugRenderer->configure(*mCameraUBO);
-	mShadowManager->configure(renderQueue.opaqueBatches);
+	mShadowManager->configure(renderQueues.opaqueBatches);
 
 	// Uniform buffer configuration
 	for (const auto& entity: getSystemEntities()) {
@@ -115,7 +111,7 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 		batchEntities(entity, camera);
 	}
 
-	std::sort(renderQueue.transparentEntities.begin(), renderQueue.transparentEntities.end(),
+	std::sort(renderQueues.transparentEntities.begin(), renderQueues.transparentEntities.end(),
 		  [](const auto& a, const auto& b) { return a.first > b.first; });
 }
 
@@ -123,18 +119,18 @@ void RenderPipeline::render(const Camera& camera) {
 	frustumCullingPass(camera);
 
 	mLightSystem->update();
-	mShadowManager->shadowPass(renderQueue.opaqueBatches, *mLightSystem);
+	mShadowManager->shadowPass(renderQueues.opaqueBatches, *mLightSystem);
 	updateBuffers(camera);
 
 	beginSceneRender();
 	mSkyboxSystem->render(camera);
-	//mDeferredRenderer->geometryPass();
-	//mDeferredRenderer->lightingPass(mShadowSystem->getShadowMaps());
-	mForwardRenderer->opaquePass(renderQueue.opaqueBatches, mShadowManager->getShadowMaps());
-	mForwardRenderer->instancedPass(renderQueue.opaqueInstancedEntities, mShadowManager->getShadowMaps());
-	mDebugRenderer->render(renderQueue.debugEntities);
-	mForwardRenderer->transparentPass(renderQueue.transparentEntities);
-	mForwardRenderer->transparentInstancedPass(renderQueue.transparentInstancedEntities);
+	//mDeferredRenderer->geometryPass(renderQueue.opaqueBatches, *mGBuffer, *mGShader);
+	//mDeferredRenderer->lightingPass(renderQueue.opaqueBatches, mShadowManager->getShadowMaps(), *mGBuffer);
+	mForwardRenderer->opaquePass(renderQueues.opaqueBatches, mShadowManager->getShadowMaps());
+	mForwardRenderer->instancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
+	mDebugRenderer->render(renderQueues.debugEntities);
+	mForwardRenderer->transparentPass(renderQueues.transparentEntities);
+	mForwardRenderer->transparentInstancedPass(renderQueues.transparentInstancedEntities);
 	endSceneRender();
 #ifdef HDR
 	mPostProcess->render(mHDRBuffer->texture());
@@ -162,25 +158,25 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 		bvc.isVisible = bvc.bv->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
 	};
 
-	for (const auto& [shader, entities]: renderQueue.opaqueBatches) {
+	for (const auto& [shader, entities]: renderQueues.opaqueBatches) {
 		for (const auto& entity: entities) {
 			cullEntity(entity);
 		}
 	}
 
-	for (const auto& entity: renderQueue.opaqueInstancedEntities) {
+	for (const auto& entity: renderQueues.opaqueInstancedEntities) {
 		cullEntity(entity);
 	}
 
-	for (const auto& [dis, entity]: renderQueue.transparentEntities) {
+	for (const auto& [dis, entity]: renderQueues.transparentEntities) {
 		cullEntity(entity);
 	}
 
-	for (const auto& entity: renderQueue.transparentInstancedEntities) {
+	for (const auto& entity: renderQueues.transparentInstancedEntities) {
 		cullEntity(entity);
 	}
 
-	for (const auto& entity: renderQueue.debugEntities) {
+	for (const auto& entity: renderQueues.debugEntities) {
 		cullEntity(entity);
 	}
 }
@@ -213,7 +209,7 @@ void RenderPipeline::endSceneRender() const {
 
 void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 	if (entity.hasComponent<DebugComponent>()) {
-		renderQueue.debugEntities.push_back(entity);
+		renderQueues.debugEntities.push_back(entity);
 	}
 
 	const auto& mat = entity.getComponent<MaterialComponent>();
@@ -227,18 +223,18 @@ void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 					const float db = glm::length2(camera.position() - b);
 					return da > db; // back to front
 			});
-			renderQueue.transparentInstancedEntities.push_back(entity);
+			renderQueues.transparentInstancedEntities.push_back(entity);
 		} else {
-			renderQueue.opaqueInstancedEntities.push_back(entity);
+			renderQueues.opaqueInstancedEntities.push_back(entity);
 		}
 	} else {
 		if (mat.flags & Transparent) {
 			const auto& tc = entity.getComponent<TransformComponent>();
 			float distance = glm::length2(camera.position() - tc.position);
-			renderQueue.transparentEntities.emplace_back(distance, entity);
+			renderQueues.transparentEntities.emplace_back(distance, entity);
 		} else {
 			auto& shader = *entity.getComponent<ShaderComponent>().shader;
-			renderQueue.opaqueBatches[&shader].push_back(entity);
+			renderQueues.opaqueBatches[&shader].push_back(entity);
 		}
 	}
 }
