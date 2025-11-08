@@ -12,6 +12,7 @@ in VS_OUT
 
 #include "blinnPhong.glsl"
 #include "camera.glsl"
+#include "material.glsl"
 
 vec2 parallaxMapping(vec2 texCoord, vec3 viewDir, float heightScale) {
     // number of depth layers
@@ -78,7 +79,7 @@ void main() {
     float specular = texture(material.texture_specular, texCoord).a;
     // Create a mask: 0.0 if no lights, 1.0 if at least one light
     bool hasLights = lightCount.x > 0 || lightCount.y > 0 || lightCount.z > 0;
-    vec3 result = mix(diffuse, calculateLights(N, fs_in.FragPos, viewPos.xyz, fs_in.ViewDir, fs_in.FragPosLightSpace, fs_in.FragPosPersLightSpace, diffuse, specular), float(hasLights));
+    vec3 result = mix(diffuse, calculateLights(N, fs_in.FragPos, viewPos.xyz, fs_in.ViewDir, fs_in.FragPosLightSpace, fs_in.FragPosPersLightSpace, diffuse, specular, material.shininess), float(hasLights));
 
     fragColor = vec4(result, 1.0);
 }
