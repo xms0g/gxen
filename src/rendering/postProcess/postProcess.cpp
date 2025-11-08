@@ -8,6 +8,7 @@
 #include "toneMapping.h"
 #include "edgeDetection.h"
 #include "../shader.h"
+#include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
 #include "../../models/quad.h"
 
@@ -47,5 +48,5 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 	}
 
 	mQuad->shader().activate();
-	draw(inputTex, mQuad->VAO());
+	RenderCommon::drawQuad(inputTex, mQuad->VAO());
 }

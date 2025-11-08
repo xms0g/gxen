@@ -1,6 +1,7 @@
 #include "sepia.h"
 #include "glad/glad.h"
 #include "../shader.h"
+#include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 Sepia::Sepia(const std::string& name, const bool enabled) : IPostEffect(name, enabled) {
@@ -17,7 +18,7 @@ uint32_t Sepia::render(const uint32_t sceneTexture,
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	shader->activate();
-	draw(sceneTexture, VAO);
+	RenderCommon::drawQuad(sceneTexture, VAO);
 
 	const uint32_t texture = renderTargets[toggle]->texture();
 	renderTargets[toggle]->unbind();

@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 class FrameBuffer;
 class Shader;
 
-class Sepia final : public IPostEffect, public QuadDraw {
+class Sepia final : public IPostEffect {
 public:
 	explicit Sepia(const std::string& name, bool enabled = false);
 

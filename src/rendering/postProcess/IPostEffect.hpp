@@ -16,9 +16,6 @@ public:
 
 	virtual ~IPostEffect() = default;
 
-	virtual void applyUniforms() const {
-	}
-
 	virtual uint32_t render(uint32_t sceneTexture,
 	                        uint32_t VAO,
 	                        const std::unique_ptr<FrameBuffer>* renderTargets,

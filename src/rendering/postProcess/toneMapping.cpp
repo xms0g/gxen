@@ -1,5 +1,7 @@
 #include "toneMapping.h"
+#include "glad/glad.h"
 #include "../shader.h"
+#include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 ToneMapping::ToneMapping(const std::string& name, const bool enabled, const float exp)
@@ -20,7 +22,7 @@ uint32_t ToneMapping::render(const uint32_t sceneTexture,
 	shader->activate();
 	shader->setFloat("exposure", exposure);
 
-	draw(sceneTexture, VAO);
+	RenderCommon::drawQuad(sceneTexture, VAO);
 
 	const uint32_t texture = renderTargets[toggle]->texture();
 	renderTargets[toggle]->unbind();

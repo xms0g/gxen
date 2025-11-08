@@ -2,7 +2,6 @@
 #include <memory>
 #include <vector>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 namespace Models {
 class Quad;
@@ -11,7 +10,7 @@ class Quad;
 class FrameBuffer;
 class Shader;
 
-class PostProcess : public QuadDraw {
+class PostProcess {
 public:
 	PostProcess(int width, int height);
 

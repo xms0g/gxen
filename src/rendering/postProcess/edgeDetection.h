@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 class FrameBuffer;
 class Shader;
 
-class EdgeDetection final : public IPostEffect, public QuadDraw {
+class EdgeDetection final : public IPostEffect {
 public:
 	explicit EdgeDetection(const std::string& name, bool enabled = false);
 

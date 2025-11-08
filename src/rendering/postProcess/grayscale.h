@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 class FrameBuffer;
 class Shader;
 
-class Grayscale final : public IPostEffect, public QuadDraw {
+class Grayscale final : public IPostEffect {
 public:
 	explicit Grayscale(const std::string& name, bool enabled = false);
 

@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 class FrameBuffer;
 class Shader;
 
-class ToneMapping final : public IPostEffect, public QuadDraw {
+class ToneMapping final : public IPostEffect {
 public:
 	float exposure{};
 

@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 class FrameBuffer;
 class Shader;
 
-class Blur final : public IPostEffect, public QuadDraw {
+class Blur final : public IPostEffect {
 public:
 	explicit Blur(const std::string& name, bool enabled = false);
 

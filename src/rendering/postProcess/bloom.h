@@ -1,15 +1,10 @@
 #pragma once
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
-
-namespace Models {
-class Quad;
-}
 
 class Shader;
 class FrameBuffer;
 
-class Bloom final : public IPostEffect, public QuadDraw {
+class Bloom final : public IPostEffect {
 public:
 	Bloom(const std::string& name, int width, int height, bool enabled = false);
 

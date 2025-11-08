@@ -1,5 +1,6 @@
 #include "renderPipeline.h"
 #include <SDL.h>
+#include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "glm/gtx/norm.hpp"
 #include "shader.h"

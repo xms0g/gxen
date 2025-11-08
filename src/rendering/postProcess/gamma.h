@@ -1,12 +1,11 @@
 #pragma once
 #include <memory>
 #include "IPostEffect.hpp"
-#include "quadDraw.hpp"
 
 class FrameBuffer;
 class Shader;
 
-class Gamma final : public IPostEffect, public QuadDraw {
+class Gamma final : public IPostEffect {
 public:
 	explicit Gamma(const std::string& name, bool enabled = false);
 

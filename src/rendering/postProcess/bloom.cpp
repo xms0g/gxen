@@ -1,11 +1,11 @@
 #include "bloom.h"
 #include "glad/glad.h"
 #include "../shader.h"
+#include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
-#include "../../models/quad.h"
 
-Bloom::Bloom(const std::string& name, const int width, const int height, const bool enabled) : IPostEffect(
-	name, enabled) {
+Bloom::Bloom(const std::string& name, const int width, const int height, const bool enabled)
+	: IPostEffect(name, enabled) {
 	brightFilter = std::make_unique<Shader>("models/quad.vert", "post-processing/bloom/brightFilter.frag");
 	brightFilter->activate();
 	brightFilter->setInt("screenTexture", 0);
@@ -52,7 +52,7 @@ uint32_t Bloom::brightFilterPass(uint32_t sceneTexture, const uint32_t VAO, int&
 
 	brightFilter->activate();
 
-	draw(sceneTexture, VAO);
+	RenderCommon::drawQuad(sceneTexture, VAO);
 
 	sceneTexture = mRenderTargets[toggle]->texture();
 	toggle = !toggle;
@@ -70,7 +70,7 @@ uint32_t Bloom::blurPass(uint32_t sceneTexture, const uint32_t VAO, int& toggle)
 		blur->setBool("horizontal", horizontal);
 		horizontal = !horizontal;
 
-		draw(sceneTexture, VAO);
+		RenderCommon::drawQuad(sceneTexture, VAO);
 
 		sceneTexture = mRenderTargets[toggle]->texture();
 		toggle = !toggle;

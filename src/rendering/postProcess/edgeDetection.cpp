@@ -1,5 +1,7 @@
 #include "edgeDetection.h"
+#include "glad/glad.h"
 #include "../shader.h"
+#include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 EdgeDetection::EdgeDetection(const std::string& name, const bool enabled): IPostEffect(name, enabled) {
@@ -18,7 +20,7 @@ uint32_t EdgeDetection::render(const uint32_t sceneTexture,
 	shader->activate();
 	shader->setFloatArray("kernel", kernel, 9);
 
-	draw(sceneTexture, VAO);
+	RenderCommon::drawQuad(sceneTexture, VAO);
 
 	const uint32_t texture = renderTargets[toggle]->texture();
 	renderTargets[toggle]->unbind();

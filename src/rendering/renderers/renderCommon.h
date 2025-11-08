@@ -13,6 +13,8 @@ void setupMaterial(const Entity& entity, const Shader& shader);
 
 void drawMeshes(const Entity& entity, const Shader& shader);
 
+void drawQuad(uint32_t sceneTexture, uint32_t VAO);
+
 using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
 
 void bindTextures(
