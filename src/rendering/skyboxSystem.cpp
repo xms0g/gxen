@@ -19,8 +19,8 @@ SkyboxSystem::SkyboxSystem() {
 void SkyboxSystem::render(const Camera& camera) const {
 	const auto& skybox = getSystemEntities().front();
 	const auto& shader = skybox.getComponent<ShaderComponent>().shader;
-	const auto& mc = skybox.getComponent<MeshComponent>();
-	const auto& mat = skybox.getComponent<MaterialComponent>();
+	const uint32_t VAO = skybox.getComponent<MeshComponent>().meshes->at(0).front().VAO();
+	const uint32_t texID = skybox.getComponent<MaterialComponent>().textures->at(0).front().id;
 
 	const glm::mat4 projectionMat = glm::perspective(
 		glm::radians(camera.zoom()),
@@ -28,7 +28,7 @@ void SkyboxSystem::render(const Camera& camera) const {
 		ZNEAR, ZFAR);
 
 	shader->activate();
-	shader->setInt(mat.textures->at(0).front().type, 0);
+	shader->setInt("skybox", 0);
 	shader->setMat4("projection", projectionMat);
 
 	const auto view = glm::mat4(glm::mat3(camera.viewMatrix()));
@@ -36,11 +36,10 @@ void SkyboxSystem::render(const Camera& camera) const {
 
 	glActiveTexture(GL_TEXTURE0); // active proper texture unit before binding
 	// and finally bind the texture
-	glBindTexture(GL_TEXTURE_CUBE_MAP, mat.textures->at(0).front().id);
-
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
 	// Draw
 	glDepthFunc(GL_LEQUAL);
-	glBindVertexArray(mc.meshes->at(0).front().VAO());
+	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
