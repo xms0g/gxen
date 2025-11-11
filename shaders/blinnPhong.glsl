@@ -53,18 +53,16 @@ float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec3 viewPos);
 float calculatePerspectiveShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
 
 vec3 calculateLights(vec3 normal, vec3 fragPos, vec3 viewPos, vec3 viewDir, vec4 fragPosLightSpace, vec4 fragPosPersLightSpace, vec3 albedo, float specular, float shininess) {
-    vec3 norm = normalize(normal);
-
     vec3 result = vec3(0.0);
 
     for (int i = 0; i < lightCount.x; i++) {
-        result += calculateDirectionalLight(dirLights[i], norm, viewDir, fragPosLightSpace, albedo, specular, shininess);
+        result += calculateDirectionalLight(dirLights[i], normal, viewDir, fragPosLightSpace, albedo, specular, shininess);
     }
     for (int i = 0; i < lightCount.y; i++) {
-        result += calculatePointLight(pointLights[i], norm, fragPos, viewPos, viewDir, albedo, specular, shininess);
+        result += calculatePointLight(pointLights[i], normal, fragPos, viewPos, viewDir, albedo, specular, shininess);
     }
     for (int i = 0; i < lightCount.z; i++) {
-        result += calculateSpotLight(spotLights[i], norm, fragPos, viewDir, fragPosPersLightSpace, albedo, specular, shininess);
+        result += calculateSpotLight(spotLights[i], normal, fragPos, viewDir, fragPosPersLightSpace, albedo, specular, shininess);
     }
 
     return result;
