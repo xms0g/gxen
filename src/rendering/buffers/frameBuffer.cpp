@@ -1,7 +1,6 @@
 #include "frameBuffer.h"
 #include <vector>
 #include "glad/glad.h"
-#include "../../config/config.hpp"
 
 FrameBuffer::FrameBuffer(const int width, const int height) : mWidth(width), mHeight(height) {
 	glGenFramebuffers(1, &mFBO);
@@ -36,7 +35,6 @@ void FrameBuffer::bindForDraw() const {
 
 void FrameBuffer::unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }
 
 FrameBuffer& FrameBuffer::withTexture() {

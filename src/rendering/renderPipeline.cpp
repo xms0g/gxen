@@ -198,8 +198,10 @@ void RenderPipeline::beginSceneRender() const {
 void RenderPipeline::endSceneRender() const {
 #ifdef HDR
 	mHDRBuffer->unbind();
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #else
 	mSceneBuffer->unbind();
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mIntermediateBuffer->width(),
