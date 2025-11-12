@@ -18,22 +18,28 @@ ShadowManager::ShadowManager() {
 
 	mShadowUBO = std::make_unique<UniformBuffer>(sizeof(ShadowData), 2);
 
-	mShadowMaps = {{
+	mShadowMaps = {
+		{
 			mDirShadowPass->getShadowMap(),
 			mOmnidirShadowPass->getShadowMap(),
 			mPerspectiveShadowPass->getShadowMap()
-	}};
+		}
+	};
 }
 
 ShadowManager::~ShadowManager() = default;
 
-void ShadowManager::configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches) const {
+void ShadowManager::configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+                              const uint32_t deferredShaderID) const {
+	mShadowUBO->configure(deferredShaderID, 2, "ShadowBlock");
+
 	for (const auto& [shader, entities]: opaqueBatches) {
 		mShadowUBO->configure(shader->ID(), 2, "ShadowBlock");
 	}
 }
 
-void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights) {
+void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+                               const LightSystem& lights) {
 	for (const auto& [shader, entities]: opaqueBatches) {
 		for (const auto& light: lights.getDirLights()) {
 			mDirShadowPass->render(entities, light->direction);

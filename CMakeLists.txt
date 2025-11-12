@@ -45,6 +45,10 @@ if(HDR_ENABLED)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HDR)
 endif()
 
+if(DEFERRED_ENABLED)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE DEFERRED)
+endif()
+
 target_include_directories(${PROJECT_NAME} PUBLIC
         ${LIBS_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS})

@@ -41,9 +41,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_MULTISAMPLE);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
@@ -72,9 +69,21 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 			.checkStatus();
 	mIntermediateBuffer->unbind();
 
+	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+	mGBuffer->withTexture16F()
+			.withTexture16F()
+			.withTexture()
+			.configureAttachments()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
+			.checkStatus();
+
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
+	mDeferredLigthingShader = std::make_unique<Shader>("models/quad.vert", "deferred/lighting.frag");
+	mGShader = std::make_unique<Shader>("deferred/gbuffer.vert", "deferred/gbuffer.frag");
+
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
+	mDeferredRenderer = std::make_unique<DeferredRenderer>(*mDeferredLigthingShader);
 	mShadowManager = std::make_unique<ShadowManager>();
 	mDebugRenderer = std::make_unique<DebugRenderer>();
 	mPostProcess = std::make_unique<PostProcess>(mSceneBuffer->width(), mSceneBuffer->height());
@@ -87,9 +96,13 @@ PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 void RenderPipeline::configure(const Camera& camera) const {
 	mForwardRenderer->configure(renderQueues.opaqueInstancedEntities, renderQueues.transparentInstancedEntities);
 	mDebugRenderer->configure(*mCameraUBO);
-	mShadowManager->configure(renderQueues.opaqueBatches);
+	mShadowManager->configure(renderQueues.opaqueBatches, mDeferredLigthingShader->ID());
 
 	// Uniform buffer configuration
+	mCameraUBO->configure(mGShader->ID(), 0, "CameraBlock");
+	mCameraUBO->configure(mDeferredLigthingShader->ID(), 0, "CameraBlock");
+	mLightSystem->getLightUBO().configure(mDeferredLigthingShader->ID(), 1, "LightBlock");
+
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
@@ -117,19 +130,24 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 }
 
 void RenderPipeline::render(const Camera& camera) {
+	updateBuffers(camera);
 	frustumCullingPass(camera);
 
 	mLightSystem->update();
 	mShadowManager->shadowPass(renderQueues.opaqueBatches, *mLightSystem);
-	updateBuffers(camera);
 
 	beginSceneRender();
-	mSkyboxSystem->render(camera);
-	//mDeferredRenderer->geometryPass(renderQueue.opaqueBatches, *mGBuffer, *mGShader);
-	//mDeferredRenderer->lightingPass(renderQueue.opaqueBatches, mShadowManager->getShadowMaps(), *mGBuffer);
+#ifdef DEFERRED
+	mDeferredRenderer->geometryPass(renderQueues.opaqueBatches, *mGBuffer, *mGShader);
+	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer, *mDeferredLigthingShader);
+#else
 	mForwardRenderer->opaquePass(renderQueues.opaqueBatches, mShadowManager->getShadowMaps());
-	mForwardRenderer->instancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
+#endif
 	mDebugRenderer->render(renderQueues.debugEntities);
+	mForwardRenderer->instancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
+
+	mSkyboxSystem->render(camera);
+
 	mForwardRenderer->transparentPass(renderQueues.transparentEntities);
 	mForwardRenderer->transparentInstancedPass(renderQueues.transparentInstancedEntities);
 	endSceneRender();
