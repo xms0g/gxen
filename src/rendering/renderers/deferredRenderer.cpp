@@ -5,7 +5,9 @@
 #include "../buffers/frameBuffer.h"
 #include "../../config/config.hpp"
 #include "../../ECS/entity.hpp"
+#include "../../ECS/components/bv.hpp"
 #include "../../models/quad.h"
+
 
 DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
 	lightingShader.activate();
@@ -27,6 +29,9 @@ void DeferredRenderer::geometryPass(std::unordered_map<Shader*, std::vector<Enti
 	gShader.activate();
 	for (const auto& [_, entities]: opaqueBatches) {
 		for (const auto& entity: entities) {
+			if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
+				continue;
+
 			RenderCommon::setupTransform(entity, gShader);
 			RenderCommon::setupMaterial(entity, gShader);
 			RenderCommon::drawMeshes(entity, gShader);
