@@ -1,5 +1,3 @@
-#include "shadow.glsl"
-
 struct DirectionalLight {
     vec4 direction;
 

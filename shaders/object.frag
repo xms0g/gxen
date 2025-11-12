@@ -10,9 +10,10 @@ in VS_OUT
     vec3 TangentViewDir;
 } fs_in;
 
-#include "blinnPhong.glsl"
 #include "camera.glsl"
 #include "material.glsl"
+#include "shadow.glsl"
+#include "blinnPhong.glsl"
 
 vec2 parallaxMapping(vec2 texCoord, vec3 viewDir, float heightScale) {
     // number of depth layers
