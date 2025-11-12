@@ -10,9 +10,9 @@ in VS_OUT
     vec3 TangentViewDir;
 } fs_in;
 
-#include "camera.glsl"
+#include "ub/camera.glsl"
+#include "ub/shadow.glsl"
 #include "material.glsl"
-#include "shadow.glsl"
 #include "blinnPhong.glsl"
 #include "normalMap.glsl"
 #include "parallaxMap.glsl"

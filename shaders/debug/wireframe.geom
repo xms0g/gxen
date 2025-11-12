@@ -2,7 +2,7 @@
 layout (triangles) in;
 layout (line_strip, max_vertices = 6) out;
 
-#include "camera.glsl"
+#include "ub/camera.glsl"
 
 out GS_OUT {
     vec3 Color;

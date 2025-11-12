@@ -4,8 +4,8 @@ in VS_OUT
     vec2 TexCoord;
 } fs_in;
 
-#include "camera.glsl"
-#include "shadow.glsl"
+#include "ub/camera.glsl"
+#include "ub/shadow.glsl"
 #include "blinnPhong.glsl"
 
 uniform sampler2D gPosition;

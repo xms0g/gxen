@@ -5,8 +5,8 @@ layout (location = 2) in vec2 aTexCoord;
 layout (location = 7) in mat4 aInstanceMatrix;
 layout (location = 11) in mat3 aInstanceNormalMatrix;
 
-#include "camera.glsl"
-#include "shadow.glsl"
+#include "ub/camera.glsl"
+#include "ub/shadow.glsl"
 
 out VS_OUT
 {

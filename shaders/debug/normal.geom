@@ -6,7 +6,7 @@ in VS_OUT {
     vec3 Normal;
 } gs_in[];
 
-#include "camera.glsl"
+#include "ub/camera.glsl"
 
 const float MAGNITUDE = 0.2;
 

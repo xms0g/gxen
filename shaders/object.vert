@@ -5,8 +5,8 @@ layout (location = 2) in vec2 aTexCoord;
 layout (location = 3) in vec3 aTangent;
 layout (location = 4) in vec3 aBitangent;
 
-#include "camera.glsl"
-#include "shadow.glsl"
+#include "ub/camera.glsl"
+#include "ub/shadow.glsl"
 #include "utils/TBN.glsl"
 
 uniform mat4 model;
