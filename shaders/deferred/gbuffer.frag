@@ -8,8 +8,8 @@ in VS_OUT
 } fs_in;
 
 #include "material.glsl"
-#include "normalMap.glsl"
-#include "parallaxMap.glsl"
+#include "utils/normalMap.glsl"
+#include "utils/parallaxMap.glsl"
 
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;

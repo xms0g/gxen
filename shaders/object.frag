@@ -14,8 +14,8 @@ in VS_OUT
 #include "ub/shadow.glsl"
 #include "material.glsl"
 #include "blinnPhong.glsl"
-#include "normalMap.glsl"
-#include "parallaxMap.glsl"
+#include "utils/normalMap.glsl"
+#include "utils/parallaxMap.glsl"
 
 out vec4 fragColor;
 
