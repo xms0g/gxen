@@ -59,6 +59,8 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 	if (entities.empty()) return;
 
 	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (const auto& [dist, entity]: entities) {
 		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
 			continue;
@@ -71,6 +73,7 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 		RenderCommon::drawMeshes(entity, *shader);
 	}
 	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 }
 
 void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
@@ -105,7 +108,11 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 }
 
 void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities) const {
+	if (entities.empty()) return;
+
 	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (auto& entity: entities) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
@@ -127,6 +134,7 @@ void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entiti
 	}
 
 	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
 }
 
 void ForwardRenderer::prepareInstanceData(const Entity& entity,
