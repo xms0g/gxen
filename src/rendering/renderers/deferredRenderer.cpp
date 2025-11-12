@@ -39,10 +39,12 @@ void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps,
                                     const FrameBuffer& gBuffer,
                                     const FrameBuffer& sceneBuffer,
                                     const Shader& lightingShader) const {
+	// Copy depth buffer of gBuffer to scene buffer for the proper depth testing
 	gBuffer.bindForRead();
 	sceneBuffer.bindForDraw();
-	glBlitFramebuffer(0, 0, gBuffer.width(), gBuffer.height(), 0, 0, sceneBuffer.width(),
-					  sceneBuffer.height(), GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, gBuffer.width(), gBuffer.height(),
+	                  0, 0, sceneBuffer.width(), sceneBuffer.height(),
+	                  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	sceneBuffer.bind();
 	lightingShader.activate();
 

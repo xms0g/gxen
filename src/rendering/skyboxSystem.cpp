@@ -38,9 +38,11 @@ void SkyboxSystem::render(const Camera& camera) const {
 	// and finally bind the texture
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
 	// Draw
+	glDepthMask(GL_FALSE);
 	glDepthFunc(GL_LEQUAL);
 	glBindVertexArray(VAO);
 	glDrawArrays(GL_TRIANGLES, 0, 36);
 	glBindVertexArray(0);
 	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
 }

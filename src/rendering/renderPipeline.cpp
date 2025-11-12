@@ -39,8 +39,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	// configure global opengl state
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_MULTISAMPLE);
-
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 	glFrontFace(GL_CCW);
@@ -52,8 +50,14 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
 
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+#ifdef ANTIALIASING
+	glEnable(GL_MULTISAMPLE);
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
 			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
+#else
+	mSceneBuffer->withTexture()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
+#endif
 			.checkStatus();
 	mSceneBuffer->unbind();
 
@@ -126,7 +130,7 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 	}
 
 	std::sort(renderQueues.transparentEntities.begin(), renderQueues.transparentEntities.end(),
-		  [](const auto& a, const auto& b) { return a.first > b.first; });
+	          [](const auto& a, const auto& b) { return a.first > b.first; });
 }
 
 void RenderPipeline::render(const Camera& camera) {
@@ -139,7 +143,8 @@ void RenderPipeline::render(const Camera& camera) {
 	beginSceneRender();
 #ifdef DEFERRED
 	mDeferredRenderer->geometryPass(renderQueues.opaqueBatches, *mGBuffer, *mGShader);
-	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer, *mDeferredLigthingShader);
+	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer,
+	                                *mDeferredLigthingShader);
 #else
 	mForwardRenderer->opaquePass(renderQueues.opaqueBatches, mShadowManager->getShadowMaps());
 #endif
@@ -222,8 +227,9 @@ void RenderPipeline::endSceneRender() const {
 	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
-	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(), 0, 0, mIntermediateBuffer->width(),
-	                  mIntermediateBuffer->height(), GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(),
+	                  0, 0, mIntermediateBuffer->width(), mIntermediateBuffer->height(),
+	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 #endif
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
@@ -240,9 +246,9 @@ void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 			const auto& positions = entity.getComponent<InstanceComponent>().positions;
 
 			std::sort(positions->begin(), positions->end(), [&](const glm::vec3& a, const glm::vec3& b) {
-					const float da = glm::length2(camera.position() - a);
-					const float db = glm::length2(camera.position() - b);
-					return da > db; // back to front
+				const float da = glm::length2(camera.position() - a);
+				const float db = glm::length2(camera.position() - b);
+				return da > db; // back to front
 			});
 			renderQueues.transparentInstancedEntities.push_back(entity);
 		} else {
