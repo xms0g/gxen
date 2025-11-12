@@ -3,18 +3,35 @@
 
 class Shader;
 
-namespace Models {
-class Quad {
+class IQuad {
 public:
-	Quad();
-	~Quad();
+	IQuad();
+
+	virtual ~IQuad();
 
 	[[nodiscard]] uint32_t VAO() const { return mVAO; }
+
+protected:
+	uint32_t mVAO{0}, mVBO{0};
+};
+
+namespace Models {
+class SingleQuad final : public IQuad {
+public:
+	SingleQuad() = default;
+
+	~SingleQuad() override = default;
+};
+
+class Quad final : public IQuad {
+public:
+	Quad();
+
+	~Quad() override = default;
 
 	[[nodiscard]] const Shader& shader() const { return *mShader; }
 
 private:
-	uint32_t mVAO{0}, mVBO{0};
 	std::unique_ptr<Shader> mShader;
 };
 }

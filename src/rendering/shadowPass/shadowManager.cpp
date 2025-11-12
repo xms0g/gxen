@@ -18,13 +18,11 @@ ShadowManager::ShadowManager() {
 
 	mShadowUBO = std::make_unique<UniformBuffer>(sizeof(ShadowData), 2);
 
-	mShadowMaps = {
-		{
+	mShadowMaps = {{
 			mDirShadowPass->getShadowMap(),
 			mOmnidirShadowPass->getShadowMap(),
 			mPerspectiveShadowPass->getShadowMap()
-		}
-	};
+	}};
 }
 
 ShadowManager::~ShadowManager() = default;

@@ -7,7 +7,7 @@
 #include "../../ECS/entity.hpp"
 #include "../../models/quad.h"
 
-DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::Quad>()) {
+DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
 	lightingShader.activate();
 	lightingShader.setInt("gPosition", 0);
 	lightingShader.setInt("gNormal", 1);
@@ -57,7 +57,6 @@ void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps,
 		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
 		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);
 	}
-
 
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mQuad->VAO());

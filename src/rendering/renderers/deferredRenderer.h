@@ -3,7 +3,7 @@
 #include <unordered_map>
 
 namespace Models {
-class Quad;
+class SingleQuad;
 }
 
 class Entity;
@@ -26,5 +26,5 @@ public:
 	                  const Shader& lightingShader) const;
 
 private:
-	std::unique_ptr<Models::Quad> mQuad;
+	std::unique_ptr<Models::SingleQuad> mQuad;
 };
