@@ -7,6 +7,7 @@ layout (location = 4) in vec3 aBitangent;
 
 #include "camera.glsl"
 #include "shadow.glsl"
+#include "utils/TBN.glsl"
 
 uniform mat4 model;
 uniform mat3 normalMatrix;
@@ -23,12 +24,7 @@ out VS_OUT
 } vs_out;
 
 void main() {
-    vec3 T = normalize(vec3(model * vec4(aTangent, 0.0)));
-    vec3 N = normalize(normalMatrix * aNormal);
-    T = normalize(T - dot(T, N) * N);
-    vec3 B = cross(N, T);
-
-    vs_out.TBN = mat3(T, B, N);
+    vs_out.TBN = TBN(model, aTangent, normalMatrix, aNormal);
     vs_out.TexCoord = aTexCoord;
     vs_out.FragPos = vec3(model * vec4(aPos, 1.0));
     vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
