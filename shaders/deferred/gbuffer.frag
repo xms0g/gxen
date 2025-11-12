@@ -2,11 +2,14 @@
 in VS_OUT
 {
     vec2 TexCoord;
-    vec3 Normal;
     vec3 FragPos;
+    mat3 TBN;
+    vec3 TangentViewDir;
 } fs_in;
 
 #include "material.glsl"
+#include "normalMap.glsl"
+#include "parallaxMap.glsl"
 
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;
@@ -15,10 +18,11 @@ layout (location = 2) out vec4 gAlbedoSpec;
 void main() {
     // store the fragment position vector in the first gbuffer texture
     gPosition = fs_in.FragPos;
+    vec2 texCoord = parallaxMapping(fs_in.TexCoord, fs_in.TangentViewDir, material.heightScale, material.hasHeightMap);
     // also store the per-fragment normals into the gbuffer
-    gNormal = normalize(fs_in.Normal);
+    gNormal = normalMapping(fs_in.TBN, texCoord, material.hasNormalMap);
     // and the diffuse per-fragment color
-    gAlbedoSpec.rgb = texture(material.texture_diffuse, fs_in.TexCoord).rgb;
+    gAlbedoSpec.rgb = texture(material.texture_diffuse, texCoord).rgb;
     // store specular intensity in gAlbedoSpec's alpha component
-    gAlbedoSpec.a = texture(material.texture_specular, fs_in.TexCoord).r;
+    gAlbedoSpec.a = texture(material.texture_specular, texCoord).r;
 }
