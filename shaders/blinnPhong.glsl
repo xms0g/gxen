@@ -152,15 +152,16 @@ float calculateDirectionalShadow(vec4 fragPosLightSpace, vec3 normal, vec3 light
     float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
     // PCF
     float shadow = 0.0;
+    int samples = 3;
     vec2 texelSize = 1.0 / textureSize(shadowMap, 0);
-    for (float x = -1.5f; x <= 1.5; ++x) {
-        for (float y = -1.5; y <= 1.5; ++y) {
-            vec2 offset = projCoords.xy + vec2(x, y) * texelSize;
-            float pcfDepth = texture(shadowMap, offset).r;
+
+    for (int x = -samples; x <= samples; ++x) {
+        for (int y = -samples; y <= samples; ++y) {
+            float pcfDepth = texture(shadowMap, projCoords.xy + vec2(x, y) * texelSize).r;
             shadow += currentDepth - bias > pcfDepth ? 1.0 : 0.0;
         }
     }
-    shadow /= 16.0;
+    shadow /= float((2 * samples + 1) * (2 * samples + 1));
 
     return shadow;
 }
