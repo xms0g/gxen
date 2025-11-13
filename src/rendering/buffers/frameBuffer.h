@@ -21,6 +21,8 @@ public:
 
 	void unbind() const;
 
+	void attachLayer(uint32_t attachment, int layer) const;
+
 	FrameBuffer& withTexture();
 
 	FrameBuffer& withTextureMultisampled(int multisampledCount);
@@ -28,6 +30,8 @@ public:
 	FrameBuffer& withTexture16F();
 
 	FrameBuffer& withTextureDepth();
+
+	FrameBuffer& withTextureArrayDepth(int layerCount);
 
 	FrameBuffer& withTextureCubemapDepth();
 

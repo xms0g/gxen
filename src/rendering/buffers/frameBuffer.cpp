@@ -37,6 +37,10 @@ void FrameBuffer::unbind() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
+void FrameBuffer::attachLayer(const uint32_t attachment, const int layer) const {
+	glFramebufferTextureLayer(GL_FRAMEBUFFER, attachment, texture(), 0, layer);
+}
+
 FrameBuffer& FrameBuffer::withTexture() {
 	uint32_t textureID;
 	glGenTextures(1, &textureID);
@@ -109,6 +113,30 @@ FrameBuffer& FrameBuffer::withTextureDepth() {
 	glDrawBuffer(GL_NONE);
 	glReadBuffer(GL_NONE);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	return *this;
+}
+
+FrameBuffer& FrameBuffer::withTextureArrayDepth(const int layerCount) {
+	uint32_t textureID;
+	glGenTextures(1, &textureID);
+	mTextureIDs.push_back(textureID);
+
+	glBindTexture(GL_TEXTURE_2D_ARRAY, textureID);
+	glTexImage3D(
+	   GL_TEXTURE_2D_ARRAY, 0, GL_DEPTH_COMPONENT32F, mWidth, mHeight, layerCount,
+	   0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+	constexpr float borderColor[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	glTexParameterfv(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BORDER_COLOR, borderColor);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, mFBO);
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureID, 0);
+	glDrawBuffer(GL_NONE);
+	glReadBuffer(GL_NONE);
 	return *this;
 }
 
