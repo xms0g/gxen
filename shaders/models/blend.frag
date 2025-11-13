@@ -4,7 +4,7 @@ in VS_OUT
     vec2 TexCoord;
 } fs_in;
 
-#include "material.glsl"
+#include "common/material.glsl"
 
 out vec4 fragColor;
 

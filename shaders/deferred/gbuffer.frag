@@ -7,9 +7,9 @@ in VS_OUT
     vec3 TangentViewDir;
 } fs_in;
 
-#include "material.glsl"
-#include "utils/normalMap.glsl"
-#include "utils/parallaxMap.glsl"
+#include "common/material.glsl"
+#include "common/normalMap.glsl"
+#include "common/parallaxMap.glsl"
 
 layout (location = 0) out vec3 gPosition;
 layout (location = 1) out vec3 gNormal;

@@ -7,7 +7,7 @@ layout (location = 11) in mat3 aInstanceNormalMatrix;
 
 #include "ub/camera.glsl"
 #include "ub/shadow.glsl"
-#include "utils/TBN.glsl"
+#include "common/TBN.glsl"
 
 out VS_OUT
 {

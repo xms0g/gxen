@@ -7,7 +7,7 @@ layout (location = 4) in vec3 aBitangent;
 
 #include "ub/camera.glsl"
 #include "ub/shadow.glsl"
-#include "utils/TBN.glsl"
+#include "common/TBN.glsl"
 
 uniform mat4 model;
 uniform mat3 normalMatrix;

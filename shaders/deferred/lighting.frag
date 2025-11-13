@@ -6,7 +6,7 @@ in VS_OUT
 
 #include "ub/camera.glsl"
 #include "ub/shadow.glsl"
-#include "blinnPhong.glsl"
+#include "common/blinnPhong.glsl"
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;

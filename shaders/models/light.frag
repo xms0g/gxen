@@ -1,5 +1,5 @@
 #version 410 core
-#include "material.glsl"
+#include "common/material.glsl"
 
 out vec4 fragColor;
 
