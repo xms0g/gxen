@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include "glm/glm.hpp"
 
@@ -31,10 +32,8 @@ public:
 	void transparentInstancedPass(const std::vector<Entity>& entities) const;
 
 private:
-	void prepareInstanceData(const Entity& entity,
-	                         const std::vector<glm::vec3>& positions,
-	                         size_t instanceSize,
-	                         uint32_t flags);
+	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
+	                         size_t instanceSize, uint32_t flags);
 	struct InstanceVBO {
 		uint32_t buffer{};
 		int offset{0};

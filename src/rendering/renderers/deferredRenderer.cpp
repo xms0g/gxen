@@ -40,10 +40,8 @@ void DeferredRenderer::geometryPass(std::unordered_map<Shader*, std::vector<Enti
 	gBuffer.unbind();
 }
 
-void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps,
-                                    const FrameBuffer& gBuffer,
-                                    const FrameBuffer& sceneBuffer,
-                                    const Shader& lightingShader) const {
+void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& gBuffer,
+                                    const FrameBuffer& sceneBuffer, const Shader& lightingShader) const {
 	// Copy depth buffer of gBuffer to scene buffer for the proper depth testing
 	gBuffer.bindForRead();
 	sceneBuffer.bindForDraw();

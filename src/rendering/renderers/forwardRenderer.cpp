@@ -33,7 +33,7 @@ void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntiti
 
 void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
-	for (uint32_t i = 0; i < 3; ++i) {
+	for (uint32_t i = 0; i < shadowMaps.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
 		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);
 	}
@@ -80,7 +80,7 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
                                     const std::array<uint32_t, 3>& shadowMaps) const {
 	if (entities.empty()) return;
 
-	for (uint32_t i = 0; i < 3; ++i) {
+	for (uint32_t i = 0; i < shadowMaps.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
 		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);
 	}
