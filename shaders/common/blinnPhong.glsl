@@ -23,8 +23,10 @@ struct SpotLight {
     vec4 diffuse;
     vec4 specular;
 
+    vec3 attenuation;
+    bool castShadow;
+
     vec4 cutOff;
-    vec4 attenuation;
 };
 
 #define MAX_DIR_LIGHTS  1
