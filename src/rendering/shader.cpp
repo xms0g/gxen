@@ -134,7 +134,7 @@ std::string Shader::preprocess(const std::string& source,
 
 				// Prevent cyclic includes
 				if (includedFiles.contains(includeFile)) {
-					throw std::runtime_error(std::string("File already included: ") + includeFile + "\nin " + fileName);
+					continue;
 				}
 				includedFiles.insert(includeFile);
 				// Load included file
