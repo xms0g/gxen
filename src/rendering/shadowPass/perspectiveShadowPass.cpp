@@ -10,7 +10,7 @@
 
 PerspectiveShadowPass::PerspectiveShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
-	mDepthMap->withTextureDepth()
+	mDepthMap->withTextureArrayDepth(MAX_SPOT_LIGHTS)
 			.checkStatus();
 	mDepthMap->unbind();
 
@@ -23,30 +23,29 @@ uint32_t PerspectiveShadowPass::getShadowMap() const {
 	return mDepthMap->texture();
 }
 
-glm::mat4 PerspectiveShadowPass::getLightSpaceMatrix() const {
-	return mLightSpaceMatrix;
+glm::mat4 PerspectiveShadowPass::getLightSpaceMatrix(const int layer) const {
+	return mLightSpaceMatrix[layer];
 }
 
-void PerspectiveShadowPass::render(const std::vector<Entity>& entities,
-                                   const glm::vec4& direction,
-                                   const glm::vec4& position,
-                                   const float fovy) {
+void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const glm::vec4& direction,
+                                   const glm::vec4& position, const float fovy, const int layer) {
 	const glm::mat4 lightProjection = glm::perspective(
 		fovy,
 		static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT),
 		SHADOW_PERSPECTIVE_NEAR,
 		SHADOW_PERSPECTIVE_FAR);
-	auto dir = glm::vec3(direction);
-	auto pos = glm::vec3(position);
+	const auto dir = glm::vec3(direction);
+	const auto pos = glm::vec3(position);
 	const glm::mat4 lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.0, 1.0, 0.0));
-	mLightSpaceMatrix = lightProjection * lightView;
+	mLightSpaceMatrix[layer]= lightProjection * lightView;
 
 	mDepthShader->activate();
-	mDepthShader->setMat4("lightSpaceMatrix", mLightSpaceMatrix);
+	mDepthShader->setMat4("lightSpaceMatrix", mLightSpaceMatrix[layer]);
 
 	// render scene from light's point of view
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	mDepthMap->bind();
+	mDepthMap->attachLayer(GL_DEPTH_ATTACHMENT, layer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);

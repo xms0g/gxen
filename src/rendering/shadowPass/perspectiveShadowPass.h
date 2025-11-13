@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "glm/glm.hpp"
+#include "../../config/config.hpp"
 
 class ForwardRenderer;
 class Entity;
@@ -17,12 +18,13 @@ public:
 
 	[[nodiscard]] uint32_t getShadowMap() const;
 
-	[[nodiscard]] glm::mat4 getLightSpaceMatrix() const;
+	[[nodiscard]] glm::mat4 getLightSpaceMatrix(int layer) const;
 
-	void render(const std::vector<Entity>& entities, const glm::vec4& direction, const glm::vec4& position, float fovy);
+	void render(const std::vector<Entity>& entities, const glm::vec4& direction,
+	            const glm::vec4& position, float fovy, int layer);
 
 private:
-	glm::mat4 mLightSpaceMatrix{};
+	glm::mat4 mLightSpaceMatrix[MAX_SPOT_LIGHTS]{};
 	std::unique_ptr<FrameBuffer> mDepthMap;
 	std::unique_ptr<Shader> mDepthShader;
 };

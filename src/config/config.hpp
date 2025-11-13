@@ -18,6 +18,11 @@ constexpr float ZOOM{45.0f};
 constexpr float ZNEAR{0.1f};
 constexpr float ZFAR{100.0f};
 
+// Light Settings
+constexpr uint32_t MAX_DIRECTIONAL_LIGHTS{1};
+constexpr uint32_t MAX_POINT_LIGHTS{4};
+constexpr uint32_t MAX_SPOT_LIGHTS{4};
+
 // Render Settings
 constexpr uint32_t MULTISAMPLED_COUNT{4};
 constexpr uint32_t SHADOW_WIDTH{1024};

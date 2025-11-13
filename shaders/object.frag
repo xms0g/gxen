@@ -5,7 +5,6 @@ in VS_OUT
     mat3 TBN;
     vec3 FragPos;
     vec4 FragPosLightSpace;
-    vec4 FragPosPersLightSpace;
     vec3 ViewDir;
     vec3 TangentViewDir;
 } fs_in;
@@ -26,7 +25,7 @@ void main() {
     float specular = texture(material.texture_specular, texCoord).a;
     // Create a mask: 0.0 if no lights, 1.0 if at least one light
     bool hasLights = lightCount.x > 0 || lightCount.y > 0 || lightCount.z > 0;
-    vec3 result = mix(diffuse, calculateLights(normal, fs_in.FragPos, viewPos.xyz, fs_in.ViewDir, fs_in.FragPosLightSpace, fs_in.FragPosPersLightSpace, diffuse, specular, material.shininess), float(hasLights));
+    vec3 result = mix(diffuse, calculateLights(normal, fs_in.FragPos, viewPos.xyz, fs_in.ViewDir, fs_in.FragPosLightSpace, diffuse, specular, material.shininess), float(hasLights));
 
     fragColor = vec4(result, 1.0);
 }

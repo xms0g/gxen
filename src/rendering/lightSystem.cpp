@@ -1,6 +1,7 @@
 #include "lightSystem.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "buffers/uniformBuffer.h"
+#include "../config/config.hpp"
 #include "../ECS/registry.h"
 #include "../ECS/components/directionalLight.hpp"
 #include "../ECS/components/pointLight.hpp"
@@ -11,9 +12,7 @@ LightSystem::LightSystem() {
 	RequireComponent<DirectionalLightComponent>(true);
 	RequireComponent<PointLightComponent>(true);
 	RequireComponent<SpotLightComponent>(true);
-#define MAX_DIRECTIONAL_LIGHTS 1
-#define MAX_POINT_LIGHTS 4
-#define MAX_SPOT_LIGHTS  4
+
 	int totalLightBufferSize = sizeof(DirectionalLightComponent) +
 							   MAX_POINT_LIGHTS * sizeof(PointLightComponent) +
 							   MAX_SPOT_LIGHTS * sizeof(SpotLightComponent) + sizeof(glm::ivec4);

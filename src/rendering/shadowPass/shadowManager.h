@@ -4,6 +4,7 @@
 #include <SDL_stdinc.h>
 #include <unordered_map>
 #include "glm/glm.hpp"
+#include "../../config/config.hpp"
 
 class ForwardRenderer;
 class Shader;
@@ -29,7 +30,7 @@ public:
 private:
 	struct alignas(16) ShadowData {
 		glm::mat4 lightSpaceMatrix;
-		glm::mat4 persLightSpaceMatrix;
+		glm::mat4 persLightSpaceMatrix[MAX_SPOT_LIGHTS];
 		glm::vec4 omniFarPlanes;
 	};
 

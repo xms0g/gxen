@@ -8,7 +8,6 @@
 #include "../../ECS/components/bv.hpp"
 #include "../../models/quad.h"
 
-
 DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
 	lightingShader.activate();
 	lightingShader.setInt("gPosition", 0);
@@ -56,10 +55,14 @@ void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps, c
 		glBindTexture(GL_TEXTURE_2D, gBuffer.textures()[i]);
 	}
 
-	for (uint32_t i = 0; i < shadowMaps.size(); ++i) {
-		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
-		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);
-	}
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
+	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
+
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
+
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMaps[2]);
 
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mQuad->VAO());

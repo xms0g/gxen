@@ -88,8 +88,8 @@ void GuiPanels::renderSpotLight(const Entity& entity) {
 	Ui::colorField4("Ambient", splc.ambient, 0.01f, 100);
 	Ui::colorField4("Diffuse", splc.diffuse, 0.01f, 100);
 	Ui::colorField4("Specular", splc.specular, 0.01f, 100);
+	Ui::dragFloat3("Attenua", splc.attenuation, 0.01f, 100);
 	Ui::dragFloat4("Cutoff", splc.cutOff, 0.01f, 100);
-	Ui::dragFloat4("Attenua", splc.attenuation, 0.01f, 100);
 }
 
 void GuiPanels::renderPointLight(const Entity& entity) {

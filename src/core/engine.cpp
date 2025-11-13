@@ -45,6 +45,7 @@ void Engine::run() {
 
 		mInput->process(*mCamera, mWindow->nativeHandle(), mDeltaTime, isRunning);
 		mCamera->update();
+
 		mRenderPipeline->render(*mCamera);
 #ifdef DEBUG
 		mGuiSystem->update(mDeltaTime);

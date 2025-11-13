@@ -21,11 +21,9 @@ void main() {
     float specular = texture(gAlbedoSpec, fs_in.TexCoord).a;
     vec3 viewDir = normalize(viewPos.xyz - fragPos);
     vec4 fragPosLightSpace = lightSpaceMatrix * vec4(fragPos, 1.0);
-    vec4 fragPosPersLightSpace = persLightSpaceMatrix * vec4(fragPos, 1.0);
-
     // Create a mask: 0.0 if no lights, 1.0 if at least one light
     bool hasLights = lightCount.x > 0 || lightCount.y > 0 || lightCount.z > 0;
-    vec3 result = mix(diffuse, calculateLights(normal, fragPos, viewPos.xyz, viewDir, fragPosLightSpace, fragPosPersLightSpace, diffuse, specular, 32.0), float(hasLights));
+    vec3 result = mix(diffuse, calculateLights(normal, fragPos, viewPos.xyz, viewDir, fragPosLightSpace, diffuse, specular, 32.0), float(hasLights));
 
     fragColor = vec4(result, 1.0);
 }
