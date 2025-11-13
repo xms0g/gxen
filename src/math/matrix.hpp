@@ -16,6 +16,6 @@ inline glm::mat4 computeModelMatrix(const glm::vec3& position,
 }
 
 inline glm::mat3 computeNormalMatrix(const glm::mat4& model) {
-	return glm::transpose(glm::inverse(glm::mat3(model)));;
+	return glm::transpose(glm::inverse(glm::mat3(model)));
 }
 }

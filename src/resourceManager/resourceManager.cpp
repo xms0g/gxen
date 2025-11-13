@@ -138,8 +138,10 @@ Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 	return {mesh->mMaterialIndex, vertices, indices};
 }
 
-void ResourceManager::loadMaterialTextures(const aiMaterial* mat, const aiTextureType type,
-                                           const std::string& typeName, const uint32_t materialID) {
+void ResourceManager::loadMaterialTextures(const aiMaterial* mat,
+                                           const aiTextureType type,
+                                           const std::string& typeName,
+                                           const uint32_t materialID) {
 	for (uint32_t i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);

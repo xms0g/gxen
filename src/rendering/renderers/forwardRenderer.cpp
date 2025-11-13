@@ -78,6 +78,8 @@ void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
 
 void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
                                     const std::array<uint32_t, 3>& shadowMaps) const {
+	if (entities.empty()) return;
+
 	for (uint32_t i = 0; i < 3; ++i) {
 		glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + i);
 		glBindTexture(GL_TEXTURE_2D, shadowMaps[i]);

@@ -71,13 +71,14 @@ bool math::AABB::isOnFrustum(const Frustum& camFrustum,
 }
 
 bool math::AABB::isOnOrForwardPlane(const Plane& plane) const {
-	const float r = extents.x * std::abs(plane.normal.x) + extents.y * std::abs(plane.normal.y) +
-					extents.z * std::abs(plane.normal.z);
+	const float r = extents.x * std::abs(plane.normal.x) +
+	                extents.y * std::abs(plane.normal.y) +
+	                extents.z * std::abs(plane.normal.z);
 
 	return -r <= plane.computeSignedDistanceToPlan(center);
 }
 
-math::Sphere math::generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh>>& meshesByMatID) {
+math::Sphere math::generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh> >& meshesByMatID) {
 	auto minAABB = glm::vec3(std::numeric_limits<float>::max());
 	auto maxAABB = glm::vec3(std::numeric_limits<float>::min());
 
@@ -98,7 +99,7 @@ math::Sphere math::generateSphereBV(const std::unordered_map<uint32_t, std::vect
 	return {(maxAABB + minAABB) * 0.5f, glm::length(minAABB - maxAABB)};
 }
 
-math::AABB math::generateAABB(const std::unordered_map<uint32_t, std::vector<Mesh>>& meshesByMatID) {
+math::AABB math::generateAABB(const std::unordered_map<uint32_t, std::vector<Mesh> >& meshesByMatID) {
 	auto minAABB = glm::vec3(std::numeric_limits<float>::max());
 	auto maxAABB = glm::vec3(std::numeric_limits<float>::min());
 

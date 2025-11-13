@@ -10,7 +10,7 @@
 struct Texture;
 using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
 class Mesh;
-using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
+using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh> >;
 
 class Shader;
 
@@ -37,13 +37,15 @@ private:
 
 	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 
-	void loadMaterialTextures(const aiMaterial* mat, aiTextureType type, const std::string& typeName,
+	void loadMaterialTextures(const aiMaterial* mat,
+	                          aiTextureType type,
+	                          const std::string& typeName,
 	                          uint32_t materialID);
 
 	std::string mDirectory;
 	TextureMap mTexturesByMatID;
 	MeshMap mMeshesByMatID;
 	std::unordered_map<size_t, TextureMap> mTexturesByEntity;
-	std::unordered_map<size_t, MeshMap > mMeshesByEntity;
+	std::unordered_map<size_t, MeshMap> mMeshesByEntity;
 	std::unordered_set<std::string> mTexturesLoaded;
 };
