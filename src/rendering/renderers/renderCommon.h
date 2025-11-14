@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include <array>
 
 struct Texture;
 class Shader;
@@ -23,4 +24,6 @@ void bindTextures(
 	const Shader& shader);
 
 void unbindTextures(uint32_t materialID, const TextureMap* texturesByMatID);
+
+void bindShadowMaps(const std::array<uint32_t, 3>& shadowMaps);
 }

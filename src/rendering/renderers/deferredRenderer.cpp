@@ -55,14 +55,7 @@ void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps, c
 		glBindTexture(GL_TEXTURE_2D, gBuffer.textures()[i]);
 	}
 
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
-	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
-
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
-
-	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMaps[2]);
+	RenderCommon::bindShadowMaps(shadowMaps);
 
 	glDisable(GL_DEPTH_TEST);
 	glBindVertexArray(mQuad->VAO());

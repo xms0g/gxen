@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include "../shader.h"
 #include "../renderFlags.hpp"
+#include "../../config/config.hpp"
 #include "../../mesh/mesh.h"
 #include "../../math/matrix.hpp"
 #include "../../ECS/entity.hpp"
@@ -101,3 +102,15 @@ void RenderCommon::unbindTextures(const uint32_t materialID,
 		}
 	}
 }
+
+void RenderCommon::bindShadowMaps(const std::array<uint32_t, 3>& shadowMaps) {
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT);
+	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
+
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
+
+	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMaps[2]);
+}
+
