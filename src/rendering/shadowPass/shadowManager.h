@@ -21,9 +21,9 @@ public:
 
 	~ShadowManager();
 
-	std::array<uint32_t, 3>& getShadowMaps() { return mShadowMaps; }
+	const std::array<uint32_t, 3>& getShadowMaps() const;
 
-	void configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, uint32_t deferredShaderID) const;
+	const UniformBuffer& getShadowUBO() const;
 
 	void shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights);
 

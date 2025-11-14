@@ -27,14 +27,8 @@ ShadowManager::ShadowManager() {
 
 ShadowManager::~ShadowManager() = default;
 
-void ShadowManager::configure(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
-                              const uint32_t deferredShaderID) const {
-	mShadowUBO->configure(deferredShaderID, 2, "ShadowBlock");
-
-	for (const auto& [shader, entities]: opaqueBatches) {
-		mShadowUBO->configure(shader->ID(), 2, "ShadowBlock");
-	}
-}
+const std::array<uint32_t, 3>& ShadowManager::getShadowMaps() const { return mShadowMaps; }
+const UniformBuffer& ShadowManager::getShadowUBO() const { return *mShadowUBO; }
 
 void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
                                const LightSystem& lights) {

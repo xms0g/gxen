@@ -60,19 +60,20 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 #endif
 			.checkStatus();
 	mSceneBuffer->unbind();
-
+#ifdef HDR
 	mHDRBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mHDRBuffer->withTexture16F()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mHDRBuffer->unbind();
-
+#else
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
 	mIntermediateBuffer->withTexture()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mIntermediateBuffer->unbind();
-
+#endif
+#ifdef DEFERRED
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
 			.withTexture16F()
@@ -80,14 +81,13 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 			.configureAttachments()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
-
-	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-
 	mDeferredLigthingShader = std::make_unique<Shader>("models/quad.vert", "deferred/lighting.frag");
 	mGShader = std::make_unique<Shader>("deferred/gbuffer.vert", "deferred/gbuffer.frag");
+	mDeferredRenderer = std::make_unique<DeferredRenderer>(*mDeferredLigthingShader);
+#endif
+	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
-	mDeferredRenderer = std::make_unique<DeferredRenderer>(*mDeferredLigthingShader);
 	mShadowManager = std::make_unique<ShadowManager>();
 	mDebugRenderer = std::make_unique<DebugRenderer>();
 	mPostProcess = std::make_unique<PostProcess>(mSceneBuffer->width(), mSceneBuffer->height());
@@ -100,18 +100,20 @@ PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 void RenderPipeline::configure(const Camera& camera) const {
 	mForwardRenderer->configure(renderQueues.opaqueInstancedEntities, renderQueues.transparentInstancedEntities);
 	mDebugRenderer->configure(*mCameraUBO);
-	mShadowManager->configure(renderQueues.opaqueBatches, mDeferredLigthingShader->ID());
 
 	// Uniform buffer configuration
+#ifdef DEFERRED
 	mCameraUBO->configure(mGShader->ID(), 0, "CameraBlock");
 	mCameraUBO->configure(mDeferredLigthingShader->ID(), 0, "CameraBlock");
 	mLightSystem->getLightUBO().configure(mDeferredLigthingShader->ID(), 1, "LightBlock");
-
+	mShadowManager->getShadowUBO().configure(mDeferredLigthingShader->ID(), 2, "ShadowBlock");
+#endif
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
 		mCameraUBO->configure(shader->ID(), 0, "CameraBlock");
 		mLightSystem->getLightUBO().configure(shader->ID(), 1, "LightBlock");
+		mShadowManager->getShadowUBO().configure(shader->ID(), 2, "ShadowBlock");
 	}
 
 	const glm::mat4 projectionMat = glm::perspective(
