@@ -48,18 +48,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	registry->addSystem<SkyboxSystem>();
 	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
-
-	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-#ifdef ANTIALIASING
-	glEnable(GL_MULTISAMPLE);
-	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
-			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
-#else
-	mSceneBuffer->withTexture()
-			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
-#endif
-			.checkStatus();
-	mSceneBuffer->unbind();
 #ifdef HDR
 	mHDRBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mHDRBuffer->withTexture16F()
@@ -67,12 +55,25 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 			.checkStatus();
 	mHDRBuffer->unbind();
 #else
+	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+# ifdef ANTIALIASING
+	glEnable(GL_MULTISAMPLE);
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
 	mIntermediateBuffer->withTexture()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mIntermediateBuffer->unbind();
+
+	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
+			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
+#else
+	mSceneBuffer->withTexture()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
+# endif
+			.checkStatus();
+	mSceneBuffer->unbind();
 #endif
+
 #ifdef DEFERRED
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
@@ -161,7 +162,11 @@ void RenderPipeline::render(const Camera& camera) {
 #ifdef HDR
 	mPostProcess->render(mHDRBuffer->texture());
 #else
+# ifdef ANTIALIASING
 	mPostProcess->render(mIntermediateBuffer->texture());
+# else
+	mPostProcess->render(mSceneBuffer->texture());
+# endif
 #endif
 }
 
@@ -223,16 +228,17 @@ void RenderPipeline::beginSceneRender() const {
 void RenderPipeline::endSceneRender() const {
 #ifdef HDR
 	mHDRBuffer->unbind();
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 #else
 	mSceneBuffer->unbind();
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+# ifdef ANTIALIASING
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(),
 	                  0, 0, mIntermediateBuffer->width(), mIntermediateBuffer->height(),
 	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
+# endif
 #endif
+	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
