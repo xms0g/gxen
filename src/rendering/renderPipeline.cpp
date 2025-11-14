@@ -91,7 +91,7 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
 	mShadowManager = std::make_unique<ShadowManager>();
 	mDebugRenderer = std::make_unique<DebugRenderer>();
-	mPostProcess = std::make_unique<PostProcess>(mSceneBuffer->width(), mSceneBuffer->height());
+	mPostProcess = std::make_unique<PostProcess>(SCR_WIDTH, SCR_HEIGHT);
 }
 
 RenderPipeline::~RenderPipeline() = default;
