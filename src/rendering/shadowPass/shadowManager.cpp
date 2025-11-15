@@ -60,6 +60,7 @@ void ShadowManager::omnidirectionalShadowPass(const std::vector<Entity>& entitie
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
+
 	for (int i = 0; i < lights.size(); i++) {
 		const auto& light = lights[i];
 		if (!light->castShadow) continue;
@@ -67,6 +68,7 @@ void ShadowManager::omnidirectionalShadowPass(const std::vector<Entity>& entitie
 		mOmnidirShadowPass->render(entities, light->position, i);
 		mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
 	}
+
 	mOmnidirShadowPass->getDepthMap().unbind();
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 }

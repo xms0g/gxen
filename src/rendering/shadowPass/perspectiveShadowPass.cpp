@@ -43,12 +43,12 @@ void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const gl
 	mDepthShader->setMat4("lightSpaceMatrix", mLightSpaceMatrix[layer]);
 
 	// render scene from light's point of view
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	mDepthMap->bind();
 	mDepthMap->attachLayer(GL_DEPTH_ATTACHMENT, layer);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	for (const auto& entity: entities) {
 		RenderCommon::setupTransform(entity, *mDepthShader);
 		RenderCommon::drawMeshes(entity, *mDepthShader);

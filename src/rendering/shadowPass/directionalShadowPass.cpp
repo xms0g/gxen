@@ -43,16 +43,16 @@ void DirectionalShadowPass::render(const std::vector<Entity>& entities, const gl
 	mDepthShader->setMat4("lightSpaceMatrix", mLightSpaceMatrix);
 
 	// render scene from light's point of view
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	mDepthMap->bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
+	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 	for (const auto& entity: entities) {
 		RenderCommon::setupTransform(entity, *mDepthShader);
 		RenderCommon::drawMeshes(entity, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 }
