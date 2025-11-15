@@ -47,10 +47,11 @@ void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >
 
 		const auto& spotLights = lights.getSpotLights();
 		for (int i = 0; i < spotLights.size(); i++) {
-			if (const auto& light = spotLights[i]; light->castShadow) {
-				mPerspectiveShadowPass->render(entities, light->direction, light->position, light->cutOff.y, i);
-				mShadowData.persLightSpaceMatrix[i] = mPerspectiveShadowPass->getLightSpaceMatrix(i);
-			}
+			const auto& light = spotLights[i];
+			if (!light->castShadow) continue;
+
+			mPerspectiveShadowPass->render(entities, light->direction, light->position, light->cutOff.y, i);
+			mShadowData.persLightSpaceMatrix[i] = mPerspectiveShadowPass->getLightSpaceMatrix(i);
 		}
 	}
 
