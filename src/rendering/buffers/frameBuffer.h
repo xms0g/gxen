@@ -35,6 +35,8 @@ public:
 
 	FrameBuffer& withTextureCubemapDepth();
 
+	FrameBuffer& withTextureCubemapArrayDepth(int layerCount);
+
 	FrameBuffer& withRenderBufferDepth(uint32_t depthFormat);
 
 	FrameBuffer& withRenderBufferDepthMultisampled(int multisampledCount, uint32_t depthFormat);

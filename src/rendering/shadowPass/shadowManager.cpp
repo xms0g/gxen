@@ -5,11 +5,13 @@
 #include "../shader.h"
 #include "../lightSystem.h"
 #include "../buffers/uniformBuffer.h"
+#include "../buffers/frameBuffer.h"
 #include "../renderers/forwardRenderer.h"
 #include "../../config/config.hpp"
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
+#include "glad/glad.h"
 
 ShadowManager::ShadowManager() {
 	mDirShadowPass = std::make_unique<DirectionalShadowPass>(SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -20,7 +22,7 @@ ShadowManager::ShadowManager() {
 
 	mShadowMaps = {
 		mDirShadowPass->getShadowMap(),
-		mOmnidirShadowPass->getShadowMap(),
+		mOmnidirShadowPass->getDepthTexture(),
 		mPerspectiveShadowPass->getShadowMap()
 	};
 }
@@ -39,11 +41,19 @@ void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >
 		}
 
 		const auto& pointLights = lights.getPointLights();
+		mOmnidirShadowPass->getDepthMap().bind();
+		glClear(GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 		for (int i = 0; i < pointLights.size(); i++) {
 			const auto& light = pointLights[i];
-			mOmnidirShadowPass->render(entities, light->position);
+			if (!light->castShadow) continue;
+
+			mOmnidirShadowPass->render(entities, light->position, i);
 			mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
 		}
+		mOmnidirShadowPass->getDepthMap().unbind();
+		glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 
 		const auto& spotLights = lights.getSpotLights();
 		for (int i = 0; i < spotLights.size(); i++) {

@@ -14,7 +14,9 @@ struct PointLight {
     vec4 ambient;
     vec4 diffuse;
     vec4 specular;
-    vec4 attenuation;
+    vec3 attenuation;
+
+    bool castShadow;
 };
 
 struct SpotLight {
@@ -40,14 +42,14 @@ layout (std140) uniform LightBlock
 };
 
 uniform sampler2D shadowMap;
-uniform samplerCube shadowCubemap;
+uniform samplerCubeArray shadowCubemap;
 uniform sampler2DArray persShadowMap;
 
 vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir, vec4 fragPosLightSpace, vec3 albedo, float specular, float shininess);
-vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewPos,vec3 viewDir, vec3 albedo, float specular, float shininess);
+vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewPos,vec3 viewDir, vec3 albedo, float specular, float shininess, int layer);
 vec3 calculateSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec4 fragPosLightSpace, vec3 albedo, float specular, float shininess, int layer);
 float calculateDirectionalShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir);
-float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec3 viewPos);
+float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec3 viewPos, int layer);
 float calculatePerspectiveShadow(vec4 fragPosLightSpace, vec3 normal, vec3 lightDir, int layer);
 
 vec3 calculateLights(vec3 normal, vec3 fragPos, vec3 viewPos, vec3 viewDir, vec4 fragPosLightSpace, vec3 albedo, float specular, float shininess) {
@@ -57,7 +59,7 @@ vec3 calculateLights(vec3 normal, vec3 fragPos, vec3 viewPos, vec3 viewDir, vec4
         result += calculateDirectionalLight(dirLights[i], normal, viewDir, fragPosLightSpace, albedo, specular, shininess);
     }
     for (int i = 0; i < lightCount.y; i++) {
-        result += calculatePointLight(pointLights[i], normal, fragPos, viewPos, viewDir, albedo, specular, shininess);
+        result += calculatePointLight(pointLights[i], normal, fragPos, viewPos, viewDir, albedo, specular, shininess, i);
     }
     for (int i = 0; i < lightCount.z; i++) {
         vec4 fragPosPersLightSpace = persLightSpaceMatrix[i] * vec4(fragPos, 1.0);
@@ -86,7 +88,7 @@ vec3 calculateDirectionalLight(DirectionalLight light, vec3 normal, vec3 viewDir
     return lighting;
 }
 
-vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewPos,vec3 viewDir, vec3 albedo, float specular, float shininess) {
+vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewPos,vec3 viewDir, vec3 albedo, float specular, float shininess, int layer) {
     vec3 lightDir = normalize(light.position.xyz - fragPos);
     // diffuse shading
     float diff = max(dot(normal, lightDir), 0.0);
@@ -105,7 +107,7 @@ vec3 calculatePointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewP
     diffuse *= attenuation;
     specular *= attenuation;
 
-    float shadow = calculateOmnidirectionalShadow(fragPos, light.position, viewPos);
+    float shadow = light.castShadow ? calculateOmnidirectionalShadow(fragPos, light.position, viewPos, layer) : 0.0;
     vec3 lighting = (ambient + (1.0 - shadow) * (diffuse + finalSpecular));
     return lighting;
 }
@@ -174,7 +176,7 @@ const vec3 gridSamplingDisk[20] = vec3[](
     vec3(0, 1, 1), vec3(0, -1, 1), vec3(0, -1, -1), vec3(0, 1, -1)
 );
 
-float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec3 viewPos) {
+float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec3 viewPos, int layer) {
     vec3 fragToLight = fragPos - lightPos.xyz;
     float currentDepth = length(fragToLight);
     float shadow = 0.0;
@@ -184,10 +186,12 @@ float calculateOmnidirectionalShadow(vec3 fragPos, vec4 lightPos, vec3 viewPos) 
     float diskRadius = (1.0 + (viewDistance / omniFarPlanes.x)) / 25.0;
 
     for (int i = 0; i < samples; ++i) {
-        float closestDepth = texture(shadowCubemap, fragToLight + gridSamplingDisk[i] * diskRadius).r;
+        vec3 sampleDir = normalize(fragToLight + gridSamplingDisk[i] * diskRadius);
+        float closestDepth = texture(shadowCubemap, vec4(sampleDir, float(layer))).r;
         closestDepth *= omniFarPlanes.x;   // undo mapping [0;1]
+
         if (currentDepth - bias > closestDepth)
-        shadow += 1.0;
+            shadow += 1.0;
     }
     shadow /= float(samples);
 

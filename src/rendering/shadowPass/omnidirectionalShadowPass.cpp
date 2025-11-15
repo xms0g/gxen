@@ -10,7 +10,7 @@
 
 OmnidirectionalShadowPass::OmnidirectionalShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
-	mDepthMap->withTextureCubemapDepth()
+	mDepthMap->withTextureCubemapArrayDepth(MAX_POINT_LIGHTS)
 			.checkStatus();
 	mDepthMap->unbind();
 
@@ -20,11 +20,16 @@ OmnidirectionalShadowPass::OmnidirectionalShadowPass(int mapWidth, int mapHeight
 
 OmnidirectionalShadowPass::~OmnidirectionalShadowPass() = default;
 
-uint32_t OmnidirectionalShadowPass::getShadowMap() const {
+uint32_t OmnidirectionalShadowPass::getDepthTexture() const {
 	return mDepthMap->texture();
 }
 
-void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec4& position) const {
+FrameBuffer& OmnidirectionalShadowPass::getDepthMap() const {
+	return *mDepthMap;
+}
+
+void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, const glm::vec4& position,
+                                       const int layer) const {
 	const glm::mat4 shadowProj = glm::perspective(
 		glm::radians(SHADOW_OMNIDIRECTIONAL_FOVY),
 		static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT),
@@ -41,20 +46,15 @@ void OmnidirectionalShadowPass::render(const std::vector<Entity>& entities, cons
 	shadowTransforms.push_back(shadowProj * glm::lookAt(pos, pos + glm::vec3(0.0f, 0.0f, -1.0f), glm::vec3(0.0f, -1.0f, 0.0f)));
 
 	mDepthShader->activate();
-	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	mDepthMap->bind();
-	glClear(GL_DEPTH_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
 	for (unsigned int i = 0; i < 6; ++i)
 		mDepthShader->setMat4("shadowMatrices[" + std::to_string(i) + "]", shadowTransforms[i]);
 
 	mDepthShader->setFloat("omniFarPlane", SHADOW_OMNIDIRECTIONAL_FAR);
 	mDepthShader->setVec3("lightPos", position);
+	mDepthShader->setInt("cubeIndex", layer);
 
 	for (const auto& entity: entities) {
 		RenderCommon::setupTransform(entity, *mDepthShader);
 		RenderCommon::drawMeshes(entity, *mDepthShader);
 	}
-	mDepthMap->unbind();
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
 }

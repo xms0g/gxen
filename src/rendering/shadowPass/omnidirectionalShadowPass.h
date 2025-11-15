@@ -16,9 +16,11 @@ public:
 
 	~OmnidirectionalShadowPass();
 
-	[[nodiscard]] uint32_t getShadowMap() const;
+	[[nodiscard]] uint32_t getDepthTexture() const;
 
-	void render(const std::vector<Entity>& entities, const glm::vec4& position) const;
+	[[nodiscard]] FrameBuffer& getDepthMap() const;
+
+	void render(const std::vector<Entity>& entities, const glm::vec4& position, int layer) const;
 
 private:
 	std::unique_ptr<FrameBuffer> mDepthMap;

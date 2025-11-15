@@ -108,7 +108,7 @@ void RenderCommon::bindShadowMaps(const std::array<uint32_t, 3>& shadowMaps) {
 	glBindTexture(GL_TEXTURE_2D, shadowMaps[0]);
 
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowMaps[1]);
+	glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, shadowMaps[1]);
 
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMaps[2]);
