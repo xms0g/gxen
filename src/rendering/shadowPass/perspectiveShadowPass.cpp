@@ -19,7 +19,7 @@ PerspectiveShadowPass::PerspectiveShadowPass(int mapWidth, int mapHeight) {
 
 PerspectiveShadowPass::~PerspectiveShadowPass() = default;
 
-uint32_t PerspectiveShadowPass::getShadowMap() const {
+uint32_t PerspectiveShadowPass::getDepthTexture() const {
 	return mDepthMap->texture();
 }
 

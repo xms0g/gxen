@@ -10,7 +10,7 @@ class LightSystem final : public System {
 public:
 	LightSystem();
 
-	const UniformBuffer& getLightUBO() const { return *mLightUBO; }
+	[[nodiscard]] const UniformBuffer& getLightUBO() const { return *mLightUBO; }
 
 	[[nodiscard]] const std::vector<PointLightComponent*>& getPointLights() const  { return pointLights; }
 	[[nodiscard]] const std::vector<DirectionalLightComponent*>& getDirLights() const { return dirLights; }

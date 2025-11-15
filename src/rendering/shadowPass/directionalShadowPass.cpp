@@ -19,7 +19,7 @@ DirectionalShadowPass::DirectionalShadowPass(int mapWidth, int mapHeight) {
 
 DirectionalShadowPass::~DirectionalShadowPass() = default;
 
-uint32_t DirectionalShadowPass::getShadowMap() const {
+uint32_t DirectionalShadowPass::getDepthTexture() const {
 	return mDepthMap->texture();
 }
 

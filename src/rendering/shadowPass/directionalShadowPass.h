@@ -15,7 +15,7 @@ public:
 
 	~DirectionalShadowPass();
 
-	[[nodiscard]] uint32_t getShadowMap() const;
+	[[nodiscard]] uint32_t getDepthTexture() const;
 
 	[[nodiscard]] glm::mat4 getLightSpaceMatrix() const;
 

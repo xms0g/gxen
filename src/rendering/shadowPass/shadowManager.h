@@ -6,6 +6,9 @@
 #include "glm/glm.hpp"
 #include "../../config/config.hpp"
 
+struct SpotLightComponent;
+struct DirectionalLightComponent;
+struct PointLightComponent;
 class ForwardRenderer;
 class Shader;
 class UniformBuffer;
@@ -28,6 +31,14 @@ public:
 	void shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights);
 
 private:
+	void directionalShadowPass(const std::vector<Entity>& entities,
+	                           const std::vector<DirectionalLightComponent*>& lights);
+
+	void omnidirectionalShadowPass(const std::vector<Entity>& entities,
+	                               const std::vector<PointLightComponent*>& lights);
+
+	void perspectiveShadowPass(const std::vector<Entity>& entities, const std::vector<SpotLightComponent*>& lights);
+
 	struct alignas(16) ShadowData {
 		glm::mat4 lightSpaceMatrix;
 		glm::mat4 persLightSpaceMatrix[MAX_SPOT_LIGHTS];
