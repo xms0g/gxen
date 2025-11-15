@@ -90,6 +90,7 @@ void GuiPanels::renderSpotLight(const Entity& entity) {
 	Ui::colorField4("Specular", splc.specular, 0.01f, 100);
 	Ui::dragFloat3("Attenua", splc.attenuation, 0.01f, 100);
 	Ui::dragFloat4("Cutoff", splc.cutOff, 0.01f, 100);
+	ImGui::Checkbox("Cast Shadow", &splc.castShadow);
 }
 
 void GuiPanels::renderPointLight(const Entity& entity) {
@@ -98,7 +99,8 @@ void GuiPanels::renderPointLight(const Entity& entity) {
 	Ui::colorField4("Ambient", plc.ambient, 0.01f, 100);
 	Ui::colorField4("Diffuse", plc.diffuse, 0.01f, 100);
 	Ui::colorField4("Specular", plc.specular, 0.01f, 100);
-	Ui::dragFloat4("Attenua", plc.attenuation, 0.01f, 100);
+	Ui::dragFloat3("Attenua", plc.attenuation, 0.01f, 100);
+	ImGui::Checkbox("Cast Shadow", &plc.castShadow);
 }
 
 void GuiPanels::renderPostProcessPanel(const std::vector<std::shared_ptr<IPostEffect>>& effects) {
