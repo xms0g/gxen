@@ -26,14 +26,12 @@ Bloom::Bloom(const std::string& name, const int width, const int height, const b
 #else
 		target->withTexture()
 #endif
-		.checkStatus();
+				.checkStatus();
 	}
 }
 
-uint32_t Bloom::render(const uint32_t sceneTexture,
-                       const uint32_t VAO,
-                       const std::unique_ptr<FrameBuffer>* renderTargets,
-                       int& toggle) const {
+uint32_t Bloom::render(const uint32_t sceneTexture, const uint32_t VAO,
+                       int& toggle, const std::unique_ptr<FrameBuffer>* renderTargets) const {
 	(void) renderTargets;
 	(void) toggle;
 	int toggle_ = 0;
@@ -79,8 +77,8 @@ uint32_t Bloom::blurPass(uint32_t sceneTexture, const uint32_t VAO, int& toggle)
 	return sceneTexture;
 }
 
-uint32_t Bloom::combinePass(const uint32_t sceneTexture, const uint32_t bloomBlur, const uint32_t VAO,
-                            const int& toggle) const {
+uint32_t Bloom::combinePass(const uint32_t sceneTexture, const uint32_t bloomBlur,
+                            const uint32_t VAO, const int& toggle) const {
 	mRenderTargets[toggle]->bind();
 	combine->activate();
 	glDisable(GL_DEPTH_TEST);

@@ -8,10 +8,8 @@ class Bloom final : public IPostEffect {
 public:
 	Bloom(const std::string& name, int width, int height, bool enabled = false);
 
-	uint32_t render(uint32_t sceneTexture,
-	                uint32_t VAO,
-	                const std::unique_ptr<FrameBuffer>* renderTargets,
-	                int& toggle) const override;
+	uint32_t render(uint32_t sceneTexture, uint32_t VAO,
+	                int& toggle, const std::unique_ptr<FrameBuffer>* renderTargets) const override;
 
 private:
 	uint32_t brightFilterPass(uint32_t sceneTexture, uint32_t VAO, int& toggle) const;

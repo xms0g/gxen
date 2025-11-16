@@ -34,10 +34,11 @@ void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const gl
 		static_cast<float>(SHADOW_WIDTH) / static_cast<float>(SHADOW_HEIGHT),
 		SHADOW_PERSPECTIVE_NEAR,
 		SHADOW_PERSPECTIVE_FAR);
+
 	const auto dir = glm::vec3(direction);
 	const auto pos = glm::vec3(position);
 	const glm::mat4 lightView = glm::lookAt(pos, pos + dir, glm::vec3(0.0, 1.0, 0.0));
-	mLightSpaceMatrix[layer]= lightProjection * lightView;
+	mLightSpaceMatrix[layer] = lightProjection * lightView;
 
 	mDepthShader->activate();
 	mDepthShader->setMat4("lightSpaceMatrix", mLightSpaceMatrix[layer]);

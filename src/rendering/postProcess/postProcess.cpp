@@ -44,7 +44,7 @@ void PostProcess::render(const uint32_t sceneTexture) const {
 	for (const auto& effect: mEffects) {
 		if (!effect->enabled) continue;
 
-		inputTex = effect->render(inputTex, mQuad->VAO(), renderTargets, toggle);
+		inputTex = effect->render(inputTex, mQuad->VAO(), toggle, renderTargets);
 	}
 
 	mQuad->shader().activate();

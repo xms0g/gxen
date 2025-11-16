@@ -22,11 +22,10 @@ void UniformBuffer::unbind() const {
 }
 
 void UniformBuffer::setData(const void* data, const size_t size, const size_t offset) const {
-	glBufferSubData(GL_UNIFORM_BUFFER, offset, size, data);
+	glBufferSubData(GL_UNIFORM_BUFFER, static_cast<long>(offset), static_cast<long>(size), data);
 }
 
-void UniformBuffer::configure(const uint32_t program,
-                              const uint32_t uniformBlockBinding,
+void UniformBuffer::configure(const uint32_t program, const uint32_t uniformBlockBinding,
                               const char* uniformBlockName) const {
 	const uint32_t ubidx = glGetUniformBlockIndex(program, uniformBlockName);
 	glUniformBlockBinding(program, ubidx, uniformBlockBinding);

@@ -8,7 +8,8 @@
 #include "../../ECS/components/bv.hpp"
 #include "../../models/quad.h"
 
-DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
+DeferredRenderer::DeferredRenderer(const Shader& lightingShader)
+	: mQuad(std::make_unique<Models::SingleQuad>()) {
 	lightingShader.activate();
 	lightingShader.setInt("gPosition", 0);
 	lightingShader.setInt("gNormal", 1);
@@ -21,8 +22,7 @@ DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::ma
 DeferredRenderer::~DeferredRenderer() = default;
 
 void DeferredRenderer::geometryPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
-                                    const FrameBuffer& gBuffer,
-                                    const Shader& gShader) const {
+                                    const FrameBuffer& gBuffer, const Shader& gShader) const {
 	gBuffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	gShader.activate();

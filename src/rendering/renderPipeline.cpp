@@ -238,7 +238,7 @@ void RenderPipeline::endSceneRender() const {
 	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
 # endif
 #endif
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 

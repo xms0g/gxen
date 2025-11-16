@@ -33,8 +33,7 @@ const std::array<uint32_t, 3>& ShadowManager::getShadowMaps() const { return mSh
 
 const UniformBuffer& ShadowManager::getShadowUBO() const { return *mShadowUBO; }
 
-void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
-                               const LightSystem& lights) {
+void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights) {
 	for (const auto& [shader, entities]: opaqueBatches) {
 		directionalShadowPass(entities, lights.getDirLights());
 		omnidirectionalShadowPass(entities, lights.getPointLights());
@@ -46,16 +45,14 @@ void ShadowManager::shadowPass(std::unordered_map<Shader*, std::vector<Entity> >
 	mShadowUBO->unbind();
 }
 
-void ShadowManager::directionalShadowPass(const std::vector<Entity>& entities,
-                                          const std::vector<DirectionalLightComponent*>& lights) {
+void ShadowManager::directionalShadowPass(const std::vector<Entity>& entities, const std::vector<DirectionalLightComponent*>& lights) {
 	for (const auto& light: lights) {
 		mDirShadowPass->render(entities, light->direction);
 		mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
 	}
 }
 
-void ShadowManager::omnidirectionalShadowPass(const std::vector<Entity>& entities,
-                                              const std::vector<PointLightComponent*>& lights) {
+void ShadowManager::omnidirectionalShadowPass(const std::vector<Entity>& entities, const std::vector<PointLightComponent*>& lights) {
 	mOmnidirShadowPass->getDepthMap().bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
@@ -73,8 +70,7 @@ void ShadowManager::omnidirectionalShadowPass(const std::vector<Entity>& entitie
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 }
 
-void ShadowManager::perspectiveShadowPass(const std::vector<Entity>& entities,
-                                          const std::vector<SpotLightComponent*>& lights) {
+void ShadowManager::perspectiveShadowPass(const std::vector<Entity>& entities, const std::vector<SpotLightComponent*>& lights) {
 	for (int i = 0; i < lights.size(); i++) {
 		const auto& light = lights[i];
 		if (!light->castShadow) continue;

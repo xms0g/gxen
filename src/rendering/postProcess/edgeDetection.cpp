@@ -10,10 +10,8 @@ EdgeDetection::EdgeDetection(const std::string& name, const bool enabled): IPost
 	shader->setInt("screenTexture", 0);
 }
 
-uint32_t EdgeDetection::render(const uint32_t sceneTexture,
-                               const uint32_t VAO,
-                               const std::unique_ptr<FrameBuffer>* renderTargets,
-                               int& toggle) const {
+uint32_t EdgeDetection::render(const uint32_t sceneTexture, const uint32_t VAO,
+                               int& toggle, const std::unique_ptr<FrameBuffer>* renderTargets) const {
 	renderTargets[toggle]->bind();
 	glClear(GL_COLOR_BUFFER_BIT);
 

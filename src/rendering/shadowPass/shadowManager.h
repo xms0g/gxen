@@ -31,11 +31,9 @@ public:
 	void shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights);
 
 private:
-	void directionalShadowPass(const std::vector<Entity>& entities,
-	                           const std::vector<DirectionalLightComponent*>& lights);
+	void directionalShadowPass(const std::vector<Entity>& entities, const std::vector<DirectionalLightComponent*>& lights);
 
-	void omnidirectionalShadowPass(const std::vector<Entity>& entities,
-	                               const std::vector<PointLightComponent*>& lights);
+	void omnidirectionalShadowPass(const std::vector<Entity>& entities, const std::vector<PointLightComponent*>& lights);
 
 	void perspectiveShadowPass(const std::vector<Entity>& entities, const std::vector<SpotLightComponent*>& lights);
 

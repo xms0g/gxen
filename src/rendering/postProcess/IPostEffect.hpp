@@ -16,8 +16,6 @@ public:
 
 	virtual ~IPostEffect() = default;
 
-	virtual uint32_t render(uint32_t sceneTexture,
-	                        uint32_t VAO,
-	                        const std::unique_ptr<FrameBuffer>* renderTargets,
-	                        int& toggle) const = 0;
+	virtual uint32_t render(uint32_t sceneTexture, uint32_t VAO,
+	                        int& toggle, const std::unique_ptr<FrameBuffer>* renderTargets) const = 0;
 };
