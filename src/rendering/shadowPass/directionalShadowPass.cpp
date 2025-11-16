@@ -1,12 +1,11 @@
 #include "directionalShadowPass.h"
 #include "glad/glad.h"
-#include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "../lightSystem.h"
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
 #include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
+#include "../../ECS/entity.hpp"
 
 DirectionalShadowPass::DirectionalShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);

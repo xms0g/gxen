@@ -2,11 +2,11 @@
 #include "glad/glad.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
-#include "../lightSystem.h"
 #include "../shader.h"
 #include "../buffers/frameBuffer.h"
 #include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
+#include "../../ECS/entity.hpp"
 
 PerspectiveShadowPass::PerspectiveShadowPass(int mapWidth, int mapHeight) {
 	mDepthMap = std::make_unique<FrameBuffer>(mapWidth, mapHeight);
@@ -55,5 +55,5 @@ void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const gl
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);
-	glViewport(0, 0, SCR_WIDTH, SCR_HEIGHT);
+	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 }

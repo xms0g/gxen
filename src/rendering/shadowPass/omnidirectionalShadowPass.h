@@ -3,9 +3,6 @@
 #include <vector>
 #include "glm/glm.hpp"
 
-class ForwardRenderer;
-class LightSystem;
-class UniformBuffer;
 class Entity;
 class Shader;
 class FrameBuffer;

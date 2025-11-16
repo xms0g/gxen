@@ -3,10 +3,8 @@
 #include <vector>
 #include "glm/glm.hpp"
 
-class ForwardRenderer;
 class Entity;
 class Shader;
-class LightSystem;
 class FrameBuffer;
 
 class DirectionalShadowPass {

@@ -4,10 +4,8 @@
 #include "glm/glm.hpp"
 #include "../../config/config.hpp"
 
-class ForwardRenderer;
 class Entity;
 class Shader;
-class LightSystem;
 class FrameBuffer;
 
 class PerspectiveShadowPass {
