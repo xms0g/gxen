@@ -8,8 +8,7 @@
 #include "../../ECS/components/bv.hpp"
 #include "../../models/quad.h"
 
-DeferredRenderer::DeferredRenderer(const Shader& lightingShader)
-	: mQuad(std::make_unique<Models::SingleQuad>()) {
+DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
 	lightingShader.activate();
 	lightingShader.setInt("gPosition", 0);
 	lightingShader.setInt("gNormal", 1);
