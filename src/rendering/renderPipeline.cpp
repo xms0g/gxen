@@ -132,6 +132,17 @@ void RenderPipeline::batchEntities(const Camera& camera) {
 		batchEntities(entity, camera);
 	}
 
+	// Sort opaque objects front to back
+	const glm::vec3 camPos = camera.position();
+	for (auto& [shader, entities]: renderQueues.opaqueBatches) {
+		std::sort(entities.begin(), entities.end(), [&camPos](const Entity& a, const Entity& b) {
+			const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
+			const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
+			return da < db;
+		});
+	}
+
+	// Sort transparent objects back to front
 	std::sort(renderQueues.transparentEntities.begin(), renderQueues.transparentEntities.end(),
 	          [](const auto& a, const auto& b) { return a.first > b.first; });
 }
