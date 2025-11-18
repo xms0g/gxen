@@ -150,7 +150,7 @@ void RenderPipeline::render(const Camera& camera) {
 	mForwardRenderer->opaquePass(renderQueues.opaqueBatches, mShadowManager->getShadowMaps());
 #endif
 	mDebugRenderer->render(renderQueues.debugEntities);
-	mForwardRenderer->instancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
+	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
 
 	mSkyboxSystem->render(camera);
 
