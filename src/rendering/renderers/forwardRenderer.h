@@ -14,11 +14,6 @@ class Camera;
 class guiSystem;
 class Shader;
 
-struct InstanceVBO {
-	uint32_t buffer{};
-	int offset{0};
-};
-
 class ForwardRenderer {
 public:
 	explicit ForwardRenderer();
@@ -33,13 +28,18 @@ public:
 
 	void transparentPass(const std::vector<Entity>& entities) const;
 
-	void instancedPass(const std::vector<Entity>& entities, InstanceVBO& vbo);
-
 	void opaqueInstancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps);
 
 	void transparentInstancedPass(const std::vector<Entity>& entities);
 
 private:
+	struct InstanceVBO {
+		uint32_t buffer{};
+		int offset{0};
+	};
+
+	void instancedPass(const std::vector<Entity>& entities, InstanceVBO& vbo);
+
 	void prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
 	                         size_t instanceSize, const InstanceVBO& vbo);
 

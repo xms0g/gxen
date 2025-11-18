@@ -72,6 +72,25 @@ void ForwardRenderer::transparentPass(const std::vector<Entity>& entities) const
 	glDisable(GL_BLEND);
 }
 
+void ForwardRenderer::opaqueInstancedPass(const std::vector<Entity>& entities,
+                                          const std::array<uint32_t, 3>& shadowMaps) {
+	if (entities.empty()) return;
+
+	RenderCommon::bindShadowMaps(shadowMaps);
+	instancedPass(entities, mOpaqueInstanceVBO);
+}
+
+void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities) {
+	if (entities.empty()) return;
+
+	glDepthMask(GL_FALSE);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	instancedPass(entities, mTransparentInstanceVBO);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_BLEND);
+}
+
 void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, InstanceVBO& vbo) {
 	for (const auto& entity: entities) {
 		const auto& ic = entity.getComponent<InstanceComponent>();
@@ -96,31 +115,12 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, Instanc
 			for (const auto& mesh: meshes) {
 				glBindVertexArray(mesh.VAO());
 				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
-				                        GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(instanceCount));
+										GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(instanceCount));
 			}
 			RenderCommon::unbindTextures(matID, texturesByMatID);
 		}
 	}
 	vbo.offset = 0;
-}
-
-void ForwardRenderer::opaqueInstancedPass(const std::vector<Entity>& entities,
-                                          const std::array<uint32_t, 3>& shadowMaps) {
-	if (entities.empty()) return;
-
-	RenderCommon::bindShadowMaps(shadowMaps);
-	instancedPass(entities, mOpaqueInstanceVBO);
-}
-
-void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities) {
-	if (entities.empty()) return;
-
-	glDepthMask(GL_FALSE);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	instancedPass(entities, mTransparentInstanceVBO);
-	glDepthMask(GL_TRUE);
-	glDisable(GL_BLEND);
 }
 
 void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
