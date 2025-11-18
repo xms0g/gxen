@@ -127,29 +127,16 @@ void RenderPipeline::configure(const Camera& camera) const {
 	mCameraUBO->unbind();
 }
 
-void RenderPipeline::batchEntities(const Camera& camera) {
+void RenderPipeline::batchEntities() {
 	for (const auto& entity: getSystemEntities()) {
-		batchEntities(entity, camera);
+		batchEntities(entity);
 	}
-
-	// Sort opaque objects front to back
-	const glm::vec3 camPos = camera.position();
-	for (auto& [shader, entities]: renderQueues.opaqueBatches) {
-		std::sort(entities.begin(), entities.end(), [&camPos](const Entity& a, const Entity& b) {
-			const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
-			const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
-			return da < db;
-		});
-	}
-
-	// Sort transparent objects back to front
-	std::sort(renderQueues.transparentEntities.begin(), renderQueues.transparentEntities.end(),
-	          [](const auto& a, const auto& b) { return a.first > b.first; });
 }
 
 void RenderPipeline::render(const Camera& camera) {
 	updateBuffers(camera);
 	frustumCullingPass(camera);
+	sortEntities(camera);
 
 	mLightSystem->update();
 	mShadowManager->shadowPass(renderQueues.opaqueBatches, *mLightSystem);
@@ -210,7 +197,7 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 		cullEntity(entity);
 	}
 
-	for (const auto& [dis, entity]: renderQueues.transparentEntities) {
+	for (const auto& entity: renderQueues.transparentEntities) {
 		cullEntity(entity);
 	}
 
@@ -253,7 +240,7 @@ void RenderPipeline::endSceneRender() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
+void RenderPipeline::batchEntities(const Entity& entity) {
 	if (entity.hasComponent<DebugComponent>()) {
 		renderQueues.debugEntities.push_back(entity);
 	}
@@ -262,25 +249,57 @@ void RenderPipeline::batchEntities(const Entity& entity, const Camera& camera) {
 
 	if (mat.flags & Instanced) {
 		if (mat.flags & Transparent) {
-			const auto& positions = entity.getComponent<InstanceComponent>().positions;
-
-			std::sort(positions->begin(), positions->end(), [&](const glm::vec3& a, const glm::vec3& b) {
-				const float da = glm::length2(camera.position() - a);
-				const float db = glm::length2(camera.position() - b);
-				return da > db; // back to front
-			});
 			renderQueues.transparentInstancedEntities.push_back(entity);
 		} else {
 			renderQueues.opaqueInstancedEntities.push_back(entity);
 		}
 	} else {
 		if (mat.flags & Transparent) {
-			const auto& tc = entity.getComponent<TransformComponent>();
-			float distance = glm::length2(camera.position() - tc.position);
-			renderQueues.transparentEntities.emplace_back(distance, entity);
+			renderQueues.transparentEntities.emplace_back(entity);
 		} else {
 			auto& shader = *entity.getComponent<ShaderComponent>().shader;
 			renderQueues.opaqueBatches[&shader].push_back(entity);
 		}
+	}
+}
+
+void RenderPipeline::sortEntities(const Camera& camera) {
+	const glm::vec3 camPos = camera.position();
+
+	// Sort opaque objects front to back
+	for (auto& [shader, entities]: renderQueues.opaqueBatches) {
+		std::sort(
+			entities.begin(),
+			entities.end(),
+			[&camPos](const Entity& a, const Entity& b) {
+				const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
+				const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
+				return da < db;
+			}
+		);
+	}
+
+	std::sort(
+		renderQueues.transparentEntities.begin(),
+		renderQueues.transparentEntities.end(),
+		[&camPos](const Entity& a, const Entity& b) {
+			const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
+			const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
+			return da > db;
+		}
+	);
+
+	for (auto& entity: renderQueues.transparentInstancedEntities) {
+		const auto& positions = entity.getComponent<InstanceComponent>().positions;
+
+		std::sort(
+			positions->begin(),
+			positions->end(),
+			[&camPos](const glm::vec3& a, const glm::vec3& b) {
+				const float da = glm::length2(camPos - a);
+				const float db = glm::length2(camPos - b);
+				return da > db; // back to front
+			}
+		);
 	}
 }

@@ -52,13 +52,13 @@ void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<E
 	}
 }
 
-void ForwardRenderer::transparentPass(TransEntityBucket& entities) const {
+void ForwardRenderer::transparentPass(const std::vector<Entity>& entities) const {
 	if (entities.empty()) return;
 
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	for (const auto& [dist, entity]: entities) {
+	for (const auto& entity: entities) {
 		if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
 			continue;
 
@@ -103,16 +103,22 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities,
 	}
 }
 
-void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities) const {
+void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities) {
 	if (entities.empty()) return;
 
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	for (auto& entity: entities) {
+		const auto& mat = entity.getComponent<MaterialComponent>();
+		const auto& ic = entity.getComponent<InstanceComponent>();
+		const size_t instanceCount = ic.positions->size();
+		const size_t instanceSize = instanceCount * sizeof(InstanceData);
+
+		prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
+
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
-		const size_t instanceCount = entity.getComponent<InstanceComponent>().positions->size();
 
 		shader->activate();
 
@@ -129,14 +135,13 @@ void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entiti
 		}
 	}
 
+	mTransparentInstanceVBO.offset = 0;
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 }
 
-void ForwardRenderer::prepareInstanceData(const Entity& entity,
-                                          const std::vector<glm::vec3>& positions,
-                                          const size_t instanceSize,
-                                          const uint32_t flags) {
+void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
+                                          const size_t instanceSize, const uint32_t flags) {
 	const auto& tc = entity.getComponent<TransformComponent>();
 
 	std::vector<InstanceData> gpuData;
@@ -181,16 +186,8 @@ void ForwardRenderer::prepareInstanceBuffer(const std::vector<Entity>& entities,
 
 	if (requiredGPUBufferSize > 0) {
 		glBindBuffer(GL_ARRAY_BUFFER, vbo.buffer);
-		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredGPUBufferSize), nullptr, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, static_cast<long>(requiredGPUBufferSize), nullptr, GL_DYNAMIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-	}
-
-	for (const auto& entity: entities) {
-		const auto& mat = entity.getComponent<MaterialComponent>();
-		const auto& ic = entity.getComponent<InstanceComponent>();
-		const size_t instanceSize = ic.positions->size() * sizeof(InstanceData);
-
-		prepareInstanceData(entity, *ic.positions, instanceSize, mat.flags);
 	}
 
 	vbo.offset = 0;

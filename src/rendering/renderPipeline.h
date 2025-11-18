@@ -27,7 +27,7 @@ public:
 
 	void configure(const Camera& camera) const;
 
-	void batchEntities(const Camera& camera);
+	void batchEntities();
 
 	void render(const Camera& camera);
 
@@ -40,7 +40,9 @@ private:
 
 	void endSceneRender() const;
 
-	void batchEntities(const Entity& entity, const Camera& camera);
+	void batchEntities(const Entity& entity);
+
+	void sortEntities(const Camera& camera);
 	// Systems
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
@@ -64,8 +66,7 @@ private:
 
 	// Render queue
 	struct {
-		using TransEntityBucket = std::vector<std::pair<float, Entity> >;
-		TransEntityBucket transparentEntities;
+		std::vector<Entity> transparentEntities;
 		std::vector<Entity> transparentInstancedEntities;
 		std::vector<Entity> opaqueInstancedEntities;
 		std::vector<Entity> debugEntities;

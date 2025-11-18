@@ -24,7 +24,7 @@ struct Vertex {
 struct InstanceData {
 	glm::mat4 model;
 	glm::mat3 normalMatrix;
-	float pad;
+	float padding[3];
 };
 
 class Mesh {
