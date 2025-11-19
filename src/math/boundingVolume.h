@@ -13,10 +13,8 @@ class BoundingVolume {
 public:
 	virtual ~BoundingVolume() = default;
 
-	[[nodiscard]] virtual bool isOnFrustum(const Frustum& camFrustum,
-	                                       const glm::vec3& position,
-	                                       const glm::vec3& rotation,
-	                                       const glm::vec3& scale) const = 0;
+	[[nodiscard]] virtual bool isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
+	                                       const glm::vec3& rotation, const glm::vec3& scale) const = 0;
 
 protected:
 	[[nodiscard]] virtual bool isOnOrForwardPlane(const Plane& plane) const = 0;
@@ -31,10 +29,8 @@ public:
 
 	~Sphere() override = default;
 
-	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum,
-	                               const glm::vec3& position,
-	                               const glm::vec3& rotation,
-	                               const glm::vec3& scale) const override;
+	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
+	                               const glm::vec3& rotation, const glm::vec3& scale) const override;
 
 private:
 	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;
@@ -58,10 +54,8 @@ public:
 
 	~AABB() override = default;
 
-	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum,
-	                               const glm::vec3& position,
-	                               const glm::vec3& rotation,
-	                               const glm::vec3& scale) const override;
+	[[nodiscard]] bool isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
+	                               const glm::vec3& rotation, const glm::vec3& scale) const override;
 
 private:
 	[[nodiscard]] bool isOnOrForwardPlane(const Plane& plane) const override;

@@ -4,10 +4,8 @@
 #include "matrix.hpp"
 #include "../mesh/mesh.h"
 
-bool math::Sphere::isOnFrustum(const Frustum& camFrustum,
-                               const glm::vec3& position,
-                               const glm::vec3& rotation,
-                               const glm::vec3& scale) const {
+bool math::Sphere::isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
+                               const glm::vec3& rotation, const glm::vec3& scale) const {
 	const glm::mat4 modelMatrix = computeModelMatrix(position, rotation, scale);
 	const glm::vec3 globalScale = {
 		glm::length(modelMatrix[0]),
@@ -37,10 +35,8 @@ bool math::Sphere::isOnOrForwardPlane(const Plane& plane) const {
 	return plane.computeSignedDistanceToPlan(mCenter) > -mRadius;
 }
 
-bool math::AABB::isOnFrustum(const Frustum& camFrustum,
-                             const glm::vec3& position,
-                             const glm::vec3& rotation,
-                             const glm::vec3& scale) const {
+bool math::AABB::isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
+                             const glm::vec3& rotation, const glm::vec3& scale) const {
 	const glm::mat4 modelMatrix = computeModelMatrix(position, rotation, scale);
 	const glm::vec3 globalCenter{modelMatrix * glm::vec4(center, 1.f)};
 	// Scaled orientation
