@@ -34,6 +34,7 @@ It’s designed for clarity, experimentation, and real-time graphics research �
 - **Built-in Models**
   - Cube – perfect for testing transforms, lighting, and shadow maps
   - Cubemap – used for skybox rendering
+  - Plane
   - Screen Quad – for post-processing, deferred pipeline, and blitting
 ## Rendering Pipeline Architecture
 
@@ -46,11 +47,11 @@ It’s designed for clarity, experimentation, and real-time graphics research �
                            │   Frustum Culling    │
                            └───────────┬──────────┘
                                        │
-                           ┌───────────▼──────────┐
-                           │    Sort Entities     │
-                           │Opaque(front to back) │
-                           │Transp(back to front) │
-                           └───────────┬──────────┘
+                       ┌───────────────▼───────────────┐
+                       │       Sort Entities           │
+                       │    Opaque(front to back)      │
+                       │    Transparent(back to front) │
+                       └───────────────┬───────────────┘
                                        │
                            ┌───────────▼──────────┐
                            │    Light System      │
