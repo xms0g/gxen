@@ -31,6 +31,10 @@ It’s designed for clarity, experimentation, and real-time graphics research �
 - **Debug Tools**
   - Normal visualization
   - Wireframe mode
+- **Built-in Models**
+  - Cube – perfect for testing transforms, lighting, and shadow maps
+  - Cubemap – used for skybox rendering
+  - Screen Quad – for post-processing, deferred pipeline, and blitting
 ## Rendering Pipeline Architecture
 
                            ┌──────────────────────┐
