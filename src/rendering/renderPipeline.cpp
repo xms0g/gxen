@@ -144,8 +144,13 @@ void RenderPipeline::render(const Camera& camera) {
 	beginSceneRender();
 #ifdef DEFERRED
 	mDeferredRenderer->geometryPass(renderQueues.opaqueBatches, *mGBuffer, *mGShader);
-	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer,
+# ifdef HDR
+	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mHDRBuffer,
 	                                *mDeferredLigthingShader);
+# else
+	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer,
+									*mDeferredLigthingShader);
+# endif
 #else
 	mForwardRenderer->opaquePass(renderQueues.opaqueBatches, mShadowManager->getShadowMaps());
 #endif
