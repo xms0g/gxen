@@ -28,7 +28,7 @@ public:
 
 	[[nodiscard]] const UniformBuffer& getShadowUBO() const;
 
-	void shadowPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const LightSystem& lights);
+	void shadowPass(const std::vector<Entity>& shadowCasters, const LightSystem& lights);
 
 private:
 	void directionalShadowPass(const std::vector<Entity>& entities, const std::vector<DirectionalLightComponent*>& lights);

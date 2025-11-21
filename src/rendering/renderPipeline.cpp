@@ -78,7 +78,11 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
 			.withTexture16F()
+# ifdef HDR
+			.withTexture16F()
+# else
 			.withTexture()
+# endif
 			.configureAttachments()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
@@ -139,21 +143,21 @@ void RenderPipeline::render(const Camera& camera) {
 	sortEntities(camera);
 
 	mLightSystem->update();
-	mShadowManager->shadowPass(renderQueues.opaqueBatches, *mLightSystem);
+	mShadowManager->shadowPass(renderQueues.shadowCasters, *mLightSystem);
 
 	beginSceneRender();
 #ifdef DEFERRED
-	mDeferredRenderer->geometryPass(renderQueues.opaqueBatches, *mGBuffer, *mGShader);
+	mDeferredRenderer->geometryPass(renderQueues.deferredBatches, *mGBuffer, *mGShader);
 # ifdef HDR
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mHDRBuffer,
 	                                *mDeferredLigthingShader);
 # else
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer,
-									*mDeferredLigthingShader);
+	                                *mDeferredLigthingShader);
 # endif
-#else
-	mForwardRenderer->opaquePass(renderQueues.opaqueBatches, mShadowManager->getShadowMaps());
 #endif
+	mForwardRenderer->opaquePass(renderQueues.forwardBatches, mShadowManager->getShadowMaps());
+
 	mDebugRenderer->render(renderQueues.debugEntities);
 	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
 
@@ -192,7 +196,13 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 		bvc.isVisible = bvc.bv->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
 	};
 
-	for (const auto& [shader, entities]: renderQueues.opaqueBatches) {
+	for (const auto& [shader, entities]: renderQueues.forwardBatches) {
+		for (const auto& entity: entities) {
+			cullEntity(entity);
+		}
+	}
+
+	for (const auto& [shader, entities]: renderQueues.deferredBatches) {
 		for (const auto& entity: entities) {
 			cullEntity(entity);
 		}
@@ -252,37 +262,53 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 
 	const auto& mat = entity.getComponent<MaterialComponent>();
 
+	if (mat.flags & CastShadow) {
+		renderQueues.shadowCasters.push_back(entity);
+	}
+
 	if (mat.flags & Instanced) {
 		if (mat.flags & Transparent) {
 			renderQueues.transparentInstancedEntities.push_back(entity);
 		} else {
 			renderQueues.opaqueInstancedEntities.push_back(entity);
 		}
-	} else {
-		if (mat.flags & Transparent) {
-			renderQueues.transparentEntities.emplace_back(entity);
-		} else {
-			auto& shader = *entity.getComponent<ShaderComponent>().shader;
-			renderQueues.opaqueBatches[&shader].push_back(entity);
-		}
+		return;
+	}
+
+	if (mat.flags & Transparent) {
+		renderQueues.transparentEntities.emplace_back(entity);
+		return;
+	}
+
+	auto& shader = *entity.getComponent<ShaderComponent>().shader;
+
+	if (mat.flags & Forward) {
+		renderQueues.forwardBatches[&shader].push_back(entity);
+	} else if (mat.flags & Deferred) {
+		renderQueues.deferredBatches[&shader].push_back(entity);
 	}
 }
 
 void RenderPipeline::sortEntities(const Camera& camera) {
 	const glm::vec3 camPos = camera.position();
 
+	auto sortBatches = [&](auto& batches) {
+		for (auto& [shader, entities]: batches) {
+			std::sort(
+				entities.begin(),
+				entities.end(),
+				[&camPos](const Entity& a, const Entity& b) {
+					const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
+					const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
+					return da < db;
+				}
+			);
+		}
+	};
+
 	// Sort opaque objects front to back
-	for (auto& [shader, entities]: renderQueues.opaqueBatches) {
-		std::sort(
-			entities.begin(),
-			entities.end(),
-			[&camPos](const Entity& a, const Entity& b) {
-				const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
-				const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
-				return da < db;
-			}
-		);
-	}
+	sortBatches(renderQueues.forwardBatches);
+	sortBatches(renderQueues.deferredBatches);
 
 	std::sort(
 		renderQueues.transparentEntities.begin(),

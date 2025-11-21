@@ -2,8 +2,10 @@
 #include <cstdint>
 
 enum RenderFlags: uint32_t {
-	Opaque = 1 << 0,
-	Transparent = 1 << 1,
-	Instanced = 1 << 2,
-	TwoSided = 1 << 3
+	Forward = 1 << 0,
+	Deferred = 1 << 1,
+	Transparent = 1 << 2,
+	Instanced = 1 << 3,
+	TwoSided = 1 << 4,
+	CastShadow = 1 << 5
 };

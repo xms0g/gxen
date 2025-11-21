@@ -70,6 +70,8 @@ private:
 		std::vector<Entity> transparentInstancedEntities;
 		std::vector<Entity> opaqueInstancedEntities;
 		std::vector<Entity> debugEntities;
-		std::unordered_map<Shader*, std::vector<Entity>> opaqueBatches;
+		std::vector<Entity> shadowCasters;
+		std::unordered_map<Shader*, std::vector<Entity>> forwardBatches;
+		std::unordered_map<Shader*, std::vector<Entity>> deferredBatches;
 	} renderQueues;
 };
