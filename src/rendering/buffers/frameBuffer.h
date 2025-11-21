@@ -50,6 +50,8 @@ public:
 	void checkStatus();
 
 private:
+	void setAttachment(uint32_t textureID, uint32_t target);
+
 	int mWidth{0};
 	int mHeight{0};
 	uint32_t mFBO{0};

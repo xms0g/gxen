@@ -52,9 +52,7 @@ FrameBuffer& FrameBuffer::withTexture() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
-	mAttachments.push_back(attachment);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, textureID, 0);
+	setAttachment(textureID, GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
@@ -68,9 +66,7 @@ FrameBuffer& FrameBuffer::withTextureMultisampled(const int multisampledCount) {
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
 	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGBA, mWidth, mHeight, GL_TRUE);
 
-	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
-	mAttachments.push_back(attachment);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D_MULTISAMPLE, textureID, 0);
+	setAttachment(textureID, GL_TEXTURE_2D_MULTISAMPLE);
 
 	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 	return *this;
@@ -86,9 +82,7 @@ FrameBuffer& FrameBuffer::withTexture16F() {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
-	mAttachments.push_back(attachment);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, textureID, 0);
+	setAttachment(textureID, GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 	return *this;
@@ -235,4 +229,10 @@ void FrameBuffer::checkStatus() {
 	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
 		throw std::runtime_error("ERROR::FRAMEBUFFER::NOT_COMPLETE!\n");
 	}
+}
+
+void FrameBuffer::setAttachment(const uint32_t textureID, const uint32_t target) {
+	const uint32_t attachment = GL_COLOR_ATTACHMENT0 + mTextureIDs.size() - 1;
+	mAttachments.push_back(attachment);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, target, textureID, 0);
 }
