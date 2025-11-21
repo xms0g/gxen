@@ -61,10 +61,8 @@ void RenderCommon::drawQuad(const uint32_t sceneTexture, const uint32_t VAO) {
 }
 
 
-void RenderCommon::bindTextures(const uint32_t materialID,
-                                const TextureMap* texturesByMatID,
-                                const Shader& shader) {
-	if (texturesByMatID && !texturesByMatID->empty()) {
+void RenderCommon::bindTextures(const uint32_t materialID, const TextureMap* texturesByMatID, const Shader& shader) {
+	if (texturesByMatID && !texturesByMatID->empty() && texturesByMatID->contains(materialID)) {
 		bool hasNormalMap{false}, hasHeightMap{false};
 		const auto& textures = texturesByMatID->at(materialID);
 
@@ -91,9 +89,8 @@ void RenderCommon::bindTextures(const uint32_t materialID,
 	}
 }
 
-void RenderCommon::unbindTextures(const uint32_t materialID,
-                                  const TextureMap* texturesByMatID) {
-	if (texturesByMatID && !texturesByMatID->empty()) {
+void RenderCommon::unbindTextures(const uint32_t materialID, const TextureMap* texturesByMatID) {
+	if (texturesByMatID && !texturesByMatID->empty() && texturesByMatID->contains(materialID)) {
 		const auto& textures = texturesByMatID->at(materialID);
 
 		for (int i = 0; i < textures.size(); i++) {
@@ -113,4 +110,3 @@ void RenderCommon::bindShadowMaps(const std::array<uint32_t, 3>& shadowMaps) {
 	glActiveTexture(GL_TEXTURE0 + SHADOWMAP_TEXTURE_SLOT + 2);
 	glBindTexture(GL_TEXTURE_2D_ARRAY, shadowMaps[2]);
 }
-

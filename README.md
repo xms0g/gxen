@@ -11,8 +11,8 @@ Itâ€™s designed for clarity, experimentation, and real-time graphics research â€
   - Works for both opaque and transparent objects.
 - **Lighting & Shadows**
   - Directional Light + Shadow Mapping
-  - Point Light Shadows (cubemap-based)
-  - Spot Light Shadows
+  - Point Light + Shadow Mapping (cubemap-based)
+  - Spot Light + Shadow Mapping
 - **HDR Rendering**
   - Full HDR workflow ready for post-processing.
 - **Entity Component System (ECS)**

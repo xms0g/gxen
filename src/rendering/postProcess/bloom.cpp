@@ -24,16 +24,16 @@ Bloom::Bloom(const std::string& name, const int width, const int height, const b
 #ifdef HDR
 		target->withTexture16F()
 #else
-		target->withTexture()
+				target->withTexture()
 #endif
 				.checkStatus();
 	}
 }
 
-uint32_t Bloom::render(const uint32_t sceneTexture, const uint32_t VAO,
-                       int& toggle, const std::unique_ptr<FrameBuffer>* renderTargets) const {
-	(void) renderTargets;
+uint32_t Bloom::render(const uint32_t sceneTexture, const uint32_t VAO, int& toggle,
+                       const std::unique_ptr<FrameBuffer>* renderTargets) const {
 	(void) toggle;
+	(void) renderTargets;
 	int toggle_ = 0;
 	uint32_t inputTex = sceneTexture;
 
