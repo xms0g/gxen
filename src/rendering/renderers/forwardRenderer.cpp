@@ -32,6 +32,8 @@ void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntiti
 
 void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
+	if (opaqueBatches.empty()) return;
+
 	RenderCommon::bindShadowMaps(shadowMaps);
 
 	for (const auto& [shader, entities]: opaqueBatches) {
