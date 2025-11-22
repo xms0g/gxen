@@ -36,6 +36,8 @@ It’s designed for clarity, experimentation, and real-time graphics research �
   - Cubemap – used for skybox rendering
   - Plane
   - Screen Quad – for post-processing, deferred pipeline, and blitting
+## Screenshots
+![Screenshot](assets/screenshot1.png)
 ## Roadmap
 - [ ] SSAO
 - [ ] PBR materials
