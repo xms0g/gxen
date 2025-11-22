@@ -31,8 +31,13 @@ bool math::Sphere::isOnFrustum(const Frustum& camFrustum, const glm::vec3& posit
 	       globalSphere.isOnOrForwardPlane(camFrustum.bottomFace);
 }
 
+bool math::Sphere::isMeshInFrustum(const Frustum& camFrustum, const glm::vec3& min, const glm::vec3& max,
+                                   const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) const {
+	return false;
+}
+
 bool math::Sphere::isOnOrForwardPlane(const Plane& plane) const {
-	return plane.computeSignedDistanceToPlan(mCenter) > -mRadius;
+	return plane.computeSignedDistanceToPlane(mCenter) > -mRadius;
 }
 
 bool math::AABB::isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
@@ -66,12 +71,45 @@ bool math::AABB::isOnFrustum(const Frustum& camFrustum, const glm::vec3& positio
 	       globalAABB.isOnOrForwardPlane(camFrustum.farFace);
 }
 
+bool math::AABB::isMeshInFrustum(const Frustum& camFrustum, const glm::vec3& min, const glm::vec3& max,
+                                 const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) const {
+	const glm::mat4 modelMatrix = computeModelMatrix(position, rotation, scale);
+
+	const glm::vec3 corners[8] = {
+		{min.x, min.y, min.z}, {max.x, min.y, min.z},
+		{min.x, max.y, min.z}, {max.x, max.y, min.z},
+		{min.x, min.y, max.z}, {max.x, min.y, max.z},
+		{min.x, max.y, max.z}, {max.x, max.y, max.z}
+	};
+
+	const Plane planes[6] = {
+		camFrustum.topFace, camFrustum.bottomFace,
+		camFrustum.rightFace, camFrustum.leftFace,
+		camFrustum.farFace, camFrustum.nearFace
+	};
+
+	for (const auto& plane: planes) {
+		int inside = 0;
+
+		for (const auto& corner: corners) {
+			auto wc = glm::vec3(modelMatrix * glm::vec4(corner, 1.0f));
+
+			if (plane.computeSignedDistanceToPlane(wc) >= 0)
+				inside++;
+		}
+
+		if (inside == 0)
+			return false;
+	}
+	return true;
+}
+
 bool math::AABB::isOnOrForwardPlane(const Plane& plane) const {
 	const float r = extents.x * std::abs(plane.normal.x) +
 	                extents.y * std::abs(plane.normal.y) +
 	                extents.z * std::abs(plane.normal.z);
 
-	return -r <= plane.computeSignedDistanceToPlan(center);
+	return -r <= plane.computeSignedDistanceToPlane(center);
 }
 
 math::Sphere math::generateSphereBV(const std::unordered_map<uint32_t, std::vector<Mesh> >& meshesByMatID) {

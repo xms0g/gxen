@@ -18,7 +18,7 @@ Itâ€™s designed for clarity, experimentation, and real-time graphics research â€
 - **Entity Component System (ECS)**
   - Lightweight, simple, and gets out of your way.
 - **Frustum Culling**
-  - Per-entity culling for squeezing out more FPS.
+  - Per-entity and per-mesh culling.
 - **Skybox Rendering** 
 - **Advanced Materials**
   - Normal Mapping

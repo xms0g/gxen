@@ -12,7 +12,7 @@ struct Plane {
 		distance = glm::dot(p1, normal);
 	}
 
-	[[nodiscard]] float computeSignedDistanceToPlan(const glm::vec3& point) const {
+	[[nodiscard]] float computeSignedDistanceToPlane(const glm::vec3& point) const {
 		return glm::dot(normal, point) - distance;
 	}
 };

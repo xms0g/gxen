@@ -57,6 +57,14 @@ Mesh::Mesh(const uint32_t materialID, std::vector<Vertex>& vertices, std::vector
 	                      reinterpret_cast<void*>(offsetof(Vertex, weights)));
 
 	glBindVertexArray(0);
+
+	mMin = glm::vec3(FLT_MAX);
+	mMax = glm::vec3(-FLT_MAX);
+
+	for (auto& vertex: mVertices) {
+		mMin = glm::min(mMin, vertex.position);
+		mMax = glm::max(mMax, vertex.position);
+	}
 }
 
 void Mesh::enableInstanceAttributes(const uint32_t instanceVBO, const size_t offset) const {

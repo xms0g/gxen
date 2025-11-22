@@ -12,7 +12,7 @@ ResourceManager& ResourceManager::instance() {
 	return instance;
 }
 
-[[nodiscard]] const MeshMap* ResourceManager::getMeshes(const size_t entityID) const {
+[[nodiscard]] MeshMap* ResourceManager::getMeshes(const size_t entityID) {
 	return &mMeshesByEntity.at(entityID);
 }
 
