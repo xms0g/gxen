@@ -197,12 +197,12 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 		const auto& tc = entity.getComponent<TransformComponent>();
 		bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
 
-		if (bvc.isVisible) {
-			for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-				for (auto& mesh: meshes) {
-					mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(), tc.position, tc.rotation,
-					                                        tc.scale));
-				}
+		if (!bvc.isVisible) return;
+
+		for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+			for (auto& mesh: meshes) {
+				mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(), tc.position, tc.rotation,
+				                                      tc.scale));
 			}
 		}
 	};
