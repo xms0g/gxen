@@ -16,7 +16,7 @@ public:
 	~Cube();
 
 	using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
-	[[nodiscard]] const MeshMap* getMeshes() const { return &meshes; }
+	[[nodiscard]] MeshMap* getMeshes() { return &meshes; }
 
 	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture>>;
 	[[nodiscard]] const TextureMap* getTextures() const { return &textures; }

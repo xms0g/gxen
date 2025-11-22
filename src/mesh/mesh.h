@@ -37,16 +37,24 @@ public:
 
 	[[nodiscard]] const std::vector<uint32_t>& indices() const { return mIndices; }
 
+	[[nodiscard]] const glm::vec3& min() const { return mMin; }
+
+	[[nodiscard]] const glm::vec3& max() const { return mMax; }
+
 	[[nodiscard]] uint32_t VAO() const { return mVAO; }
 
-	void enableInstanceAttributes(uint32_t instanceVBO, size_t offset) const;
+	[[nodiscard]] bool isVisible() const { return mIsVisible; }
 
+	void setVisible(const bool visible) { mIsVisible = visible; }
+
+	void enableInstanceAttributes(uint32_t instanceVBO, size_t offset) const;
 private:
 	// mesh Data
 	uint32_t mMaterialID;
 	std::vector<Vertex> mVertices;
 	std::vector<uint32_t> mIndices;
 	uint32_t mVAO{}, mVBO{}, mEBO{};
+	// Bounding Volume
+	glm::vec3 mMin{}, mMax{};
+	bool mIsVisible{true};
 };
-
-void setupInstancing();

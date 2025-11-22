@@ -26,6 +26,7 @@
 #include "../ECS/components/instance.hpp"
 #include "../math/frustum.hpp"
 #include "../math/boundingVolume.h"
+#include "../mesh/mesh.h"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -192,8 +193,18 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 
 	auto cullEntity = [&](const Entity& entity) {
 		auto& bvc = entity.getComponent<BoundingVolumeComponent>();
+		const auto& aabb = bvc.bv;
 		const auto& tc = entity.getComponent<TransformComponent>();
-		bvc.isVisible = bvc.bv->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
+		bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
+
+		if (bvc.isVisible) {
+			for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+				for (auto& mesh: meshes) {
+					mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(), tc.position, tc.rotation,
+					                                        tc.scale));
+				}
+			}
+		}
 	};
 
 	for (const auto& [shader, entities]: renderQueues.forwardBatches) {

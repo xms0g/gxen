@@ -22,7 +22,7 @@ public:
 
 	static ResourceManager& instance();
 
-	[[nodiscard]] const MeshMap* getMeshes(size_t entityID) const;
+	[[nodiscard]] MeshMap* getMeshes(size_t entityID);
 
 	[[nodiscard]] const TextureMap* getTextures(size_t entityID) const;
 
