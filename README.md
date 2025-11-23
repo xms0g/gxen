@@ -37,7 +37,7 @@ It’s designed for clarity, experimentation, and real-time graphics research �
   - Plane
   - Screen Quad – for post-processing, deferred pipeline, and blitting
 ## Screenshots
-![Screenshot](assets/screenshot1.png)
+![Screenshot](assets/screenshot.png)
 ## Roadmap
 - [ ] SSAO
 - [ ] PBR materials
