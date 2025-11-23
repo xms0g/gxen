@@ -2,6 +2,8 @@
 #include <vector>
 #include <unordered_map>
 
+struct RenderItem;
+
 namespace Models {
 class SingleQuad;
 }
@@ -16,7 +18,7 @@ public:
 
 	~DeferredRenderer();
 
-	void geometryPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches, const FrameBuffer& gBuffer,
+	void geometryPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems, const FrameBuffer& gBuffer,
 	                  const Shader& gShader) const;
 
 	void lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& gBuffer,

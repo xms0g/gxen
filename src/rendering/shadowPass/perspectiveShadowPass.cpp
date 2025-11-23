@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "../shader.h"
+#include "../renderItem.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
@@ -27,7 +28,7 @@ glm::mat4 PerspectiveShadowPass::getLightSpaceMatrix(const int layer) const {
 	return mLightSpaceMatrix[layer];
 }
 
-void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const glm::vec4& direction,
+void PerspectiveShadowPass::render(const std::vector<RenderItem>& shadowCasters, const glm::vec4& direction,
                                    const glm::vec4& position, const float fovy, const int layer) {
 	const glm::mat4 lightProjection = glm::perspective(
 		fovy,
@@ -50,9 +51,9 @@ void PerspectiveShadowPass::render(const std::vector<Entity>& entities, const gl
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	for (const auto& entity: entities) {
-		RenderCommon::setupTransform(entity, *mDepthShader);
-		RenderCommon::drawMeshes(entity, *mDepthShader);
+	for (const auto& item: shadowCasters) {
+		RenderCommon::setupTransform(*item.entity, *mDepthShader);
+		RenderCommon::drawMesh(item, *mDepthShader);
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);

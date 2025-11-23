@@ -3,6 +3,7 @@
 #include <vector>
 #include "glm/glm.hpp"
 
+struct RenderItem;
 class Entity;
 class Shader;
 class FrameBuffer;
@@ -17,7 +18,7 @@ public:
 
 	[[nodiscard]] FrameBuffer& getDepthMap() const;
 
-	void render(const std::vector<Entity>& entities, const glm::vec4& position, int layer) const;
+	void render(const std::vector<RenderItem>& shadowCasters, const glm::vec4& position, int layer) const;
 
 private:
 	std::unique_ptr<FrameBuffer> mDepthMap;

@@ -96,7 +96,7 @@ Models::Plane::Plane(const char* diffuseTexture,
 			heightTexture);
 	}
 
-	material[0] = {0, textures};
+	material[0] = {1 << 2, textures};
 }
 
 Models::Plane::~Plane() = default;

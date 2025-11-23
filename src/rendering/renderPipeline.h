@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include "../ECS/system.hpp"
 
+struct RenderItem;
+class Mesh;
 class Shader;
 class FrameBuffer;
 class UniformBuffer;
@@ -66,12 +68,12 @@ private:
 
 	// Render queue
 	struct {
-		std::vector<Entity> transparentEntities;
 		std::vector<Entity> transparentInstancedEntities;
 		std::vector<Entity> opaqueInstancedEntities;
-		std::vector<Entity> debugEntities;
-		std::vector<Entity> shadowCasters;
-		std::unordered_map<Shader*, std::vector<Entity>> forwardBatches;
-		std::unordered_map<Shader*, std::vector<Entity>> deferredBatches;
+		std::vector<RenderItem> debugEntities;
+		std::vector<RenderItem> shadowCasters;
+		std::unordered_map<Shader*, std::vector<RenderItem>> forwardOpaqueItems;
+		std::unordered_map<Shader*, std::vector<RenderItem>> deferredOpaqueItems;
+		std::unordered_map<Shader*, std::vector<RenderItem>> transparentItems;
 	} renderQueues;
 };

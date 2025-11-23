@@ -6,6 +6,7 @@
 #include "glm/glm.hpp"
 #include "../../config/config.hpp"
 
+struct RenderItem;
 struct SpotLightComponent;
 struct DirectionalLightComponent;
 struct PointLightComponent;
@@ -28,14 +29,14 @@ public:
 
 	[[nodiscard]] const UniformBuffer& getShadowUBO() const;
 
-	void shadowPass(const std::vector<Entity>& shadowCasters, const LightSystem& lights);
+	void shadowPass(const std::vector<RenderItem>& shadowCasters, const LightSystem& lights);
 
 private:
-	void directionalShadowPass(const std::vector<Entity>& entities, const std::vector<DirectionalLightComponent*>& lights);
+	void directionalShadowPass(const std::vector<RenderItem>& shadowCasters, const std::vector<DirectionalLightComponent*>& lights);
 
-	void omnidirectionalShadowPass(const std::vector<Entity>& entities, const std::vector<PointLightComponent*>& lights);
+	void omnidirectionalShadowPass(const std::vector<RenderItem>& shadowCasters, const std::vector<PointLightComponent*>& lights);
 
-	void perspectiveShadowPass(const std::vector<Entity>& entities, const std::vector<SpotLightComponent*>& lights);
+	void perspectiveShadowPass(const std::vector<RenderItem>& shadowCasters, const std::vector<SpotLightComponent*>& lights);
 
 	struct alignas(16) ShadowData {
 		glm::mat4 lightSpaceMatrix;

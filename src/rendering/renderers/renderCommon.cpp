@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include "../shader.h"
 #include "../renderFlags.hpp"
+#include "../renderItem.hpp"
 #include "../material.hpp"
 #include "../../config/config.hpp"
 #include "../../mesh/mesh.h"
@@ -37,24 +38,19 @@ void RenderCommon::setupMaterial(const Entity& entity, const Shader& shader) {
 	}
 }
 
-void RenderCommon::drawMeshes(const Entity& entity, const Shader& shader) {
-	const auto& materials = entity.getComponent<MaterialComponent>().materials;
+void RenderCommon::drawMesh(const RenderItem& item, const Shader& shader) {
+	if (!item.mesh->isVisible()) return;
 
-	for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-		bindTextures(matID, materials, shader);
+	bindTextures(item.material->textures, shader);
 
-		for (const auto& mesh: meshes) {
-			if (!mesh.isVisible()) continue;
-
-			glBindVertexArray(mesh.VAO());
-			if (!mesh.indices().empty()) {
-				glDrawElements(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
-			} else {
-				glDrawArrays(GL_TRIANGLES, 0, static_cast<int32_t>(mesh.vertices().size()));
-			}
-		}
-		unbindTextures(matID, materials);
+	glBindVertexArray(item.mesh->VAO());
+	if (!item.mesh->indices().empty()) {
+		glDrawElements(GL_TRIANGLES, static_cast<int32_t>(item.mesh->indices().size()), GL_UNSIGNED_INT, nullptr);
+	} else {
+		glDrawArrays(GL_TRIANGLES, 0, static_cast<int32_t>(item.mesh->vertices().size()));
 	}
+
+	unbindTextures(item.material->textures);
 }
 
 void RenderCommon::drawQuad(const uint32_t sceneTexture, const uint32_t VAO) {
@@ -68,42 +64,35 @@ void RenderCommon::drawQuad(const uint32_t sceneTexture, const uint32_t VAO) {
 }
 
 
-void RenderCommon::bindTextures(const uint32_t materialID, const MaterialMap* materials, const Shader& shader) {
-	if (materials && !materials->empty() && materials->contains(materialID)) {
-		bool hasNormalMap{false}, hasHeightMap{false};
-		const auto& textures = materials->at(materialID).textures;
+void RenderCommon::bindTextures(const std::vector<Texture>& textures, const Shader& shader) {
+	bool hasNormalMap{false}, hasHeightMap{false};
 
-		for (int i = 0; i < textures.size(); i++) {
-			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
+	for (int i = 0; i < textures.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
 
-			std::string name = textures[i].type;
+		std::string name = textures[i].type;
 
-			if (name == "texture_normal") {
-				hasNormalMap = true;
-			}
-
-			if (name == "texture_height") {
-				hasHeightMap = true;
-			}
-
-			// now set the sampler to the correct texture unit
-			shader.setInt(std::string("material.").append(name), i);
-			// and finally bind the texture
-			glBindTexture(GL_TEXTURE_2D, textures[i].id);
+		if (name == "texture_normal") {
+			hasNormalMap = true;
 		}
-		shader.setBool("material.hasNormalMap", hasNormalMap);
-		shader.setBool("material.hasHeightMap", hasHeightMap);
+
+		if (name == "texture_height") {
+			hasHeightMap = true;
+		}
+
+		// now set the sampler to the correct texture unit
+		shader.setInt(std::string("material.").append(name), i);
+		// and finally bind the texture
+		glBindTexture(GL_TEXTURE_2D, textures[i].id);
 	}
+	shader.setBool("material.hasNormalMap", hasNormalMap);
+	shader.setBool("material.hasHeightMap", hasHeightMap);
 }
 
-void RenderCommon::unbindTextures(const uint32_t materialID, const MaterialMap* materials) {
-	if (materials && !materials->empty() && materials->contains(materialID)) {
-		const auto& textures = materials->at(materialID).textures;
-
-		for (int i = 0; i < textures.size(); i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, 0);
-		}
+void RenderCommon::unbindTextures(const std::vector<Texture>& textures) {
+	for (int i = 0; i < textures.size(); i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 }
 

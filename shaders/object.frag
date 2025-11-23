@@ -22,6 +22,9 @@ void main() {
     vec2 texCoord = parallaxMapping(fs_in.TexCoord, fs_in.TangentViewDir, material.heightScale, material.hasHeightMap);
     vec3 normal = normalMapping(fs_in.TBN, texCoord, material.hasNormalMap);
     vec3 diffuse = texture(material.texture_diffuse, texCoord).rgb;
+    float alpha = texture(material.texture_diffuse, texCoord).a;
+    if (alpha < 0.1)
+        discard;
     float specular = texture(material.texture_specular, texCoord).a;
     // Create a mask: 0.0 if no lights, 1.0 if at least one light
     bool hasLights = lightCount.x > 0 || lightCount.y > 0 || lightCount.z > 0;

@@ -52,7 +52,7 @@ int main() {
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
 		skybox.addComponent<SkyboxComponent>();
-		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f, Transparent);
+		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f);
 		skybox.addComponent<MeshComponent>(skyboxModel.getMeshes());
 		skybox.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("skybox.vert", "skybox.frag"));
@@ -121,9 +121,9 @@ int main() {
 		ResourceManager::instance().loadModel(suzanne.id(), "suzanne/suzanne.obj");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0f, Deferred | CastShadow);
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0f, CastShadow);
 
-		suzanne.addComponent<ShaderComponent>(instancedObject);
+		suzanne.addComponent<ShaderComponent>(object);
 
 		suzanne.addComponent<BoundingVolumeComponent>(
 			std::make_shared<math::AABB>(
@@ -142,7 +142,7 @@ int main() {
 		// 	glm::vec3(2.0f));
 		//
 		// plane.addComponent<MeshComponent>(planeModel.getMeshes());
-		// plane.addComponent<MaterialComponent>(planeModel.getTextures(), 32.0f, 1.0f, TwoSided | Deferred);
+		// plane.addComponent<MaterialComponent>(planeModel.getMaterial(), 32.0f, 1.0f, Deferred | TwoSided);
 		//
 		// plane.addComponent<ShaderComponent>(object);
 		//
@@ -166,7 +166,7 @@ int main() {
 			glm::vec3(2.0f));
 
 		cube.addComponent<MeshComponent>(cubeModel.getMeshes());
-		cube.addComponent<MaterialComponent>(cubeModel.getMaterial(), 32.0f, 1.0f, Deferred | CastShadow);
+		cube.addComponent<MaterialComponent>(cubeModel.getMaterial(), 32.0f, 1.0f, CastShadow);
 
 		cube.addComponent<ShaderComponent>(object);
 
@@ -252,7 +252,7 @@ int main() {
 		ResourceManager::instance().loadModel(ruin.id(), "sponza_palace/scene.gltf");
 
 		ruin.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(ruin.id()));
-		ruin.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(ruin.id()), 32.0f, 1.0f, Deferred | CastShadow);
+		ruin.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(ruin.id()), 32.0f, 1.0f, CastShadow);
 
 		ruin.addComponent<ShaderComponent>(object);
 

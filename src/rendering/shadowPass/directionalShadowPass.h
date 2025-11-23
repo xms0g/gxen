@@ -3,6 +3,7 @@
 #include <vector>
 #include "glm/glm.hpp"
 
+struct RenderItem;
 class Entity;
 class Shader;
 class FrameBuffer;
@@ -17,7 +18,7 @@ public:
 
 	[[nodiscard]] glm::mat4 getLightSpaceMatrix() const;
 
-	void render(const std::vector<Entity>& entities, const glm::vec4& direction);
+	void render(const std::vector<RenderItem>& shadowCasters, const glm::vec4& direction);
 
 private:
 	glm::mat4 mLightSpaceMatrix{};

@@ -143,7 +143,7 @@ Models::Cube::Cube(const char* diffuseTexture,
 			heightTexture);
 	}
 
-	material[0] = {0, textures};
+	material[0] = {1 << 2, textures};
 }
 
 Models::Cube::~Cube() = default;

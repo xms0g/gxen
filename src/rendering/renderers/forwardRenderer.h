@@ -7,6 +7,7 @@
 #include "../../core/camera.h"
 #include "glm/glm.hpp"
 
+struct RenderItem;
 struct Texture;
 class Entity;
 class Window;
@@ -23,10 +24,10 @@ public:
 	void configure(const std::vector<Entity>& opaqueInstancedEntities,
 	               const std::vector<Entity>& transparentInstancedEntities);
 
-	void opaquePass(const std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+	void opaquePass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems,
 	                const std::array<uint32_t, 3>& shadowMaps) const;
 
-	void transparentPass(const std::vector<Entity>& entities) const;
+	void transparentPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems) const;
 
 	void opaqueInstancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps);
 

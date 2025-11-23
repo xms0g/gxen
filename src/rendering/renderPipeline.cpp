@@ -5,7 +5,9 @@
 #include "glm/gtx/norm.hpp"
 #include "shader.h"
 #include "lightSystem.h"
+#include "material.hpp"
 #include "renderFlags.hpp"
+#include "renderItem.hpp"
 #include "skyboxSystem.h"
 #include "buffers/frameBuffer.h"
 #include "buffers/uniformBuffer.h"
@@ -27,6 +29,7 @@
 #include "../math/frustum.hpp"
 #include "../math/boundingVolume.h"
 #include "../mesh/mesh.h"
+#include "../resourceManager/texture.h"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -148,7 +151,7 @@ void RenderPipeline::render(const Camera& camera) {
 
 	beginSceneRender();
 #ifdef DEFERRED
-	mDeferredRenderer->geometryPass(renderQueues.deferredBatches, *mGBuffer, *mGShader);
+	mDeferredRenderer->geometryPass(renderQueues.deferredOpaqueItems, *mGBuffer, *mGShader);
 # ifdef HDR
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mHDRBuffer,
 	                                *mDeferredLigthingShader);
@@ -157,14 +160,14 @@ void RenderPipeline::render(const Camera& camera) {
 	                                *mDeferredLigthingShader);
 # endif
 #endif
-	mForwardRenderer->opaquePass(renderQueues.forwardBatches, mShadowManager->getShadowMaps());
+	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueItems, mShadowManager->getShadowMaps());
 
 	mDebugRenderer->render(renderQueues.debugEntities);
 	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
 
 	mSkyboxSystem->render(camera);
 
-	mForwardRenderer->transparentPass(renderQueues.transparentEntities);
+	mForwardRenderer->transparentPass(renderQueues.transparentItems);
 	mForwardRenderer->transparentInstancedPass(renderQueues.transparentInstancedEntities);
 	endSceneRender();
 #ifdef HDR
@@ -191,49 +194,25 @@ void RenderPipeline::updateBuffers(const Camera& camera) const {
 void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 	const math::Frustum& frustum = camera.frustum();
 
-	auto cullEntity = [&](const Entity& entity) {
-		auto& bvc = entity.getComponent<BoundingVolumeComponent>();
-		const auto& aabb = bvc.bv;
-		const auto& tc = entity.getComponent<TransformComponent>();
-		bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
+	auto cullItems = [&](const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems) {
+		for (const auto& [shader, items]: renderItems) {
+			for (auto& item: items) {
+				auto& bvc = item.entity->getComponent<BoundingVolumeComponent>();
+				const auto& tc = item.entity->getComponent<TransformComponent>();
+				const auto& aabb = bvc.bv;
+				bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
 
-		if (!bvc.isVisible) return;
-
-		for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-			for (auto& mesh: meshes) {
-				mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(), tc.position, tc.rotation,
-				                                      tc.scale));
+				if (!bvc.isVisible) return;
+				item.mesh->setVisible(aabb->isMeshInFrustum(frustum, item.mesh->min(), item.mesh->max(),
+															tc.position, tc.rotation, tc.scale));
 			}
 		}
+
 	};
 
-	for (const auto& [shader, entities]: renderQueues.forwardBatches) {
-		for (const auto& entity: entities) {
-			cullEntity(entity);
-		}
-	}
-
-	for (const auto& [shader, entities]: renderQueues.deferredBatches) {
-		for (const auto& entity: entities) {
-			cullEntity(entity);
-		}
-	}
-
-	for (const auto& entity: renderQueues.opaqueInstancedEntities) {
-		cullEntity(entity);
-	}
-
-	for (const auto& entity: renderQueues.transparentEntities) {
-		cullEntity(entity);
-	}
-
-	for (const auto& entity: renderQueues.transparentInstancedEntities) {
-		cullEntity(entity);
-	}
-
-	for (const auto& entity: renderQueues.debugEntities) {
-		cullEntity(entity);
-	}
+	cullItems(renderQueues.forwardOpaqueItems);
+	cullItems(renderQueues.deferredOpaqueItems);
+	cullItems(renderQueues.transparentItems);
 }
 
 void RenderPipeline::beginSceneRender() const {
@@ -267,18 +246,10 @@ void RenderPipeline::endSceneRender() const {
 }
 
 void RenderPipeline::batchEntities(const Entity& entity) {
-	if (entity.hasComponent<DebugComponent>()) {
-		renderQueues.debugEntities.push_back(entity);
-	}
+	const auto& matc = entity.getComponent<MaterialComponent>();
 
-	const auto& mat = entity.getComponent<MaterialComponent>();
-
-	if (mat.flags & CastShadow) {
-		renderQueues.shadowCasters.push_back(entity);
-	}
-
-	if (mat.flags & Instanced) {
-		if (mat.flags & Transparent) {
+	if (matc.flags & Instanced) {
+		if (matc.flags & Transparent) {
 			renderQueues.transparentInstancedEntities.push_back(entity);
 		} else {
 			renderQueues.opaqueInstancedEntities.push_back(entity);
@@ -286,31 +257,56 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 		return;
 	}
 
-	if (mat.flags & Transparent) {
-		renderQueues.transparentEntities.emplace_back(entity);
-		return;
-	}
-
 	auto& shader = *entity.getComponent<ShaderComponent>().shader;
+	const auto& materials = entity.getComponent<MaterialComponent>().materials;
 
-	if (mat.flags & Forward) {
-		renderQueues.forwardBatches[&shader].push_back(entity);
-	} else if (mat.flags & Deferred) {
-		renderQueues.deferredBatches[&shader].push_back(entity);
+	for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
+		auto& material = materials->at(matID);
+
+		for (auto& mesh: meshes) {
+
+			if (material.flag & Opaque) {
+				RenderItem item{&entity, &mesh, &material};
+
+				if (matc.flags & Forward) {
+					renderQueues.forwardOpaqueItems[&shader].push_back(item);
+				} else {
+					renderQueues.deferredOpaqueItems[&shader].push_back(item);
+				}
+
+				if (matc.flags & CastShadow) {
+					renderQueues.shadowCasters.push_back(item);
+				}
+
+				if (entity.hasComponent<DebugComponent>()) {
+					renderQueues.debugEntities.push_back(item);
+				}
+			} else if (material.flag & Transparent) {
+				RenderItem item{&entity, &mesh, &material};
+				renderQueues.transparentItems[&shader].push_back(item);
+
+				if (entity.hasComponent<DebugComponent>()) {
+					renderQueues.debugEntities.push_back(item);
+				}
+			}
+		}
 	}
 }
 
 void RenderPipeline::sortEntities(const Camera& camera) {
 	const glm::vec3 camPos = camera.position();
 
-	auto sortBatches = [&](auto& batches) {
-		for (auto& [shader, entities]: batches) {
+	auto sortBatches = [&](auto& batch, bool transparent) {
+		for (auto& [shader, renderItems]: batch) {
 			std::sort(
-				entities.begin(),
-				entities.end(),
-				[&camPos](const Entity& a, const Entity& b) {
-					const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
-					const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
+				renderItems.begin(),
+				renderItems.end(),
+				[&camPos, &transparent](const RenderItem& a, const RenderItem& b) {
+					const float da = glm::length2(camPos - a.entity->getComponent<TransformComponent>().position);
+					const float db = glm::length2(camPos - b.entity->getComponent<TransformComponent>().position);
+
+					if (transparent)
+						return da > db;
 					return da < db;
 				}
 			);
@@ -318,18 +314,9 @@ void RenderPipeline::sortEntities(const Camera& camera) {
 	};
 
 	// Sort opaque objects front to back
-	sortBatches(renderQueues.forwardBatches);
-	sortBatches(renderQueues.deferredBatches);
-
-	std::sort(
-		renderQueues.transparentEntities.begin(),
-		renderQueues.transparentEntities.end(),
-		[&camPos](const Entity& a, const Entity& b) {
-			const float da = glm::length2(camPos - a.getComponent<TransformComponent>().position);
-			const float db = glm::length2(camPos - b.getComponent<TransformComponent>().position);
-			return da > db;
-		}
-	);
+	sortBatches(renderQueues.deferredOpaqueItems, false);
+	sortBatches(renderQueues.forwardOpaqueItems, false);
+	sortBatches(renderQueues.transparentItems, true);
 
 	for (auto& entity: renderQueues.transparentInstancedEntities) {
 		const auto& positions = entity.getComponent<InstanceComponent>().positions;

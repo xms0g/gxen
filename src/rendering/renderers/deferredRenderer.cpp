@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include "renderCommon.h"
 #include "../shader.h"
+#include "../renderItem.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../../config/config.hpp"
 #include "../../ECS/entity.hpp"
@@ -20,19 +21,19 @@ DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::ma
 
 DeferredRenderer::~DeferredRenderer() = default;
 
-void DeferredRenderer::geometryPass(std::unordered_map<Shader*, std::vector<Entity> >& opaqueBatches,
+void DeferredRenderer::geometryPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems,
                                     const FrameBuffer& gBuffer, const Shader& gShader) const {
 	gBuffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	gShader.activate();
-	for (const auto& [_, entities]: opaqueBatches) {
-		for (const auto& entity: entities) {
-			if (!entity.getComponent<BoundingVolumeComponent>().isVisible)
+	for (const auto& [shader, items]: renderItems) {
+		for (const auto& item: items) {
+			if (!item.entity->getComponent<BoundingVolumeComponent>().isVisible)
 				continue;
 
-			RenderCommon::setupTransform(entity, gShader);
-			RenderCommon::setupMaterial(entity, gShader);
-			RenderCommon::drawMeshes(entity, gShader);
+			RenderCommon::setupTransform(*item.entity, gShader);
+			RenderCommon::setupMaterial(*item.entity, gShader);
+			RenderCommon::drawMesh(item, gShader);
 		}
 	}
 	gBuffer.unbind();
