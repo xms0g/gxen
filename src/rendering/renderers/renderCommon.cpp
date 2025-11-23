@@ -2,6 +2,7 @@
 #include "glad/glad.h"
 #include "../shader.h"
 #include "../renderFlags.hpp"
+#include "../material.hpp"
 #include "../../config/config.hpp"
 #include "../../mesh/mesh.h"
 #include "../../math/matrix.hpp"
@@ -31,16 +32,16 @@ void RenderCommon::setupMaterial(const Entity& entity, const Shader& shader) {
 	shader.setFloat("material.shininess", mtc.shininess);
 	shader.setFloat("material.heightScale", mtc.heightScale);
 
-	if (!mtc.textures) {
+	if (!mtc.materials) {
 		shader.setVec3("material.color", mtc.color);
 	}
 }
 
 void RenderCommon::drawMeshes(const Entity& entity, const Shader& shader) {
-	const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
+	const auto& materials = entity.getComponent<MaterialComponent>().materials;
 
 	for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-		bindTextures(matID, texturesByMatID, shader);
+		bindTextures(matID, materials, shader);
 
 		for (const auto& mesh: meshes) {
 			if (!mesh.isVisible()) continue;
@@ -48,7 +49,7 @@ void RenderCommon::drawMeshes(const Entity& entity, const Shader& shader) {
 			glBindVertexArray(mesh.VAO());
 			glDrawElements(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
 		}
-		unbindTextures(matID, texturesByMatID);
+		unbindTextures(matID, materials);
 	}
 }
 
@@ -63,10 +64,10 @@ void RenderCommon::drawQuad(const uint32_t sceneTexture, const uint32_t VAO) {
 }
 
 
-void RenderCommon::bindTextures(const uint32_t materialID, const TextureMap* texturesByMatID, const Shader& shader) {
-	if (texturesByMatID && !texturesByMatID->empty() && texturesByMatID->contains(materialID)) {
+void RenderCommon::bindTextures(const uint32_t materialID, const MaterialMap* materials, const Shader& shader) {
+	if (materials && !materials->empty() && materials->contains(materialID)) {
 		bool hasNormalMap{false}, hasHeightMap{false};
-		const auto& textures = texturesByMatID->at(materialID);
+		const auto& textures = materials->at(materialID).textures;
 
 		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i); // active proper texture unit before binding
@@ -91,9 +92,9 @@ void RenderCommon::bindTextures(const uint32_t materialID, const TextureMap* tex
 	}
 }
 
-void RenderCommon::unbindTextures(const uint32_t materialID, const TextureMap* texturesByMatID) {
-	if (texturesByMatID && !texturesByMatID->empty() && texturesByMatID->contains(materialID)) {
-		const auto& textures = texturesByMatID->at(materialID);
+void RenderCommon::unbindTextures(const uint32_t materialID, const MaterialMap* materials) {
+	if (materials && !materials->empty() && materials->contains(materialID)) {
+		const auto& textures = materials->at(materialID).textures;
 
 		for (int i = 0; i < textures.size(); i++) {
 			glActiveTexture(GL_TEXTURE0 + i);

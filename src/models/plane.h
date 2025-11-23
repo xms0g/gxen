@@ -1,10 +1,10 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include "../rendering/material.hpp"
 
 class Mesh;
 struct Vertex;
-struct Texture;
 
 namespace Models {
 class Plane {
@@ -17,13 +17,13 @@ public:
 	~Plane();
 
 	using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
-	[[nodiscard]] const MeshMap* getMeshes() const { return &meshes; }
+	[[nodiscard]] MeshMap* getMeshes() { return &meshes; }
 
-	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture>>;
-	[[nodiscard]] const TextureMap* getTextures() const { return &textures; }
+	using MaterialMap = std::unordered_map<uint32_t, Material>;
+	[[nodiscard]] const MaterialMap* getMaterial() const { return &material; }
 
 private:
 	MeshMap meshes;
-	TextureMap textures;
+	MaterialMap material;
 };
 }

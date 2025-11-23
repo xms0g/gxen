@@ -112,8 +112,10 @@ Models::Cube::Cube(const char* diffuseTexture,
 
 	meshes[0].emplace_back(vertices, indices);
 
+	std::vector<Texture> textures;
+
 	if (diffuseTexture) {
-		textures[0].emplace_back(
+		textures.emplace_back(
 			texture::load(fs::path(ASSET_DIR + diffuseTexture).c_str()),
 			"texture_diffuse",
 			diffuseTexture
@@ -121,25 +123,27 @@ Models::Cube::Cube(const char* diffuseTexture,
 	}
 
 	if (specularTexture) {
-		textures[0].emplace_back(
+		textures.emplace_back(
 			texture::load(fs::path(ASSET_DIR + specularTexture).c_str()),
 			"texture_specular",
 			specularTexture);
 	}
 
 	if (normalTexture) {
-		textures[0].emplace_back(
+		textures.emplace_back(
 			texture::load(fs::path(ASSET_DIR + normalTexture).c_str()),
 			"texture_normal",
 			normalTexture);
 	}
 
 	if (heightTexture) {
-		textures[0].emplace_back(
+		textures.emplace_back(
 			texture::load(fs::path(ASSET_DIR + heightTexture).c_str()),
 			"texture_height",
 			heightTexture);
 	}
+
+	material[0] = {0, textures};
 }
 
 Models::Cube::~Cube() = default;

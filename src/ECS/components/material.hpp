@@ -1,10 +1,11 @@
 #pragma once
 
+struct Material;
 struct Texture;
 
 struct MaterialComponent {
-	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
-	const TextureMap* textures;
+	using MaterialMap = std::unordered_map<uint32_t, Material >;
+	const MaterialMap* materials;
 
 	glm::vec3 color;
 	float shininess;
@@ -14,11 +15,11 @@ struct MaterialComponent {
 	MaterialComponent() = default;
 
 	explicit MaterialComponent(
-		const TextureMap* tex,
+		const MaterialMap* mat,
 		const float s = 32.0f,
 		const float h = 1.0f,
 		const uint32_t f = 1)
-		: textures(tex), color(1.0f), shininess(s), heightScale(h), flags(f) {
+		: materials(mat), color(1.0f), shininess(s), heightScale(h), flags(f) {
 	}
 
 	explicit MaterialComponent(
@@ -26,6 +27,6 @@ struct MaterialComponent {
 		const float s = 32.0f,
 		const float h = 1.0f,
 		const uint32_t f = 1)
-		: textures(nullptr), color(c), shininess(s),heightScale(h), flags(f) {
+		: materials(nullptr), color(c), shininess(s),heightScale(h), flags(f) {
 	}
 };

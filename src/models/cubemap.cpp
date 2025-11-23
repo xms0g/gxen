@@ -65,11 +65,9 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 		faces.emplace_back(fs::path(ASSET_DIR + f[i]));
 	}
 
-	textures[0].emplace_back(
-		texture::loadCubemap(faces),
-		"skybox",
-		"skybox.jpg"
-	);
+	std::vector<Texture> textures;
+	textures.emplace_back(texture::loadCubemap(faces),"skybox","skybox.jpg");
+	material[0] = {0, textures};
 }
 
 Models::Cubemap::~Cubemap() = default;

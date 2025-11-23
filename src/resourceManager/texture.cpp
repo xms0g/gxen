@@ -79,3 +79,9 @@ uint32_t texture::loadCubemap(const std::vector<std::string>& faces) {
 
 	return textureID;
 }
+
+int texture::info(const char* path) {
+	int w, h, channels;
+	stbi_info(path, &w, &h, &channels);
+	return channels;
+}

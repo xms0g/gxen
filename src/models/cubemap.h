@@ -1,6 +1,7 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
+#include "../rendering/material.hpp"
 
 class Mesh;
 struct Texture;
@@ -15,11 +16,11 @@ public:
 	using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
 	[[nodiscard]] MeshMap* getMeshes() { return &meshes; }
 
-	using TextureMap = std::unordered_map<uint32_t, std::vector<Texture>>;
-	[[nodiscard]] const TextureMap* getTextures() const { return &textures; }
+	using MaterialMap = std::unordered_map<uint32_t, Material>;
+	[[nodiscard]] const MaterialMap* getMaterial() const { return &material; }
 
 private:
 	MeshMap meshes;
-	TextureMap textures;
+	MaterialMap material;
 };
 }

@@ -5,7 +5,8 @@
 #include "../mesh/mesh.h"
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
-#include "../rendering/shader.h"
+#include "../rendering/material.hpp"
+#include "../rendering/renderFlags.hpp"
 
 ResourceManager& ResourceManager::instance() {
 	static ResourceManager instance;
@@ -16,8 +17,8 @@ ResourceManager& ResourceManager::instance() {
 	return &mMeshesByEntity.at(entityID);
 }
 
-[[nodiscard]] const TextureMap* ResourceManager::getTextures(const size_t entityID) const {
-	return &mTexturesByEntity.at(entityID);
+[[nodiscard]] const MaterialMap* ResourceManager::getMaterial(const size_t entityID) const {
+	return &mMaterialsByEntity.at(entityID);
 }
 
 void ResourceManager::loadModel(const size_t entityID, const char* file) {
@@ -40,9 +41,9 @@ void ResourceManager::loadModel(const size_t entityID, const char* file) {
 	processNode(scene->mRootNode, scene);
 
 	mMeshesByEntity.emplace(entityID, mMeshesByMatID);
-	mTexturesByEntity.emplace(entityID, mTexturesByMatID);
+	mMaterialsByEntity.emplace(entityID, mMaterials);
 	mMeshesByMatID.clear();
-	mTexturesByMatID.clear();
+	mMaterials.clear();
 	mTexturesLoaded.clear();
 }
 
@@ -145,16 +146,27 @@ void ResourceManager::loadMaterialTextures(const aiMaterial* mat,
 	for (uint32_t i = 0; i < mat->GetTextureCount(type); i++) {
 		aiString str;
 		mat->GetTexture(type, i, &str);
+		std::string path = mDirectory + str.C_Str();
 		// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
-		if (mTexturesLoaded.contains(str.C_Str()))
+		if (mTexturesLoaded.contains(path))
 			continue;
 
-		mTexturesByMatID[materialID].emplace_back(
-			texture::load((mDirectory + str.C_Str()).c_str()),
-			typeName,
-			str.C_Str()
-		);
+		if (mMaterials.contains(materialID)) {
+			mMaterials[materialID].textures.emplace_back(texture::load(path.c_str()), typeName, str.C_Str());
+		} else {
+			uint32_t flag = 0;
+
+			if (type == aiTextureType_DIFFUSE) {
+				const uint32_t channel = texture::info(path.c_str());
+				flag = channel == 3 ? Opaque : channel == 4 ? Transparent : 0;
+			}
+
+			std::vector<Texture> textures;
+			textures.emplace_back(texture::load(path.c_str()), typeName, str.C_Str());
+			mMaterials[materialID] = {flag, textures};
+		}
+
 		// store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate mTextures.
-		mTexturesLoaded.emplace(str.C_Str());
+		mTexturesLoaded.emplace(path);
 	}
 }

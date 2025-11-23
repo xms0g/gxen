@@ -103,7 +103,7 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, Instanc
 		vbo.offset += static_cast<int>(instanceSize);
 
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& texturesByMatID = entity.getComponent<MaterialComponent>().textures;
+		const auto& materials = entity.getComponent<MaterialComponent>().materials;
 
 		shader->activate();
 		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
@@ -113,13 +113,13 @@ void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, Instanc
 		RenderCommon::setupMaterial(entity, *shader);
 
 		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-			RenderCommon::bindTextures(matID, texturesByMatID, *shader);
+			RenderCommon::bindTextures(matID, materials, *shader);
 			for (const auto& mesh: meshes) {
 				glBindVertexArray(mesh.VAO());
 				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
 										GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(instanceCount));
 			}
-			RenderCommon::unbindTextures(matID, texturesByMatID);
+			RenderCommon::unbindTextures(matID, materials);
 		}
 	}
 	vbo.offset = 0;

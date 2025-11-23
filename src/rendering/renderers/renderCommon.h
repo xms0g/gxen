@@ -3,7 +3,7 @@
 #include <vector>
 #include <array>
 
-struct Texture;
+struct Material;
 class Shader;
 class Entity;
 
@@ -16,14 +16,14 @@ void drawMeshes(const Entity& entity, const Shader& shader);
 
 void drawQuad(uint32_t sceneTexture, uint32_t VAO);
 
-using TextureMap = std::unordered_map<uint32_t, std::vector<Texture> >;
+using MaterialMap = std::unordered_map<uint32_t, Material>;
 
 void bindTextures(
 	uint32_t materialID,
-	const TextureMap* texturesByMatID,
+	const MaterialMap* materials,
 	const Shader& shader);
 
-void unbindTextures(uint32_t materialID, const TextureMap* texturesByMatID);
+void unbindTextures(uint32_t materialID, const MaterialMap* materials);
 
 void bindShadowMaps(const std::array<uint32_t, 3>& shadowMaps);
 }

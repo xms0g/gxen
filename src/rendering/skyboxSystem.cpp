@@ -3,6 +3,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "shader.h"
+#include "material.hpp"
 #include "../config/config.hpp"
 #include "../core/camera.h"
 #include "../mesh/mesh.h"
@@ -20,7 +21,7 @@ void SkyboxSystem::render(const Camera& camera) const {
 	const auto& skybox = getSystemEntities().front();
 	const auto& shader = skybox.getComponent<ShaderComponent>().shader;
 	const uint32_t VAO = skybox.getComponent<MeshComponent>().meshes->at(0).front().VAO();
-	const uint32_t texID = skybox.getComponent<MaterialComponent>().textures->at(0).front().id;
+	const uint32_t texID = skybox.getComponent<MaterialComponent>().materials->at(0).textures.front().id;
 
 	const glm::mat4 projectionMat = glm::perspective(
 		glm::radians(camera.zoom()),
