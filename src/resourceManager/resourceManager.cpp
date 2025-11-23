@@ -52,8 +52,8 @@ void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
 		// the node object only contains mIndices to index the actual objects in the scene.
 		// the scene contains all the data, node is just to keep stuff organized (like relations between nodes).
 		aiMesh* aMesh = scene->mMeshes[node->mMeshes[i]];
-		auto mesh = processMesh(aMesh, scene);
-		mMeshesByMatID[mesh.materialID()].push_back(mesh);
+		auto [matID, mesh] = processMesh(aMesh, scene);
+		mMeshesByMatID[matID].push_back(mesh);
 	}
 	// after we've processed all of the mMeshes (if any) we then recursively process each of the children nodes
 	for (uint32_t i = 0; i < node->mNumChildren; i++) {
@@ -61,7 +61,7 @@ void ResourceManager::processNode(const aiNode* node, const aiScene* scene) {
 	}
 }
 
-Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
+std::pair<uint32_t, Mesh> ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// data to fill
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
@@ -135,7 +135,7 @@ Mesh ResourceManager::processMesh(aiMesh* mesh, const aiScene* scene) {
 	// 4. height maps
 	loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_height", mesh->mMaterialIndex);
 	// return a mesh object created from the extracted mesh data
-	return {mesh->mMaterialIndex, vertices, indices};
+	return std::make_pair(mesh->mMaterialIndex, Mesh{vertices, indices});
 }
 
 void ResourceManager::loadMaterialTextures(const aiMaterial* mat,

@@ -29,7 +29,7 @@ Models::Window::Window(const char* texture) {
 		vertices.emplace_back(vertex);
 	}
 
-	meshes[0].emplace_back(0, vertices, indices);
+	meshes[0].emplace_back(vertices, indices);
 
 	if (texture) {
 		textures[0].emplace_back(

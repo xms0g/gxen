@@ -35,7 +35,7 @@ private:
 
 	void processNode(const aiNode* node, const aiScene* scene);
 
-	Mesh processMesh(aiMesh* mesh, const aiScene* scene);
+	std::pair<uint32_t, Mesh> processMesh(aiMesh* mesh, const aiScene* scene);
 
 	void loadMaterialTextures(const aiMaterial* mat,
 	                          aiTextureType type,

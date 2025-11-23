@@ -110,7 +110,7 @@ Models::Cube::Cube(const char* diffuseTexture,
 			                                                  f * (-deltaUV2.x * edge1.z + deltaUV1.x * edge2.z));
 	}
 
-	meshes[0].emplace_back(0, vertices, indices);
+	meshes[0].emplace_back(vertices, indices);
 
 	if (diffuseTexture) {
 		textures[0].emplace_back(
