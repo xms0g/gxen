@@ -52,7 +52,7 @@ int main() {
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
 		skybox.addComponent<SkyboxComponent>();
-		skybox.addComponent<MaterialComponent>(skyboxModel.getTextures(), 32.0f, Transparent);
+		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f, Transparent);
 		skybox.addComponent<MeshComponent>(skyboxModel.getMeshes());
 		skybox.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("skybox.vert", "skybox.frag"));
@@ -121,7 +121,7 @@ int main() {
 		ResourceManager::instance().loadModel(suzanne.id(), "suzanne/suzanne.obj");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(suzanne.id()), 32.0f, 1.0f, Deferred | CastShadow);
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0f, Deferred | CastShadow);
 
 		suzanne.addComponent<ShaderComponent>(instancedObject);
 
@@ -166,7 +166,7 @@ int main() {
 			glm::vec3(2.0f));
 
 		cube.addComponent<MeshComponent>(cubeModel.getMeshes());
-		cube.addComponent<MaterialComponent>(cubeModel.getTextures(), 32.0f, 1.0f, Deferred | CastShadow);
+		cube.addComponent<MaterialComponent>(cubeModel.getMaterial(), 32.0f, 1.0f, Deferred | CastShadow);
 
 		cube.addComponent<ShaderComponent>(object);
 
@@ -249,10 +249,10 @@ int main() {
 			glm::vec3(0.0f),
 			glm::vec3(0.02f));
 
-		ResourceManager::instance().loadModel(ruin.id(), "Sponza/sponza.obj");
+		ResourceManager::instance().loadModel(ruin.id(), "sponza_palace/scene.gltf");
 
 		ruin.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(ruin.id()));
-		ruin.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(ruin.id()), 32.0f, 1.0f, Deferred | CastShadow);
+		ruin.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(ruin.id()), 32.0f, 1.0f, Deferred | CastShadow);
 
 		ruin.addComponent<ShaderComponent>(object);
 
