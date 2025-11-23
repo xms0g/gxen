@@ -47,7 +47,11 @@ void RenderCommon::drawMeshes(const Entity& entity, const Shader& shader) {
 			if (!mesh.isVisible()) continue;
 
 			glBindVertexArray(mesh.VAO());
-			glDrawElements(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+			if (!mesh.indices().empty()) {
+				glDrawElements(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+			} else {
+				glDrawArrays(GL_TRIANGLES, 0, static_cast<int32_t>(mesh.vertices().size()));
+			}
 		}
 		unbindTextures(matID, materials);
 	}
