@@ -264,10 +264,9 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 		auto& material = materials->at(matID);
 
 		for (auto& mesh: meshes) {
+			RenderItem item{&entity, &mesh, &material};
 
 			if (material.flag & Opaque) {
-				RenderItem item{&entity, &mesh, &material};
-
 				if (matc.flags & Forward) {
 					renderQueues.forwardOpaqueItems[&shader].push_back(item);
 				} else {
@@ -282,7 +281,6 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 					renderQueues.debugEntities.push_back(item);
 				}
 			} else if (material.flag & Transparent) {
-				RenderItem item{&entity, &mesh, &material};
 				renderQueues.transparentItems[&shader].push_back(item);
 
 				if (entity.hasComponent<DebugComponent>()) {
