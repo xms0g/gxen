@@ -114,7 +114,7 @@ int main() {
 		// Suzanne
 		auto suzanne = registry.createEntity("Suzanne");
 		suzanne.addComponent<TransformComponent>(
-			glm::vec3(3.2f, 2.1f, 0.0f),
+			glm::vec3(3.2f, 1.1f, 0.0f),
 			glm::vec3(1.0f, 45.0f, 23.0f),
 			glm::vec3(1.0f));
 
@@ -159,22 +159,22 @@ int main() {
 			"textures/brickwall_specular.jpg",
 			"textures/brickwall_normal.jpg"
 		};
-		auto cube = registry.createEntity("Cube");
-		cube.addComponent<TransformComponent>(
-			glm::vec3(0.0f, 3.6f, 0.0f),
-			glm::vec3(0.0),
-			glm::vec3(2.0f));
-
-		cube.addComponent<MeshComponent>(cubeModel.getMeshes());
-		cube.addComponent<MaterialComponent>(cubeModel.getMaterial(), 32.0f, 1.0f, CastShadow);
-
-		cube.addComponent<ShaderComponent>(object);
-
-		cube.addComponent<DebugComponent>();
-
-		cube.addComponent<BoundingVolumeComponent>(
-			std::make_shared<math::AABB>(
-				math::generateAABB(*cubeModel.getMeshes())));
+		// auto cube = registry.createEntity("Cube");
+		// cube.addComponent<TransformComponent>(
+		// 	glm::vec3(0.0f, 3.6f, 0.0f),
+		// 	glm::vec3(0.0),
+		// 	glm::vec3(2.0f));
+		//
+		// cube.addComponent<MeshComponent>(cubeModel.getMeshes());
+		// cube.addComponent<MaterialComponent>(cubeModel.getMaterial(), 32.0f, 1.0f, CastShadow);
+		//
+		// cube.addComponent<ShaderComponent>(object);
+		//
+		// cube.addComponent<DebugComponent>();
+		//
+		// cube.addComponent<BoundingVolumeComponent>(
+		// 	std::make_shared<math::AABB>(
+		// 		math::generateAABB(*cubeModel.getMeshes())));
 
 
 		// Blend
@@ -243,47 +243,47 @@ int main() {
 		//
 		// angel.addComponent<DebugComponent>(DebugMode::None);
 
-		auto ruin = registry.createEntity("Ruin");
-		ruin.addComponent<TransformComponent>(
+		auto sponza = registry.createEntity("Sponza");
+		sponza.addComponent<TransformComponent>(
 			glm::vec3(0.0f, 0.0f, 0.0f),
 			glm::vec3(0.0f),
 			glm::vec3(0.02f));
 
-		ResourceManager::instance().loadModel(ruin.id(), "sponza_palace/scene.gltf");
+		ResourceManager::instance().loadModel(sponza.id(), "sponza_palace/scene.gltf");
 
-		ruin.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(ruin.id()));
-		ruin.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(ruin.id()), 32.0f, 1.0f, CastShadow);
+		sponza.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(sponza.id()));
+		sponza.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(sponza.id()), 32.0f, 1.0f, CastShadow);
 
-		ruin.addComponent<ShaderComponent>(object);
+		sponza.addComponent<ShaderComponent>(object);
 
-		ruin.addComponent<DebugComponent>();
+		sponza.addComponent<DebugComponent>();
 
-		ruin.addComponent<BoundingVolumeComponent>(
+		sponza.addComponent<BoundingVolumeComponent>(
 			std::make_shared<math::AABB>(
-				math::generateAABB(*ResourceManager::instance().getMeshes(ruin.id()))));
+				math::generateAABB(*ResourceManager::instance().getMeshes(sponza.id()))));
 
 
-		auto dirLight = registry.createEntity("Directional Light");
-		dirLight.addComponent<DirectionalLightComponent>(
-			glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
-			glm::vec4(0.01f, 0.01f, 0.01f, 0.0f),
-			glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
-			glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
+		// auto dirLight = registry.createEntity("Directional Light");
+		// dirLight.addComponent<DirectionalLightComponent>(
+		// 	glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
+		// 	glm::vec4(0.01f, 0.01f, 0.01f, 0.0f),
+		// 	glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
+		// 	glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
 
-		// auto pointLight = registry.createEntity("Point Light");
-		// pointLight.addComponent<TransformComponent>(
-		// 	glm::vec3(-3.2f, 5.0f, -2.4f),
-		// 	glm::vec3(0.0f, 0.0f, 0.0f),
-		// 	glm::vec3(0.2f));
-		//
-		// pointLight.addComponent<PointLightComponent>(
-		// 	glm::vec4(0.0f),
-		// 	glm::vec4(0.03f, 0.03f, 0.03f, 0.0f), // ambient
-		// 	glm::vec4(2.3f, 2.2f, 2.5f, 0.0f), // diffuse
-		// 	glm::vec4(1.3f, 1.2f, 1.5f, 0.0f), // specular
-		// 	glm::vec3(1.0f, 0.14f, 0.07f), // attenuation
-		// 	true
-		// );
+		auto pointLight = registry.createEntity("Point Light");
+		pointLight.addComponent<TransformComponent>(
+			glm::vec3(-3.2f, 5.0f, -2.4f),
+			glm::vec3(0.0f, 0.0f, 0.0f),
+			glm::vec3(0.2f));
+
+		pointLight.addComponent<PointLightComponent>(
+			glm::vec4(0.0f),
+			glm::vec4(0.03f, 0.03f, 0.03f, 0.0f), // ambient
+			glm::vec4(2.3f, 2.2f, 2.5f, 0.0f), // diffuse
+			glm::vec4(1.3f, 1.2f, 1.5f, 0.0f), // specular
+			glm::vec3(1.0f, 0.14f, 0.07f), // attenuation
+			true
+		);
 		//
 		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
 		// pointLight.addComponent<MaterialComponent>(glm::vec4(4.0f), 32.0f, 1.0f, Forward);
@@ -326,12 +326,6 @@ int main() {
 		// 	glm::vec3(0.0f, 0.0f, 0.0f),
 		// 	glm::vec3(0.2f));
 		//
-		// spotLight.addComponent<MeshComponent>(cubeModel.getMeshes());
-		// spotLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f, 1.0f, Forward);
-		//
-		// spotLight.addComponent<ShaderComponent>(
-		// 	std::make_shared<Shader>("models/light.vert", "models/light.frag"));
-		//
 		// spotLight.addComponent<SpotLightComponent>(
 		// 	glm::vec4(-3.2f, 5.0f, 0.0f, 0.0f),
 		// 	glm::vec4(1.0f, -1.0f, 0.0f, 0.0f),
@@ -341,6 +335,14 @@ int main() {
 		// 	glm::vec3(1.0f, 0.045f, 0.0075f),
 		// 	true,
 		// 	glm::vec4(glm::cos(glm::radians(20.5f)), glm::cos(glm::radians(25.0f)), 0.0f, 0.0f));
+		//
+
+		// spotLight.addComponent<MeshComponent>(cubeModel.getMeshes());
+		// spotLight.addComponent<MaterialComponent>(glm::vec4(1.0f), 32.0f, 1.0f, Forward);
+		//
+		// spotLight.addComponent<ShaderComponent>(
+		// 	std::make_shared<Shader>("models/light.vert", "models/light.frag"));
+		//
 		//
 		// spotLight.addComponent<BoundingVolumeComponent>(
 		// 	std::make_shared<math::AABB>(
