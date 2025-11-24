@@ -19,7 +19,7 @@ void Engine::init(Registry* registry) {
 	mRegistry = registry;
 
 	mWindow = std::make_unique<Window>();
-	mWindow->init("GXen");
+	mWindow->init("Abra");
 
 	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
 	mGuiSystem = &registry->getSystem<GuiSystem>();
