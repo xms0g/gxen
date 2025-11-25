@@ -6,7 +6,7 @@
 uint32_t texture::load(const char* path) {
     uint32_t textureID;
 
-	stbi_set_flip_vertically_on_load(true);
+	stbi_set_flip_vertically_on_load(false);
 
 	int width, height, depth;
     unsigned char* data = stbi_load(path, &width, &height, &depth, 0);
