@@ -144,7 +144,7 @@ Models::Cube::Cube(const char* diffuseTexture,
 			heightTexture);
 	}
 
-	material[0] = {1 << 2, textures};
+	material[0] = {Opaque | CastShadow, textures};
 }
 
 Models::Cube::~Cube() = default;

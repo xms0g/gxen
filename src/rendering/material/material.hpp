@@ -13,6 +13,6 @@ enum MaterialFlags: uint32_t {
 struct Texture;
 
 struct Material {
-	MaterialFlags flag;
+	uint32_t flag;
 	std::vector<Texture> textures;
 };
