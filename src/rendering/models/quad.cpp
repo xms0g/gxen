@@ -1,7 +1,7 @@
 #include "quad.h"
 #include "glad/glad.h"
-#include "../rendering/shader.h"
-#include "../config/config.hpp"
+#include "../../rendering/shader.h"
+#include "../../config/config.hpp"
 
 IQuad::IQuad() {
 	constexpr float vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.

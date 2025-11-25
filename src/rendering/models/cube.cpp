@@ -1,8 +1,9 @@
 #include "cube.h"
-#include "../config/config.hpp"
 #include "../mesh/mesh.h"
-#include "../io/filesystem.hpp"
-#include "../resourceManager/texture.h"
+#include "../texture/texture.h"
+#include "../material/material.hpp"
+#include "../../config/config.hpp"
+#include "../../io/filesystem.hpp"
 
 Models::Cube::Cube(const char* diffuseTexture,
                    const char* specularTexture,
@@ -147,3 +148,7 @@ Models::Cube::Cube(const char* diffuseTexture,
 }
 
 Models::Cube::~Cube() = default;
+
+[[nodiscard]] MeshMap* Models::Cube::getMeshes() { return &meshes; }
+
+[[nodiscard]] const MaterialMap* Models::Cube::getMaterial() const { return &material; }

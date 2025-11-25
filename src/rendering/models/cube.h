@@ -1,9 +1,12 @@
 #pragma once
 #include <unordered_map>
 #include <vector>
-#include "../rendering/material.hpp"
 
+struct Material;
 class Mesh;
+
+using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
+using MaterialMap = std::unordered_map<uint32_t, Material>;
 
 namespace Models {
 class Cube {
@@ -15,11 +18,9 @@ public:
 
 	~Cube();
 
-	using MeshMap = std::unordered_map<uint32_t, std::vector<Mesh>>;
-	[[nodiscard]] MeshMap* getMeshes() { return &meshes; }
+	[[nodiscard]] MeshMap* getMeshes();
 
-	using MaterialMap = std::unordered_map<uint32_t, Material>;
-	[[nodiscard]] const MaterialMap* getMaterial() const { return &material; }
+	[[nodiscard]] const MaterialMap* getMaterial() const;
 
 private:
 	MeshMap meshes;

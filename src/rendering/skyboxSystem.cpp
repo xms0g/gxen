@@ -3,15 +3,15 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "shader.h"
-#include "material.hpp"
+#include "material/material.hpp"
+#include "mesh/mesh.h"
+#include "texture/texture.h"
 #include "../config/config.hpp"
 #include "../core/camera.h"
-#include "../mesh/mesh.h"
 #include "../ECS/components/material.hpp"
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/skybox.hpp"
-#include "../resourceManager/texture.h"
 
 SkyboxSystem::SkyboxSystem() {
 	RequireComponent<SkyboxComponent>();

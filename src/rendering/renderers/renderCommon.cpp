@@ -1,17 +1,16 @@
 #include "renderCommon.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderFlags.hpp"
 #include "../renderItem.hpp"
-#include "../material.hpp"
-#include "../../config/config.hpp"
-#include "../../mesh/mesh.h"
+#include "../material/material.hpp"
+#include "../texture/texture.h"
+#include "../mesh/mesh.h"
 #include "../../math/matrix.hpp"
 #include "../../ECS/entity.hpp"
 #include "../../ECS/components/transform.hpp"
 #include "../../ECS/components/material.hpp"
 #include "../../ECS/components/mesh.hpp"
-#include "../../resourceManager/texture.h"
+#include "../../config/config.hpp"
 
 void RenderCommon::setupTransform(const Entity& entity, const Shader& shader) {
 	const auto& tc = entity.getComponent<TransformComponent>();

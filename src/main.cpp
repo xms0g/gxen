@@ -18,11 +18,10 @@
 #include "ECS/components/debug.hpp"
 #include "ECS/components/instance.hpp"
 #include "math/boundingVolume.h"
-#include "mesh/mesh.h"
-#include "models/cube.h"
-#include "models/cubemap.h"
-#include "models/plane.h"
-#include "models/window.h"
+#include "rendering/mesh/mesh.h"
+#include "rendering/models/cube.h"
+#include "rendering/models/cubemap.h"
+#include "rendering/models/plane.h"
 #include "rendering/renderFlags.hpp"
 
 #define VERSION_MAJOR 0
@@ -60,45 +59,6 @@ int main() {
 		auto instancedObject = std::make_shared<Shader>("instanced.vert", "object.frag");
 		auto object = std::make_shared<Shader>("object.vert", "object.frag");
 
-		// Backpack
-		// auto backpack = registry.createEntity("Backpack");
-		// backpack.addComponent<TransformComponent>(
-		// 	glm::vec3(-5.2f, 2.8f, 0.0f),
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(1.0f));
-		//
-		// ResourceManager::instance().loadModel(backpack.id(), "backpack/backpack.obj");
-		//
-		// backpack.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(backpack.id()));
-		// backpack.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(backpack.id()), 32.0f);
-		// backpack.addComponent<ShaderComponent>(object);
-		//
-		// backpack.addComponent<BoundingVolumeComponent>(
-		// 	std::make_shared<math::AABB>(
-		// 		math::generateAABB(*ResourceManager::instance().getMeshes(backpack.id()))));
-		//
-		// backpack.addComponent<DebugComponent>();
-
-		// Sekhmet
-		// auto sekhmet = registry.createEntity("sekhmet");
-		// sekhmet.addComponent<TransformComponent>(
-		// 	glm::vec3(-3.2f, 1.8f, 8.0f),
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(1.0f));
-		//
-		// ResourceManager::instance().loadModel(sekhmet.id(), "sekhmet/sekhmet.obj");
-		//
-		// sekhmet.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(sekhmet.id()));
-		// sekhmet.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(sekhmet.id()), 32.0f, 1.0f, Deferred);
-		// sekhmet.addComponent<ShaderComponent>(object);
-		//
-		// sekhmet.addComponent<BoundingVolumeComponent>(
-		// 	std::make_shared<math::AABB>(
-		// 		math::generateAABB(*ResourceManager::instance().getMeshes(sekhmet.id()))));
-		//
-		// sekhmet.addComponent<DebugComponent>();
-
-
 		//
 		// std::vector<glm::vec3> pos1;
 		// float x = 5.0f, z = 0.0f;
@@ -118,10 +78,10 @@ int main() {
 			glm::vec3(1.0f, 45.0f, 23.0f),
 			glm::vec3(1.0f));
 
-		ResourceManager::instance().loadModel(suzanne.id(), "suzanne/suzanne.obj");
+		ResourceManager::instance().loadModel(suzanne.id(), "Suzanne/glTF/Suzanne.gltf");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0f, CastShadow);
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f);
 
 		suzanne.addComponent<ShaderComponent>(object);
 
@@ -249,10 +209,10 @@ int main() {
 			glm::vec3(0.0f),
 			glm::vec3(0.02f));
 
-		ResourceManager::instance().loadModel(sponza.id(), "sponza_palace/scene.gltf");
+		ResourceManager::instance().loadModel(sponza.id(), "Sponza/glTF/Sponza.gltf");
 
 		sponza.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(sponza.id()));
-		sponza.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(sponza.id()), 32.0f, 1.0f, CastShadow);
+		sponza.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(sponza.id()), 32.0f);
 
 		sponza.addComponent<ShaderComponent>(object);
 
@@ -263,27 +223,27 @@ int main() {
 				math::generateAABB(*ResourceManager::instance().getMeshes(sponza.id()))));
 
 
-		// auto dirLight = registry.createEntity("Directional Light");
-		// dirLight.addComponent<DirectionalLightComponent>(
-		// 	glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
-		// 	glm::vec4(0.01f, 0.01f, 0.01f, 0.0f),
-		// 	glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
-		// 	glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
+		auto dirLight = registry.createEntity("Directional Light");
+		dirLight.addComponent<DirectionalLightComponent>(
+			glm::vec4(-0.2f, -1.0f, -0.3f, 0.0f),
+			glm::vec4(0.01f, 0.01f, 0.01f, 0.0f),
+			glm::vec4(0.4f, 0.4f, 0.4f, 0.0f),
+			glm::vec4(0.5f, 0.5f, 0.5f, 0.0f));
 
-		auto pointLight = registry.createEntity("Point Light");
-		pointLight.addComponent<TransformComponent>(
-			glm::vec3(-3.2f, 5.0f, -2.4f),
-			glm::vec3(0.0f, 0.0f, 0.0f),
-			glm::vec3(0.2f));
-
-		pointLight.addComponent<PointLightComponent>(
-			glm::vec4(0.0f),
-			glm::vec4(0.03f, 0.03f, 0.03f, 0.0f), // ambient
-			glm::vec4(2.3f, 2.2f, 2.5f, 0.0f), // diffuse
-			glm::vec4(1.3f, 1.2f, 1.5f, 0.0f), // specular
-			glm::vec3(1.0f, 0.14f, 0.07f), // attenuation
-			true
-		);
+		// auto pointLight = registry.createEntity("Point Light");
+		// pointLight.addComponent<TransformComponent>(
+		// 	glm::vec3(-3.2f, 5.0f, -2.4f),
+		// 	glm::vec3(0.0f, 0.0f, 0.0f),
+		// 	glm::vec3(0.2f));
+		//
+		// pointLight.addComponent<PointLightComponent>(
+		// 	glm::vec4(0.0f),
+		// 	glm::vec4(0.03f, 0.03f, 0.03f, 0.0f), // ambient
+		// 	glm::vec4(2.3f, 2.2f, 2.5f, 0.0f), // diffuse
+		// 	glm::vec4(1.3f, 1.2f, 1.5f, 0.0f), // specular
+		// 	glm::vec3(1.0f, 0.14f, 0.07f), // attenuation
+		// 	true
+		// );
 		//
 		// pointLight.addComponent<MeshComponent>(cubeModel.getMeshes());
 		// pointLight.addComponent<MaterialComponent>(glm::vec4(4.0f), 32.0f, 1.0f, Forward);

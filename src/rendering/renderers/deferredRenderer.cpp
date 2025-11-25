@@ -4,10 +4,10 @@
 #include "../shader.h"
 #include "../renderItem.hpp"
 #include "../buffers/frameBuffer.h"
+#include "../models/quad.h"
 #include "../../config/config.hpp"
 #include "../../ECS/entity.hpp"
 #include "../../ECS/components/bv.hpp"
-#include "../../models/quad.h"
 
 DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
 	lightingShader.activate();

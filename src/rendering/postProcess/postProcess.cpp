@@ -10,7 +10,7 @@
 #include "../shader.h"
 #include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
-#include "../../models/quad.h"
+#include "../models/quad.h"
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	mEffects = {

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "frustum.hpp"
 #include "matrix.hpp"
-#include "../mesh/mesh.h"
+#include "../rendering/mesh/mesh.h"
 
 bool math::Sphere::isOnFrustum(const Frustum& camFrustum, const glm::vec3& position,
                                const glm::vec3& rotation, const glm::vec3& scale) const {

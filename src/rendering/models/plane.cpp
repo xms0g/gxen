@@ -1,8 +1,9 @@
 #include "plane.h"
-#include "../config/config.hpp"
 #include "../mesh/mesh.h"
-#include "../io/filesystem.hpp"
-#include "../resourceManager/texture.h"
+#include "../texture/texture.h"
+#include "../material/material.hpp"
+#include "../../config/config.hpp"
+#include "../../io/filesystem.hpp"
 
 Models::Plane::Plane(const char* diffuseTexture,
                      const char* specularTexture,
@@ -100,3 +101,7 @@ Models::Plane::Plane(const char* diffuseTexture,
 }
 
 Models::Plane::~Plane() = default;
+
+[[nodiscard]] MeshMap* Models::Plane::getMeshes() { return &meshes; }
+
+[[nodiscard]] const MaterialMap* Models::Plane::getMaterial() const { return &material; }

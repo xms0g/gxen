@@ -1,8 +1,9 @@
 #include "cubemap.h"
-#include "../config/config.hpp"
 #include "../mesh/mesh.h"
-#include "../io/filesystem.hpp"
-#include "../resourceManager/texture.h"
+#include "../texture/texture.h"
+#include "../material/material.hpp"
+#include "../../config/config.hpp"
+#include "../../io/filesystem.hpp"
 
 Models::Cubemap::Cubemap(const char* const f[]) {
 	constexpr float v[]= {
@@ -71,4 +72,8 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 }
 
 Models::Cubemap::~Cubemap() = default;
+
+[[nodiscard]] MeshMap* Models::Cubemap::getMeshes() { return &meshes; }
+
+[[nodiscard]] const MaterialMap* Models::Cubemap::getMaterial() const { return &material; }
 
