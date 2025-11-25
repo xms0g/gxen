@@ -1,12 +1,11 @@
 #include "resourceManager.h"
 #include <iostream>
-#include "texture.h"
 #include "image/stb_image.h"
-#include "../mesh/mesh.h"
+#include "../rendering/texture/texture.h"
+#include "../rendering/mesh/mesh.h"
 #include "../io/filesystem.hpp"
 #include "../config/config.hpp"
-#include "../rendering/material.hpp"
-#include "../rendering/renderFlags.hpp"
+#include "../rendering/material/material.hpp"
 
 ResourceManager& ResourceManager::instance() {
 	static ResourceManager instance;
@@ -154,16 +153,15 @@ void ResourceManager::loadMaterialTextures(const aiMaterial* mat,
 		if (mMaterials.contains(materialID)) {
 			mMaterials[materialID].textures.emplace_back(texture::load(path.c_str()), typeName, str.C_Str());
 		} else {
-			uint32_t flag = 0;
+			uint32_t mode = 0;
 
 			if (type == aiTextureType_DIFFUSE) {
-				const uint32_t channel = texture::info(path.c_str());
-				flag = channel == 3 ? Opaque : channel == 4 ? Transparent : 0;
+				mode = texture::detectAlphaMode(path.c_str());
 			}
 
 			std::vector<Texture> textures;
 			textures.emplace_back(texture::load(path.c_str()), typeName, str.C_Str());
-			mMaterials[materialID] = {flag, textures};
+			mMaterials[materialID] = {mode, textures};
 		}
 
 		// store it as texture loaded for entire model, to ensure we won't unnecessary load duplicate mTextures.

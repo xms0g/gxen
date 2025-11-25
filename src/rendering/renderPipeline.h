@@ -73,7 +73,7 @@ private:
 		std::vector<RenderItem> debugEntities;
 		std::vector<RenderItem> shadowCasters;
 		std::unordered_map<Shader*, std::vector<RenderItem>> forwardOpaqueItems;
-		std::unordered_map<Shader*, std::vector<RenderItem>> deferredOpaqueItems;
-		std::unordered_map<Shader*, std::vector<RenderItem>> transparentItems;
+		std::unordered_map<Shader*, std::vector<RenderItem>> deferredItems;
+		std::unordered_map<Shader*, std::vector<RenderItem>> blendItems;
 	} renderQueues;
 };

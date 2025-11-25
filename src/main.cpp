@@ -51,7 +51,7 @@ int main() {
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
 		skybox.addComponent<SkyboxComponent>();
-		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f);
+		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f, 1.0f, RenderFlags::Forward);
 		skybox.addComponent<MeshComponent>(skyboxModel.getMeshes());
 		skybox.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("skybox.vert", "skybox.frag"));
@@ -81,7 +81,7 @@ int main() {
 		ResourceManager::instance().loadModel(suzanne.id(), "Suzanne/glTF/Suzanne.gltf");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f);
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0, RenderFlags::Deferred);
 
 		suzanne.addComponent<ShaderComponent>(object);
 
@@ -212,7 +212,7 @@ int main() {
 		ResourceManager::instance().loadModel(sponza.id(), "Sponza/glTF/Sponza.gltf");
 
 		sponza.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(sponza.id()));
-		sponza.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(sponza.id()), 32.0f);
+		sponza.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(sponza.id()), 32.0f, 1.0f, RenderFlags::Deferred);
 
 		sponza.addComponent<ShaderComponent>(object);
 

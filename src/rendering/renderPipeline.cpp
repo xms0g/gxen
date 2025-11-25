@@ -5,7 +5,6 @@
 #include "glm/gtx/norm.hpp"
 #include "shader.h"
 #include "lightSystem.h"
-#include "material.hpp"
 #include "renderFlags.hpp"
 #include "renderItem.hpp"
 #include "skyboxSystem.h"
@@ -16,6 +15,8 @@
 #include "renderers/debugRenderer.h"
 #include "postProcess/postProcess.h"
 #include "shadowPass/shadowManager.h"
+#include "mesh/mesh.h"
+#include "material/material.hpp"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
 #include "../core/camera.h"
@@ -28,8 +29,6 @@
 #include "../ECS/components/instance.hpp"
 #include "../math/frustum.hpp"
 #include "../math/boundingVolume.h"
-#include "../mesh/mesh.h"
-#include "../resourceManager/texture.h"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -151,7 +150,7 @@ void RenderPipeline::render(const Camera& camera) {
 
 	beginSceneRender();
 #ifdef DEFERRED
-	mDeferredRenderer->geometryPass(renderQueues.deferredOpaqueItems, *mGBuffer, *mGShader);
+	mDeferredRenderer->geometryPass(renderQueues.deferredItems, *mGBuffer, *mGShader);
 # ifdef HDR
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mHDRBuffer,
 	                                *mDeferredLigthingShader);
@@ -167,7 +166,7 @@ void RenderPipeline::render(const Camera& camera) {
 
 	mSkyboxSystem->render(camera);
 
-	mForwardRenderer->transparentPass(renderQueues.transparentItems);
+	mForwardRenderer->transparentPass(renderQueues.blendItems);
 	mForwardRenderer->transparentInstancedPass(renderQueues.transparentInstancedEntities);
 	endSceneRender();
 #ifdef HDR
@@ -211,8 +210,8 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 	};
 
 	cullItems(renderQueues.forwardOpaqueItems);
-	cullItems(renderQueues.deferredOpaqueItems);
-	cullItems(renderQueues.transparentItems);
+	cullItems(renderQueues.deferredItems);
+	cullItems(renderQueues.blendItems);
 }
 
 void RenderPipeline::beginSceneRender() const {
@@ -248,14 +247,14 @@ void RenderPipeline::endSceneRender() const {
 void RenderPipeline::batchEntities(const Entity& entity) {
 	const auto& matc = entity.getComponent<MaterialComponent>();
 
-	if (matc.flags & Instanced) {
-		if (matc.flags & Transparent) {
-			renderQueues.transparentInstancedEntities.push_back(entity);
-		} else {
-			renderQueues.opaqueInstancedEntities.push_back(entity);
-		}
-		return;
-	}
+	// if (matc.flag == RenderFlags::Instanced) {
+	// 	if (matc.flags & Blend) {
+	// 		renderQueues.transparentInstancedEntities.push_back(entity);
+	// 	} else {
+	// 		renderQueues.opaqueInstancedEntities.push_back(entity);
+	// 	}
+	// 	return;
+	// }
 
 	auto& shader = *entity.getComponent<ShaderComponent>().shader;
 	const auto& materials = entity.getComponent<MaterialComponent>().materials;
@@ -266,26 +265,24 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 		for (auto& mesh: meshes) {
 			RenderItem item{&entity, &mesh, &material};
 
+			if (entity.hasComponent<DebugComponent>()) {
+				renderQueues.debugEntities.push_back(item);
+			}
+
+			if (material.flag & CastShadow) {
+				renderQueues.shadowCasters.push_back(item);
+			}
+
 			if (material.flag & Opaque) {
-				if (matc.flags & Forward) {
+				if (matc.flag == RenderFlags::Forward) {
 					renderQueues.forwardOpaqueItems[&shader].push_back(item);
 				} else {
-					renderQueues.deferredOpaqueItems[&shader].push_back(item);
+					renderQueues.deferredItems[&shader].push_back(item);
 				}
-
-				if (matc.flags & CastShadow) {
-					renderQueues.shadowCasters.push_back(item);
-				}
-
-				if (entity.hasComponent<DebugComponent>()) {
-					renderQueues.debugEntities.push_back(item);
-				}
-			} else if (material.flag & Transparent) {
-				renderQueues.transparentItems[&shader].push_back(item);
-
-				if (entity.hasComponent<DebugComponent>()) {
-					renderQueues.debugEntities.push_back(item);
-				}
+			} else if (material.flag & Cutout) {
+				renderQueues.forwardOpaqueItems[&shader].push_back(item);
+			} else if (material.flag & Blend) {
+				renderQueues.blendItems[&shader].push_back(item);
 			}
 		}
 	}
@@ -312,9 +309,9 @@ void RenderPipeline::sortEntities(const Camera& camera) {
 	};
 
 	// Sort opaque objects front to back
-	sortBatches(renderQueues.deferredOpaqueItems, false);
+	sortBatches(renderQueues.deferredItems, false);
 	sortBatches(renderQueues.forwardOpaqueItems, false);
-	sortBatches(renderQueues.transparentItems, true);
+	sortBatches(renderQueues.blendItems, true);
 
 	for (auto& entity: renderQueues.transparentInstancedEntities) {
 		const auto& positions = entity.getComponent<InstanceComponent>().positions;

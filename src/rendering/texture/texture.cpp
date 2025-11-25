@@ -2,14 +2,15 @@
 #include <iostream>
 #include "glad/glad.h"
 #include "image/stb_image.h"
+#include "../material/material.hpp"
 
 uint32_t texture::load(const char* path) {
     uint32_t textureID;
 
 	stbi_set_flip_vertically_on_load(false);
 
-	int width, height, depth;
-    unsigned char* data = stbi_load(path, &width, &height, &depth, 0);
+	int width, height, channel;
+    unsigned char* data = stbi_load(path, &width, &height, &channel, 0);
 
     if (!data) {
         std::cerr << "Texture failed to load at path: " << path << std::endl;
@@ -17,11 +18,11 @@ uint32_t texture::load(const char* path) {
     }
 
     GLenum format{0};
-    if (depth == 1) {
+    if (channel == 1) {
     	format = GL_RED;
-    } else if (depth == 3) {
+    } else if (channel == 3) {
     	format = GL_RGB;
-    } else if (depth == 4) {
+    } else if (channel == 4) {
     	format = GL_RGBA;
     }
 
@@ -36,14 +37,14 @@ uint32_t texture::load(const char* path) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	if (depth == 1) {
+	if (channel == 1) {
 		constexpr GLint swizzleMask[] = { GL_RED, GL_RED, GL_RED, GL_ONE };
 		glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzleMask);
 	}
 
-    stbi_image_free(data);
-
+	stbi_image_free(data);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
     return textureID;
 }
 
@@ -80,8 +81,31 @@ uint32_t texture::loadCubemap(const std::vector<std::string>& faces) {
 	return textureID;
 }
 
-int texture::info(const char* path) {
-	int w, h, channels;
-	stbi_info(path, &w, &h, &channels);
-	return channels;
+uint32_t texture::detectAlphaMode(const char* path) {
+	int width, height, channel;
+	unsigned char* data = stbi_load(path, &width, &height, &channel, 0);
+
+	if (channel == 3)
+		return Opaque | CastShadow;
+
+	bool hasTransparent{false};
+
+	for (int i = 0; i < width * height; i++) {
+		const float a = data[i * channel + 3] / 255.0f;
+
+		if (a <= 0.01f)
+			hasTransparent = true;
+
+		if (a > 0.01f && a < 0.99f) {
+			stbi_image_free(data);
+			return Blend; // early exit
+		}
+	}
+
+	stbi_image_free(data);
+
+	if (hasTransparent)
+		return Cutout | CastShadow; // binary alpha only
+
+	return Opaque | CastShadow;
 }

@@ -25,9 +25,9 @@ void RenderCommon::setupTransform(const Entity& entity, const Shader& shader) {
 void RenderCommon::setupMaterial(const Entity& entity, const Shader& shader) {
 	const auto& mtc = entity.getComponent<MaterialComponent>();
 
-	if (mtc.flags & TwoSided) {
-		glDisable(GL_CULL_FACE);
-	}
+	// if (mtc.flag & TwoSided) {
+	// 	glDisable(GL_CULL_FACE);
+	// }
 
 	shader.setFloat("material.shininess", mtc.shininess);
 	shader.setFloat("material.heightScale", mtc.heightScale);
