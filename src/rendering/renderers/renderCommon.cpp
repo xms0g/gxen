@@ -22,12 +22,12 @@ void RenderCommon::setupTransform(const Entity& entity, const Shader& shader) {
 	shader.setMat3("normalMatrix", normal);
 }
 
-void RenderCommon::setupMaterial(const Entity& entity, const Shader& shader) {
-	const auto& mtc = entity.getComponent<MaterialComponent>();
+void RenderCommon::setupMaterial(const RenderItem& item, const Shader& shader) {
+	const auto& mtc = item.entity->getComponent<MaterialComponent>();
 
-	// if (mtc.flag & TwoSided) {
-	// 	glDisable(GL_CULL_FACE);
-	// }
+	if (item.material->flag & TwoSided) {
+		glDisable(GL_CULL_FACE);
+	}
 
 	shader.setFloat("material.shininess", mtc.shininess);
 	shader.setFloat("material.heightScale", mtc.heightScale);
