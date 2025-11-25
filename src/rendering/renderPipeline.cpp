@@ -77,7 +77,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mSceneBuffer->unbind();
 #endif
 
-#ifdef DEFERRED
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
 			.withTexture16F()
@@ -92,7 +91,7 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mDeferredLigthingShader = std::make_unique<Shader>("models/quad.vert", "deferred/lighting.frag");
 	mGShader = std::make_unique<Shader>("deferred/gbuffer.vert", "deferred/gbuffer.frag");
 	mDeferredRenderer = std::make_unique<DeferredRenderer>(*mDeferredLigthingShader);
-#endif
+
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
@@ -110,12 +109,11 @@ void RenderPipeline::configure(const Camera& camera) const {
 	mDebugRenderer->configure(*mCameraUBO);
 
 	// Uniform buffer configuration
-#ifdef DEFERRED
 	mCameraUBO->configure(mGShader->ID(), 0, "CameraBlock");
 	mCameraUBO->configure(mDeferredLigthingShader->ID(), 0, "CameraBlock");
 	mLightSystem->getLightUBO().configure(mDeferredLigthingShader->ID(), 1, "LightBlock");
 	mShadowManager->getShadowUBO().configure(mDeferredLigthingShader->ID(), 2, "ShadowBlock");
-#endif
+
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
@@ -149,7 +147,6 @@ void RenderPipeline::render(const Camera& camera) {
 	mShadowManager->shadowPass(renderQueues.shadowCasters, *mLightSystem);
 
 	beginSceneRender();
-#ifdef DEFERRED
 	mDeferredRenderer->geometryPass(renderQueues.deferredItems, *mGBuffer, *mGShader);
 # ifdef HDR
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mHDRBuffer,
@@ -158,7 +155,6 @@ void RenderPipeline::render(const Camera& camera) {
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer,
 	                                *mDeferredLigthingShader);
 # endif
-#endif
 	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueItems, mShadowManager->getShadowMaps());
 
 	mDebugRenderer->render(renderQueues.debugEntities);
@@ -193,7 +189,7 @@ void RenderPipeline::updateBuffers(const Camera& camera) const {
 void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 	const math::Frustum& frustum = camera.frustum();
 
-	auto cullItems = [&](const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems) {
+	auto cullItems = [&](const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems) {
 		for (const auto& [shader, items]: renderItems) {
 			for (auto& item: items) {
 				auto& bvc = item.entity->getComponent<BoundingVolumeComponent>();
@@ -256,11 +252,11 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 	// 	return;
 	// }
 
-	auto& shader = *entity.getComponent<ShaderComponent>().shader;
+	const auto& shader = *entity.getComponent<ShaderComponent>().shader;
 	const auto& materials = entity.getComponent<MaterialComponent>().materials;
 
 	for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-		auto& material = materials->at(matID);
+		const auto& material = materials->at(matID);
 
 		for (auto& mesh: meshes) {
 			RenderItem item{&entity, &mesh, &material};

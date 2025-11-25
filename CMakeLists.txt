@@ -45,10 +45,6 @@ if(HDR_ENABLED)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HDR)
 endif()
 
-if(DEFERRED_ENABLED)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEFERRED)
-endif()
-
 if(ANTIALIASING_ENABLED)
     target_compile_definitions(${PROJECT_NAME} PRIVATE ANTIALIASING)
 endif()

@@ -6,8 +6,7 @@ enum MaterialFlags: uint32_t {
 	Opaque = 1 << 0,
 	Blend = 1 << 1,
 	Cutout = 1 << 2,
-	TwoSided = 1 << 3,
-	CastShadow = 1 << 4,
+	CastShadow = 1 << 3,
 };
 
 struct Texture;

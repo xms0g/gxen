@@ -18,7 +18,7 @@ public:
 
 	~DeferredRenderer();
 
-	void geometryPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems, const FrameBuffer& gBuffer,
+	void geometryPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems, const FrameBuffer& gBuffer,
 	                  const Shader& gShader) const;
 
 	void lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& gBuffer,

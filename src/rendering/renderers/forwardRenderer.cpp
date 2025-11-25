@@ -32,7 +32,7 @@ void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntiti
 	prepareInstanceBuffer(transparentInstancedEntities, mTransparentInstanceVBO);
 }
 
-void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems,
+void ForwardRenderer::opaquePass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
 	if (renderItems.empty()) return;
 
@@ -55,7 +55,7 @@ void ForwardRenderer::opaquePass(const std::unordered_map<Shader*, std::vector<R
 	}
 }
 
-void ForwardRenderer::transparentPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems) const {
+void ForwardRenderer::transparentPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems) const {
 	if (renderItems.empty()) return;
 
 	glDepthMask(GL_FALSE);

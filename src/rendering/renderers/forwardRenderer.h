@@ -24,10 +24,10 @@ public:
 	void configure(const std::vector<Entity>& opaqueInstancedEntities,
 	               const std::vector<Entity>& transparentInstancedEntities);
 
-	void opaquePass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems,
+	void opaquePass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems,
 	                const std::array<uint32_t, 3>& shadowMaps) const;
 
-	void transparentPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems) const;
+	void transparentPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems) const;
 
 	void opaqueInstancedPass(const std::vector<Entity>& entities, const std::array<uint32_t, 3>& shadowMaps);
 

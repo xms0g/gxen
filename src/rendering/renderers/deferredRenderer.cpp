@@ -21,7 +21,7 @@ DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::ma
 
 DeferredRenderer::~DeferredRenderer() = default;
 
-void DeferredRenderer::geometryPass(const std::unordered_map<Shader*, std::vector<RenderItem>>& renderItems,
+void DeferredRenderer::geometryPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems,
                                     const FrameBuffer& gBuffer, const Shader& gShader) const {
 	gBuffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

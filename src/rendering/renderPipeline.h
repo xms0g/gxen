@@ -72,8 +72,8 @@ private:
 		std::vector<Entity> opaqueInstancedEntities;
 		std::vector<RenderItem> debugEntities;
 		std::vector<RenderItem> shadowCasters;
-		std::unordered_map<Shader*, std::vector<RenderItem>> forwardOpaqueItems;
-		std::unordered_map<Shader*, std::vector<RenderItem>> deferredItems;
-		std::unordered_map<Shader*, std::vector<RenderItem>> blendItems;
+		std::unordered_map<const Shader*, std::vector<RenderItem>> forwardOpaqueItems;
+		std::unordered_map<const Shader*, std::vector<RenderItem>> deferredItems;
+		std::unordered_map<const Shader*, std::vector<RenderItem>> blendItems;
 	} renderQueues;
 };
