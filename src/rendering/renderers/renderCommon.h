@@ -13,7 +13,7 @@ class Entity;
 namespace RenderCommon {
 void setupTransform(const Entity& entity, const Shader& shader);
 
-void setupMaterial(const RenderItem& item, const Shader& shader);
+void setupMaterial(const Entity& entity, const Shader& shader);
 
 void drawMesh(const RenderItem& item, const Shader& shader);
 
