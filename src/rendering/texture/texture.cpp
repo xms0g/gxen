@@ -7,8 +7,6 @@
 uint32_t texture::load(const char* path) {
     uint32_t textureID;
 
-	stbi_set_flip_vertically_on_load(false);
-
 	int width, height, channel;
     unsigned char* data = stbi_load(path, &width, &height, &channel, 0);
 
@@ -53,8 +51,6 @@ uint32_t texture::loadCubemap(const std::vector<std::string>& faces) {
 
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
-
-	stbi_set_flip_vertically_on_load(false);
 
 	int width, height, depth;
     for (uint32_t i = 0; i < faces.size(); i++) {
