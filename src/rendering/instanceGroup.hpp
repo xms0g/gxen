@@ -1,14 +1,8 @@
 #pragma once
+#include "material/material.hpp"
 
 class Shader;
 class Mesh;
-struct Material;
-
-struct MaterialBatch {
-	const Material* material{};
-	const Shader* shader{};
-	std::vector<const Mesh*> meshes;
-};
 
 struct InstanceGroup {
 	const Entity* entity;

@@ -111,9 +111,9 @@ void ForwardRenderer::instancedPass(const std::vector<InstanceGroup>& instancedG
 			RenderCommon::setupMaterial(*entity, *shader);
 			RenderCommon::bindTextures(material->textures, *shader);
 
-			for (const auto& mesh: meshes) {
-				glBindVertexArray(mesh->VAO());
-				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh->indices().size()),
+			for (const auto& mesh: *meshes) {
+				glBindVertexArray(mesh.VAO());
+				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
 										GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(count));
 			}
 
@@ -151,8 +151,8 @@ void ForwardRenderer::prepareInstanceBuffer(const std::vector<InstanceGroup>& in
 
 	for (const auto& [entity, transforms, materials]: instancedGroup) {
 		for (const auto& material: materials) {
-			for (const auto& mesh: material.meshes) {
-				mesh->enableInstanceAttributes(vbo.buffer, vbo.offset);
+			for (const auto& mesh: *material.meshes) {
+				mesh.enableInstanceAttributes(vbo.buffer, vbo.offset);
 			}
 		}
 

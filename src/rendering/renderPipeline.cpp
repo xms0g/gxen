@@ -250,18 +250,8 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 		const auto& material = materials->at(matID);
 
 		if (matc.flag == RenderFlags::Instanced) {
-			std::vector<const Mesh*> instanceMeshes;
-
-			for (auto& mesh: meshes) {
-				instanceMeshes.push_back(&mesh);
-
-				// if (material.flag & CastShadow) {
-				// 	RenderItem renderItem{&entity, &mesh, &material};
-				// 	renderQueues.shadowCasters.push_back(renderItem);
-				// }
-			}
 			std::vector<MaterialBatch> instanceMaterials;
-			instanceMaterials.emplace_back(&material, &shader, instanceMeshes);
+			instanceMaterials.emplace_back(&material, &shader, &meshes);
 
 			InstanceGroup instance{&entity, ic.transforms, instanceMaterials};
 

@@ -10,8 +10,16 @@ enum MaterialFlags: uint32_t {
 };
 
 struct Texture;
+class Shader;
+class Mesh;
 
 struct Material {
 	uint32_t flag;
 	std::vector<Texture> textures;
+};
+
+struct MaterialBatch {
+	const Material* material{};
+	const Shader* shader{};
+	const std::vector<Mesh>* meshes;
 };
