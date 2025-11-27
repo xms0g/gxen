@@ -3,8 +3,8 @@
 #include <array>
 #include <unordered_map>
 
+struct RenderGroup;
 struct InstanceGroup;
-struct RenderItem;
 struct Texture;
 class Entity;
 class Window;
@@ -21,10 +21,10 @@ public:
 	void configure(const std::vector<InstanceGroup>& opaqueInstancedGroup,
 	               const std::vector<InstanceGroup>& blendInstancedGroup);
 
-	void opaquePass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems,
+	void opaquePass(const std::vector<RenderGroup>& groups,
 	                const std::array<uint32_t, 3>& shadowMaps) const;
 
-	void transparentPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems) const;
+	void transparentPass(const std::vector<RenderGroup>& groups) const;
 
 	void opaqueInstancedPass(const std::vector<InstanceGroup>& instancedGroup, const std::array<uint32_t, 3>& shadowMaps);
 

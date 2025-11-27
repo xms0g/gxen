@@ -4,7 +4,7 @@
 #include "../ECS/system.hpp"
 
 struct InstanceGroup;
-struct RenderItem;
+struct RenderGroup;
 class Mesh;
 class Shader;
 class FrameBuffer;
@@ -71,10 +71,10 @@ private:
 	struct {
 		std::vector<InstanceGroup> opaqueInstancedGroup;
 		std::vector<InstanceGroup> blendInstancedGroup;
-		std::vector<RenderItem> debugEntities;
-		std::vector<RenderItem> shadowCasters;
-		std::unordered_map<const Shader*, std::vector<RenderItem>> forwardOpaqueItems;
-		std::unordered_map<const Shader*, std::vector<RenderItem>> deferredItems;
-		std::unordered_map<const Shader*, std::vector<RenderItem>> blendItems;
+		std::vector<RenderGroup> debugEntities;
+		std::vector<RenderGroup> shadowCasters;
+		std::vector<RenderGroup> forwardOpaqueItems;
+		std::vector<RenderGroup> deferredItems;
+		std::vector<RenderGroup> blendItems;
 	} renderQueues;
 };

@@ -1,7 +1,6 @@
 #include "renderCommon.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderItem.hpp"
 #include "../material/material.hpp"
 #include "../texture/texture.h"
 #include "../mesh/mesh.h"
@@ -33,19 +32,17 @@ void RenderCommon::setupMaterial(const Entity& entity, const Shader& shader) {
 	}
 }
 
-void RenderCommon::drawMesh(const RenderItem& item, const Shader& shader) {
-	if (!item.mesh->isVisible()) return;
+void RenderCommon::drawMeshes(const std::vector<Mesh>& meshes) {
+	for (const auto& mesh: meshes) {
+		if (!mesh.isVisible()) continue;
 
-	bindTextures(item.material->textures, shader);
-
-	glBindVertexArray(item.mesh->VAO());
-	if (!item.mesh->indices().empty()) {
-		glDrawElements(GL_TRIANGLES, static_cast<int32_t>(item.mesh->indices().size()), GL_UNSIGNED_INT, nullptr);
-	} else {
-		glDrawArrays(GL_TRIANGLES, 0, static_cast<int32_t>(item.mesh->vertices().size()));
+		glBindVertexArray(mesh.VAO());
+		if (!mesh.indices().empty()) {
+			glDrawElements(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()), GL_UNSIGNED_INT, nullptr);
+		} else {
+			glDrawArrays(GL_TRIANGLES, 0, static_cast<int32_t>(mesh.vertices().size()));
+		}
 	}
-
-	unbindTextures(item.material->textures);
 }
 
 void RenderCommon::drawQuad(const uint32_t sceneTexture, const uint32_t VAO) {

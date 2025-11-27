@@ -4,7 +4,7 @@
 #include "omnidirectionalShadowPass.h"
 #include "perspectiveShadowPass.h"
 #include "../shader.h"
-#include "../renderItem.hpp"
+#include "../renderGroup.hpp"
 #include "../lightSystem.h"
 #include "../buffers/uniformBuffer.h"
 #include "../buffers/frameBuffer.h"
@@ -34,7 +34,7 @@ const std::array<uint32_t, 3>& ShadowManager::getShadowMaps() const { return mSh
 
 const UniformBuffer& ShadowManager::getShadowUBO() const { return *mShadowUBO; }
 
-void ShadowManager::shadowPass(const std::vector<RenderItem>& shadowCasters, const LightSystem& lights) {
+void ShadowManager::shadowPass(const std::vector<RenderGroup>& shadowCasters, const LightSystem& lights) {
 	directionalShadowPass(shadowCasters, lights.getDirLights());
 	omnidirectionalShadowPass(shadowCasters, lights.getPointLights());
 	perspectiveShadowPass(shadowCasters, lights.getSpotLights());
@@ -44,7 +44,7 @@ void ShadowManager::shadowPass(const std::vector<RenderItem>& shadowCasters, con
 	mShadowUBO->unbind();
 }
 
-void ShadowManager::directionalShadowPass(const std::vector<RenderItem>& shadowCasters,
+void ShadowManager::directionalShadowPass(const std::vector<RenderGroup>& shadowCasters,
                                           const std::vector<DirectionalLightComponent*>& lights) {
 	for (const auto& light: lights) {
 		mDirShadowPass->render(shadowCasters, light->direction);
@@ -52,7 +52,7 @@ void ShadowManager::directionalShadowPass(const std::vector<RenderItem>& shadowC
 	}
 }
 
-void ShadowManager::omnidirectionalShadowPass(const std::vector<RenderItem>& shadowCasters,
+void ShadowManager::omnidirectionalShadowPass(const std::vector<RenderGroup>& shadowCasters,
                                               const std::vector<PointLightComponent*>& lights) {
 	mOmnidirShadowPass->getDepthMap().bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
@@ -71,7 +71,7 @@ void ShadowManager::omnidirectionalShadowPass(const std::vector<RenderItem>& sha
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 }
 
-void ShadowManager::perspectiveShadowPass(const std::vector<RenderItem>& shadowCasters,
+void ShadowManager::perspectiveShadowPass(const std::vector<RenderGroup>& shadowCasters,
                                           const std::vector<SpotLightComponent*>& lights) {
 	for (int i = 0; i < lights.size(); i++) {
 		const auto& light = lights[i];

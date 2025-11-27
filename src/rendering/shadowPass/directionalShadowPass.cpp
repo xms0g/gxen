@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "../shader.h"
-#include "../renderItem.hpp"
+#include "../renderGroup.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
@@ -27,7 +27,7 @@ glm::mat4 DirectionalShadowPass::getLightSpaceMatrix() const {
 	return mLightSpaceMatrix;
 }
 
-void DirectionalShadowPass::render(const std::vector<RenderItem>& shadowCasters, const glm::vec4& direction) {
+void DirectionalShadowPass::render(const std::vector<RenderGroup>& shadowCasters, const glm::vec4& direction) {
 	const glm::vec3 lightPos = -glm::vec3(direction) * 5.0f;
 	const glm::mat4 lightProjection = glm::ortho(
 		SHADOW_DIRECTIONAL_LEFT,
@@ -48,9 +48,11 @@ void DirectionalShadowPass::render(const std::vector<RenderItem>& shadowCasters,
 	glEnable(GL_DEPTH_TEST);
 	glCullFace(GL_FRONT);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
-	for (const auto& item: shadowCasters) {
-		RenderCommon::setupTransform(*item.entity, *mDepthShader);
-		RenderCommon::drawMesh(item, *mDepthShader);
+	for (const auto& [entity, matBatches]: shadowCasters) {
+		for (const auto& [material, shader, meshes]: matBatches) {
+			RenderCommon::setupTransform(*entity, *mDepthShader);
+			RenderCommon::drawMeshes(*meshes);
+		}
 	}
 	mDepthMap->unbind();
 	glCullFace(GL_BACK);

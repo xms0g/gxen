@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 #include "renderCommon.h"
 #include "../shader.h"
-#include "../renderItem.hpp"
+#include "../renderGroup.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../models/quad.h"
 #include "../../config/config.hpp"
@@ -21,19 +21,22 @@ DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::ma
 
 DeferredRenderer::~DeferredRenderer() = default;
 
-void DeferredRenderer::geometryPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems,
+void DeferredRenderer::geometryPass(const std::vector<RenderGroup>& groups,
                                     const FrameBuffer& gBuffer, const Shader& gShader) const {
 	gBuffer.bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	gShader.activate();
-	for (const auto& [shader, items]: renderItems) {
-		for (const auto& item: items) {
-			if (!item.entity->getComponent<BoundingVolumeComponent>().isVisible)
-				continue;
+	for (const auto& [entity, matBatches]: groups) {
+		if (!entity->getComponent<BoundingVolumeComponent>().isVisible)
+			continue;
 
-			RenderCommon::setupTransform(*item.entity, gShader);
-			RenderCommon::setupMaterial(*item.entity, gShader);
-			RenderCommon::drawMesh(item, gShader);
+		for (const auto& [material, shader, meshes]: matBatches) {
+			RenderCommon::setupTransform(*entity, gShader);
+			RenderCommon::setupMaterial(*entity, gShader);
+
+			RenderCommon::bindTextures(material->textures, gShader);
+			RenderCommon::drawMeshes(*meshes);
+			RenderCommon::unbindTextures(material->textures);
 		}
 	}
 	gBuffer.unbind();

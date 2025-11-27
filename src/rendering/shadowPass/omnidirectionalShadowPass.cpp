@@ -2,7 +2,7 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/type_ptr.hpp"
 #include "../shader.h"
-#include "../renderItem.hpp"
+#include "../renderGroup.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"
@@ -28,7 +28,7 @@ FrameBuffer& OmnidirectionalShadowPass::getDepthMap() const {
 	return *mDepthMap;
 }
 
-void OmnidirectionalShadowPass::render(const std::vector<RenderItem>& shadowCasters, const glm::vec4& position,
+void OmnidirectionalShadowPass::render(const std::vector<RenderGroup>& shadowCasters, const glm::vec4& position,
                                        const int layer) const {
 	const glm::mat4 shadowProj = glm::perspective(
 		glm::radians(SHADOW_OMNIDIRECTIONAL_FOVY),
@@ -53,8 +53,10 @@ void OmnidirectionalShadowPass::render(const std::vector<RenderItem>& shadowCast
 	mDepthShader->setVec3("lightPos", position);
 	mDepthShader->setInt("cubeIndex", layer);
 
-	for (const auto& item: shadowCasters) {
-		RenderCommon::setupTransform(*item.entity, *mDepthShader);
-		RenderCommon::drawMesh(item, *mDepthShader);
+	for (const auto& [entity, matBatches]: shadowCasters) {
+		for (const auto& [material, shader, meshes]: matBatches) {
+			RenderCommon::setupTransform(*entity, *mDepthShader);
+			RenderCommon::drawMeshes(*meshes);
+		}
 	}
 }

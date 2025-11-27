@@ -4,7 +4,7 @@
 #include "glm/glm.hpp"
 #include "../../config/config.hpp"
 
-struct RenderItem;
+struct RenderGroup;
 class Entity;
 class Shader;
 class FrameBuffer;
@@ -19,7 +19,7 @@ public:
 
 	[[nodiscard]] glm::mat4 getLightSpaceMatrix(int layer) const;
 
-	void render(const std::vector<RenderItem>& shadowCasters, const glm::vec4& direction,
+	void render(const std::vector<RenderGroup>& shadowCasters, const glm::vec4& direction,
 	            const glm::vec4& position, float fovy, int layer);
 
 private:

@@ -5,7 +5,7 @@
 #include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "renderCommon.h"
-#include "../renderItem.hpp"
+#include "../renderGroup.hpp"
 #include "../instanceGroup.hpp"
 #include "../shader.h"
 #include "../material/material.hpp"
@@ -31,48 +31,54 @@ void ForwardRenderer::configure(const std::vector<InstanceGroup>& opaqueInstance
 	prepareInstanceData(blendInstancedGroup, mTransparentInstanceVBO);
 }
 
-void ForwardRenderer::opaquePass(const std::unordered_map<const Shader*, std::vector<RenderItem> >& renderItems,
+void ForwardRenderer::opaquePass(const std::vector<RenderGroup>& groups,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
-	if (renderItems.empty()) return;
+	if (groups.empty()) return;
 
 	RenderCommon::bindShadowMaps(shadowMaps);
 
-	for (const auto& [shader, items]: renderItems) {
-		shader->activate();
-		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-		shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
-		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
+	for (const auto& [entity, matBatches]: groups) {
+		if (!entity->getComponent<BoundingVolumeComponent>().isVisible)
+			continue;
 
-		for (const auto& item: items) {
-			if (!item.entity->getComponent<BoundingVolumeComponent>().isVisible)
-				continue;
+		for (const auto& [material, shader, meshes]: matBatches) {
+			shader->activate();
+			shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+			shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+			shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
-			RenderCommon::setupTransform(*item.entity, *shader);
-			RenderCommon::setupMaterial(*item.entity, *shader);
-			RenderCommon::drawMesh(item, *shader);
+			RenderCommon::setupTransform(*entity, *shader);
+			RenderCommon::setupMaterial(*entity, *shader);
+
+			RenderCommon::bindTextures(material->textures, *shader);
+			RenderCommon::drawMeshes(*meshes);
+			RenderCommon::unbindTextures(material->textures);
 		}
 	}
 }
 
-void ForwardRenderer::transparentPass(const std::unordered_map<const Shader*, std::vector<RenderItem> >& renderItems) const {
-	if (renderItems.empty()) return;
+void ForwardRenderer::transparentPass(const std::vector<RenderGroup>& groups) const {
+	if (groups.empty()) return;
 
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	for (const auto& [shader, items]: renderItems) {
-		shader->activate();
-		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-		shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
-		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
+	for (const auto& [entity, matBatches]: groups) {
+		if (!entity->getComponent<BoundingVolumeComponent>().isVisible)
+			continue;
 
-		for (const auto& item: items) {
-			if (!item.entity->getComponent<BoundingVolumeComponent>().isVisible)
-				continue;
+		for (const auto& [material, shader, meshes]: matBatches) {
+			shader->activate();
+			shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+			shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+			shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
-			RenderCommon::setupTransform(*item.entity, *shader);
-			RenderCommon::setupMaterial(*item.entity, *shader);
-			RenderCommon::drawMesh(item, *shader);
+			RenderCommon::setupTransform(*entity, *shader);
+			RenderCommon::setupMaterial(*entity, *shader);
+
+			RenderCommon::bindTextures(material->textures, *shader);
+			RenderCommon::drawMeshes(*meshes);
+			RenderCommon::unbindTextures(material->textures);
 		}
 	}
 	glDepthMask(GL_TRUE);
@@ -99,10 +105,10 @@ void ForwardRenderer::transparentInstancedPass(const std::vector<InstanceGroup>&
 }
 
 void ForwardRenderer::instancedPass(const std::vector<InstanceGroup>& instancedGroup) {
-	for (const auto& [entity, transforms, materials]: instancedGroup) {
+	for (const auto& [entity, transforms, matBatches]: instancedGroup) {
 		const size_t count = transforms->size() / 9;
 
-		for (const auto& [material, shader, meshes]: materials) {
+		for (const auto& [material, shader, meshes]: matBatches) {
 			shader->activate();
 			shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
 			shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
@@ -114,7 +120,7 @@ void ForwardRenderer::instancedPass(const std::vector<InstanceGroup>& instancedG
 			for (const auto& mesh: *meshes) {
 				glBindVertexArray(mesh.VAO());
 				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
-										GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(count));
+				                        GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(count));
 			}
 
 			RenderCommon::unbindTextures(material->textures);
@@ -139,7 +145,8 @@ void ForwardRenderer::prepareInstanceData(const std::vector<InstanceGroup>& inst
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, vbo.buffer);
-		glBufferSubData(GL_ARRAY_BUFFER, vbo.offset, static_cast<long>(gpuData.size() * sizeof(InstanceData)), gpuData.data());
+		glBufferSubData(GL_ARRAY_BUFFER, vbo.offset, static_cast<long>(gpuData.size() * sizeof(InstanceData)),
+		                gpuData.data());
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
 }

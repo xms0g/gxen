@@ -6,7 +6,7 @@
 #include "shader.h"
 #include "lightSystem.h"
 #include "renderFlags.hpp"
-#include "renderItem.hpp"
+#include "renderGroup.hpp"
 #include "instanceGroup.hpp"
 #include "skyboxSystem.h"
 #include "buffers/frameBuffer.h"
@@ -190,17 +190,20 @@ void RenderPipeline::updateBuffers(const Camera& camera) const {
 void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 	const math::Frustum& frustum = camera.frustum();
 
-	auto cullItems = [&](const std::unordered_map<const Shader*, std::vector<RenderItem> >& renderItems) {
-		for (const auto& [shader, items]: renderItems) {
-			for (auto& item: items) {
-				auto& bvc = item.entity->getComponent<BoundingVolumeComponent>();
-				const auto& tc = item.entity->getComponent<TransformComponent>();
-				const auto& aabb = bvc.bv;
-				bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
+	auto cullItems = [&](const std::vector<RenderGroup>& groups) {
+		for (const auto& [entity, matBatch]: groups) {
+			auto& bvc = entity->getComponent<BoundingVolumeComponent>();
+			const auto& tc = entity->getComponent<TransformComponent>();
+			const auto& aabb = bvc.bv;
 
+			for (auto& [material, shader, meshes]: matBatch) {
+				bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
 				if (!bvc.isVisible) return;
-				item.mesh->setVisible(aabb->isMeshInFrustum(frustum, item.mesh->min(), item.mesh->max(),
-				                                            tc.position, tc.rotation, tc.scale));
+
+				for (auto& mesh: *meshes) {
+					mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(),
+					                                      tc.position, tc.rotation, tc.scale));
+				}
 			}
 		}
 	};
@@ -248,12 +251,11 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 
 	for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
 		const auto& material = materials->at(matID);
+		std::vector<MaterialBatch> matBatch;
+		matBatch.emplace_back(&material, &shader, &meshes);
 
 		if (matc.flag == RenderFlags::Instanced) {
-			std::vector<MaterialBatch> instanceMaterials;
-			instanceMaterials.emplace_back(&material, &shader, &meshes);
-
-			InstanceGroup instance{&entity, ic.transforms, instanceMaterials};
+			InstanceGroup instance{&entity, ic.transforms, matBatch};
 
 			if (material.flag & Blend) {
 				renderQueues.blendInstancedGroup.push_back(instance);
@@ -263,28 +265,26 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 			continue;
 		}
 
-		for (auto& mesh: meshes) {
-			RenderItem renderItem{&entity, &mesh, &material};
+		RenderGroup group{&entity, matBatch};
 
-			if (entity.hasComponent<DebugComponent>()) {
-				renderQueues.debugEntities.push_back(renderItem);
-			}
+		if (entity.hasComponent<DebugComponent>()) {
+			renderQueues.debugEntities.push_back(group);
+		}
 
-			if (material.flag & CastShadow) {
-				renderQueues.shadowCasters.push_back(renderItem);
-			}
+		if (material.flag & CastShadow) {
+			renderQueues.shadowCasters.push_back(group);
+		}
 
-			if (material.flag & Opaque) {
-				if (matc.flag == RenderFlags::Forward) {
-					renderQueues.forwardOpaqueItems[&shader].push_back(renderItem);
-				} else {
-					renderQueues.deferredItems[&shader].push_back(renderItem);
-				}
-			} else if (material.flag & Cutout) {
-				renderQueues.forwardOpaqueItems[&shader].push_back(renderItem);
-			} else if (material.flag & Blend) {
-				renderQueues.blendItems[&shader].push_back(renderItem);
+		if (material.flag & Opaque) {
+			if (matc.flag == RenderFlags::Forward) {
+				renderQueues.forwardOpaqueItems.push_back(group);
+			} else {
+				renderQueues.deferredItems.push_back(group);
 			}
+		} else if (material.flag & Cutout) {
+			renderQueues.forwardOpaqueItems.push_back(group);
+		} else if (material.flag & Blend) {
+			renderQueues.blendItems.push_back(group);
 		}
 	}
 }
@@ -293,20 +293,17 @@ void RenderPipeline::sortEntities(const Camera& camera) {
 	const glm::vec3 camPos = camera.position();
 
 	auto sortBatches = [&](auto& batch, bool transparent) {
-		for (auto& [shader, renderItems]: batch) {
-			std::sort(
-				renderItems.begin(),
-				renderItems.end(),
-				[&camPos, &transparent](const RenderItem& a, const RenderItem& b) {
-					const float da = glm::length2(camPos - a.entity->getComponent<TransformComponent>().position);
-					const float db = glm::length2(camPos - b.entity->getComponent<TransformComponent>().position);
+		std::sort(
+			batch.begin(),
+			batch.end(),
+			[&camPos, &transparent](const RenderGroup& a, const RenderGroup& b) {
+				const float da = glm::length2(camPos - a.entity->getComponent<TransformComponent>().position);
+				const float db = glm::length2(camPos - b.entity->getComponent<TransformComponent>().position);
 
-					if (transparent)
-						return da > db;
-					return da < db;
-				}
-			);
-		}
+				if (transparent)
+					return da > db;
+				return da < db;
+			});
 	};
 
 	// Sort opaque objects front to back
@@ -314,7 +311,7 @@ void RenderPipeline::sortEntities(const Camera& camera) {
 	sortBatches(renderQueues.forwardOpaqueItems, false);
 	sortBatches(renderQueues.blendItems, true);
 
-	// for (auto& [transforms, materials]: renderQueues.blendInstancedGroup) {
+	// for (auto& [entity, transforms, materials]: renderQueues.blendInstancedGroup) {
 	// 	auto transform = *transforms;
 	//
 	// 	for (int i = 0; i < transform.size(); i += 9) {

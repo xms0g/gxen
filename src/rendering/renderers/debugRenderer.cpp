@@ -1,7 +1,7 @@
 #include "debugRenderer.h"
 #include "renderCommon.h"
 #include "../shader.h"
-#include "../renderItem.hpp"
+#include "../renderGroup.hpp"
 #include "../buffers/uniformBuffer.h"
 #include "../../ECS/components/debug.hpp"
 #include "../../ECS/entity.hpp"
@@ -21,15 +21,19 @@ void DebugRenderer::configure(const UniformBuffer& cameraUBO) const {
 	}
 }
 
-void DebugRenderer::render(const std::vector<RenderItem>& renderItems) const {
-	for (const auto& item: renderItems) {
-		const auto& db = item.entity->getComponent<DebugComponent>();
+void DebugRenderer::render(const std::vector<RenderGroup>& groups) const {
+	for (const auto& [entity, matBatches]: groups) {
+		const auto& db = entity->getComponent<DebugComponent>();
 		if (db.mode == None)
 			continue;
 
 		const auto& dbgShader = mDebugShaders.at(db.mode);
 		dbgShader->activate();
-		RenderCommon::setupTransform(*item.entity, *dbgShader);
-		RenderCommon::drawMesh(item, *dbgShader);
+
+		for (const auto& [material, shader, meshes]: matBatches) {
+			RenderCommon::setupTransform(*entity, *dbgShader);
+			RenderCommon::drawMeshes(*meshes);
+		}
+
 	}
 }

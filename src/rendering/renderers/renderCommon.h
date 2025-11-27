@@ -3,9 +3,9 @@
 #include <vector>
 #include <array>
 
+struct MaterialBatch;
 struct Texture;
 class Mesh;
-struct RenderItem;
 struct Material;
 class Shader;
 class Entity;
@@ -15,7 +15,7 @@ void setupTransform(const Entity& entity, const Shader& shader);
 
 void setupMaterial(const Entity& entity, const Shader& shader);
 
-void drawMesh(const RenderItem& item, const Shader& shader);
+void drawMeshes(const std::vector<Mesh>& meshes);
 
 void drawQuad(uint32_t sceneTexture, uint32_t VAO);
 
