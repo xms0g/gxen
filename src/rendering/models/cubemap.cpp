@@ -29,13 +29,13 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 
 		-1.0f, -1.0f,  1.0f,
 		-1.0f,  1.0f,  1.0f,
-		  1.0f,  1.0f,  1.0f,
+		 1.0f,  1.0f,  1.0f,
 		 1.0f,  1.0f,  1.0f,
 		 1.0f, -1.0f,  1.0f,
 		-1.0f, -1.0f,  1.0f,
 
 		-1.0f,  1.0f, -1.0f,
-		  1.0f,  1.0f, -1.0f,
+		 1.0f,  1.0f, -1.0f,
 		 1.0f,  1.0f,  1.0f,
 		 1.0f,  1.0f,  1.0f,
 		-1.0f,  1.0f,  1.0f,
@@ -46,7 +46,7 @@ Models::Cubemap::Cubemap(const char* const f[]) {
 		 1.0f, -1.0f, -1.0f,
 		 1.0f, -1.0f, -1.0f,
 		-1.0f, -1.0f,  1.0f,
-		  1.0f, -1.0f,  1.0f
+		 1.0f, -1.0f,  1.0f
 	};
 
 	std::vector<Vertex> vertices;

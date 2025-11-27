@@ -6,17 +6,13 @@
 #include "glm/gtc/type_ptr.hpp"
 #include "renderCommon.h"
 #include "../renderItem.hpp"
+#include "../instanceGroup.hpp"
 #include "../shader.h"
 #include "../material/material.hpp"
 #include "../mesh/mesh.h"
 #include "../../config/config.hpp"
 #include "../../ECS/registry.h"
 #include "../../ECS/components/bv.hpp"
-#include "../../ECS/components/transform.hpp"
-#include "../../ECS/components/material.hpp"
-#include "../../ECS/components/mesh.hpp"
-#include "../../ECS/components/shader.hpp"
-#include "../../ECS/components/instance.hpp"
 #include "../../math/matrix.hpp"
 
 ForwardRenderer::ForwardRenderer() {
@@ -26,13 +22,16 @@ ForwardRenderer::ForwardRenderer() {
 
 ForwardRenderer::~ForwardRenderer() = default;
 
-void ForwardRenderer::configure(const std::vector<Entity>& opaqueInstancedEntities,
-                                const std::vector<Entity>& transparentInstancedEntities) {
-	prepareInstanceBuffer(opaqueInstancedEntities, mOpaqueInstanceVBO);
-	prepareInstanceBuffer(transparentInstancedEntities, mTransparentInstanceVBO);
+void ForwardRenderer::configure(const std::vector<InstanceGroup>& opaqueInstancedGroup,
+                                const std::vector<InstanceGroup>& blendInstancedGroup) {
+	prepareInstanceBuffer(opaqueInstancedGroup, mOpaqueInstanceVBO);
+	prepareInstanceData(opaqueInstancedGroup, mOpaqueInstanceVBO);
+
+	prepareInstanceBuffer(blendInstancedGroup, mTransparentInstanceVBO);
+	prepareInstanceData(blendInstancedGroup, mTransparentInstanceVBO);
 }
 
-void ForwardRenderer::opaquePass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems,
+void ForwardRenderer::opaquePass(const std::unordered_map<const Shader*, std::vector<RenderItem> >& renderItems,
                                  const std::array<uint32_t, 3>& shadowMaps) const {
 	if (renderItems.empty()) return;
 
@@ -55,7 +54,7 @@ void ForwardRenderer::opaquePass(const std::unordered_map<const Shader*, std::ve
 	}
 }
 
-void ForwardRenderer::transparentPass(const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems) const {
+void ForwardRenderer::transparentPass(const std::unordered_map<const Shader*, std::vector<RenderItem> >& renderItems) const {
 	if (renderItems.empty()) return;
 
 	glDepthMask(GL_FALSE);
@@ -80,90 +79,85 @@ void ForwardRenderer::transparentPass(const std::unordered_map<const Shader*, st
 	glDisable(GL_BLEND);
 }
 
-void ForwardRenderer::opaqueInstancedPass(const std::vector<Entity>& entities,
+void ForwardRenderer::opaqueInstancedPass(const std::vector<InstanceGroup>& instancedGroup,
                                           const std::array<uint32_t, 3>& shadowMaps) {
-	if (entities.empty()) return;
+	if (instancedGroup.empty()) return;
 
 	RenderCommon::bindShadowMaps(shadowMaps);
-	instancedPass(entities, mOpaqueInstanceVBO);
+	instancedPass(instancedGroup);
 }
 
-void ForwardRenderer::transparentInstancedPass(const std::vector<Entity>& entities) {
-	if (entities.empty()) return;
+void ForwardRenderer::transparentInstancedPass(const std::vector<InstanceGroup>& instancedGroup) {
+	if (instancedGroup.empty()) return;
 
 	glDepthMask(GL_FALSE);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	instancedPass(entities, mTransparentInstanceVBO);
+	instancedPass(instancedGroup);
 	glDepthMask(GL_TRUE);
 	glDisable(GL_BLEND);
 }
 
-void ForwardRenderer::instancedPass(const std::vector<Entity>& entities, InstanceVBO& vbo) {
-	for (const auto& entity: entities) {
-		const auto& ic = entity.getComponent<InstanceComponent>();
-		const size_t instanceCount = ic.positions->size();
-		const size_t instanceSize = instanceCount * sizeof(InstanceData);
+void ForwardRenderer::instancedPass(const std::vector<InstanceGroup>& instancedGroup) {
+	for (const auto& [entity, transforms, materials]: instancedGroup) {
+		const size_t count = transforms->size() / 9;
 
-		prepareInstanceData(entity, *ic.positions, instanceSize, vbo);
-		vbo.offset += static_cast<int>(instanceSize);
+		for (const auto& [material, shader, meshes]: materials) {
+			shader->activate();
+			shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+			shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+			shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 
-		const auto& shader = entity.getComponent<ShaderComponent>().shader;
-		const auto& materials = entity.getComponent<MaterialComponent>().materials;
+			RenderCommon::setupMaterial(*entity, *shader);
+			RenderCommon::bindTextures(material->textures, *shader);
 
-		shader->activate();
-		shader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-		shader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
-		shader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
-
-		RenderCommon::setupMaterial(entity, *shader);
-
-		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-			auto& material = materials->at(matID);
-			RenderCommon::bindTextures(material.textures, *shader);
 			for (const auto& mesh: meshes) {
-				glBindVertexArray(mesh.VAO());
-				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh.indices().size()),
-										GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(instanceCount));
+				glBindVertexArray(mesh->VAO());
+				glDrawElementsInstanced(GL_TRIANGLES, static_cast<int32_t>(mesh->indices().size()),
+										GL_UNSIGNED_INT, nullptr, static_cast<int32_t>(count));
 			}
-			RenderCommon::unbindTextures(material.textures);
+
+			RenderCommon::unbindTextures(material->textures);
 		}
 	}
-	vbo.offset = 0;
 }
 
-void ForwardRenderer::prepareInstanceData(const Entity& entity, const std::vector<glm::vec3>& positions,
-                                          const size_t instanceSize, const InstanceVBO& vbo) {
-	const auto& tc = entity.getComponent<TransformComponent>();
+void ForwardRenderer::prepareInstanceData(const std::vector<InstanceGroup>& instancedGroup, const InstanceVBO& vbo) {
+	for (const auto& [entity, transforms, materials]: instancedGroup) {
+		std::vector<InstanceData> gpuData;
+		gpuData.reserve(transforms->size() / 9);
 
-	std::vector<InstanceData> gpuData;
-	gpuData.reserve(positions.size());
+		auto transform = *transforms;
+		for (int i = 0; i < transform.size(); i += 9) {
+			glm::vec3 pos{transform[i], transform[i + 1], transform[i + 2]};
+			glm::vec3 rot{transform[i + 3], transform[i + 4], transform[i + 5]};
+			glm::vec3 scale{transform[i + 6], transform[i + 7], transform[i + 8]};
 
-	for (auto& pos: positions) {
-		const glm::mat4 model = math::computeModelMatrix(pos, tc.rotation, tc.scale);
-		const glm::mat3 normal = math::computeNormalMatrix(model);
-		gpuData.emplace_back(model, normal);
+			const glm::mat4 model = math::computeModelMatrix(pos, rot, scale);
+			const glm::mat3 normal = math::computeNormalMatrix(model);
+			gpuData.emplace_back(model, normal);
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, vbo.buffer);
+		glBufferSubData(GL_ARRAY_BUFFER, vbo.offset, static_cast<long>(gpuData.size() * sizeof(InstanceData)), gpuData.data());
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}
-
-	glBindBuffer(GL_ARRAY_BUFFER, vbo.buffer);
-	glBufferSubData(GL_ARRAY_BUFFER, vbo.offset, static_cast<long>(instanceSize), gpuData.data());
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-void ForwardRenderer::prepareInstanceBuffer(const std::vector<Entity>& entities, InstanceVBO& vbo) {
-	if (entities.empty()) return;
+void ForwardRenderer::prepareInstanceBuffer(const std::vector<InstanceGroup>& instancedGroup, InstanceVBO& vbo) {
+	if (instancedGroup.empty()) return;
 
 	size_t requiredGPUBufferSize = 0;
 
-	for (const auto& entity: entities) {
-		for (const auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
-			for (const auto& mesh: meshes) {
-				mesh.enableInstanceAttributes(vbo.buffer, vbo.offset);
+	for (const auto& [entity, transforms, materials]: instancedGroup) {
+		for (const auto& material: materials) {
+			for (const auto& mesh: material.meshes) {
+				mesh->enableInstanceAttributes(vbo.buffer, vbo.offset);
 			}
 		}
 
-		const size_t instanceSize = entity.getComponent<InstanceComponent>().positions->size() * sizeof(InstanceData);
-
+		const size_t count = transforms->size() / 9;
+		const size_t instanceSize = count * sizeof(InstanceData);
 		requiredGPUBufferSize += instanceSize;
 		vbo.offset += static_cast<int>(instanceSize);
 	}

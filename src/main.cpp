@@ -60,16 +60,32 @@ int main() {
 		auto object = std::make_shared<Shader>("object.vert", "object.frag");
 
 		//
-		// std::vector<glm::vec3> pos1;
-		// float x = 5.0f, z = 0.0f;
-		// for (int i = 0; i < 10; i++) {
-		// 	pos1.push_back(glm::vec3(x, 0.0, z));
-		// 	x += 5.0f;
-		// 	if (x == 20) {
-		// 		x = 0.0f;
-		// 		z += 5;
-		// 	}
-		// }
+		std::vector<float> transform = {
+			// Instance 0
+			-20.0f, 1.0f, 0.0f,      // position
+			0.0f, 0.0f, 0.0f,      // rotation
+			1.0f, 1.0f, 1.0f,      // scale
+
+			// Instance 1
+			-22.0f, 1.0f, -3.0f,     // position
+			0.0f, 45.0f, 0.0f,     // rotation
+			1.0f, 1.0f, 1.0f,      // scale
+
+			// Instance 2
+			-21.5f, 1.0f, 4.0f,     // position
+			90.0f, 0.0f, 0.0f,     // rotation
+			1.0f, 1.0f, 1.0f,      // scale
+
+			// Instance 3
+			-23.0f, 1.0f, 1.0f,     // position
+			0.0f, 30.0f, 10.0f,    // rotation
+			1.0f, 1.0f, 1.0f,      // scale
+
+			// Instance 4
+			-23.0f, 1.0f, -2.0f,    // position
+			45.0f, 45.0f, 45.0f,   // rotation
+			1.0f, 1.0f, 1.0f       // scale
+		};
 
 		// Suzanne
 		auto suzanne = registry.createEntity("Suzanne");
@@ -81,9 +97,9 @@ int main() {
 		ResourceManager::instance().loadModel(suzanne.id(), "Suzanne/glTF/Suzanne.gltf");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0, RenderFlags::Deferred);
+		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0, RenderFlags::Instanced);
 
-		suzanne.addComponent<ShaderComponent>(object);
+		suzanne.addComponent<ShaderComponent>(instancedObject);
 
 		suzanne.addComponent<BoundingVolumeComponent>(
 			std::make_shared<math::AABB>(
@@ -91,7 +107,7 @@ int main() {
 
 		suzanne.addComponent<DebugComponent>();
 
-		//suzanne.addComponent<InstanceComponent>(&pos1);
+		suzanne.addComponent<InstanceComponent>(&transform);
 
 		//Plane
 		// Models::Plane planeModel{"textures/wood.png", "textures/wood_specular.png"};
@@ -114,11 +130,11 @@ int main() {
 
 
 		// Cube
-		Models::Cube cubeModel{
-			"textures/brickwall.jpg",
-			"textures/brickwall_specular.jpg",
-			"textures/brickwall_normal.jpg"
-		};
+		// Models::Cube cubeModel{
+		// 	"textures/brickwall.jpg",
+		// 	"textures/brickwall_specular.jpg",
+		// 	"textures/brickwall_normal.jpg"
+		// };
 		// auto cube = registry.createEntity("Cube");
 		// cube.addComponent<TransformComponent>(
 		// 	glm::vec3(0.0f, 3.6f, 0.0f),
@@ -136,72 +152,27 @@ int main() {
 		// 	std::make_shared<math::AABB>(
 		// 		math::generateAABB(*cubeModel.getMeshes())));
 
+		// Helmet
+		auto helmet = registry.createEntity("Helmet");
+		helmet.addComponent<TransformComponent>(
+			glm::vec3(-1.2f, 3.3, 0.0f),
+			glm::vec3(0.0f),
+			glm::vec3(1.0f));
 
-		// Blend
-		// std::vector<glm::vec3> windows{
-		// 	glm::vec3(-4.3f, 2.0f, 1.8f),
-		// 	glm::vec3(-0.45f, 1.9f, 1.9f),
-		// 	glm::vec3(0.45f, 3.9f, 1.9f),
-		// };
-		//
-		// Models::Window windowModel{"textures/window.png"};
-		//
-		// auto window = registry.createEntity("Window");
-		// window.addComponent<TransformComponent>(
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(2.0f));
-		//
-		// window.addComponent<MeshComponent>(windowModel.getMeshes());
-		// window.addComponent<MaterialComponent>(windowModel.getTextures(), 32.0f, 1.0f,
-		//                                        TwoSided | Instanced | Transparent);
-		// window.addComponent<ShaderComponent>(
-		// 	std::make_shared<Shader>("instanced.vert", "models/blend.frag"));
-		// window.addComponent<BoundingVolumeComponent>(
-		// 	std::make_shared<math::AABB>(
-		// 		math::generateAABB(*windowModel.getMeshes())));
-		//
-		// window.addComponent<InstanceComponent>(&windows);
-		//
-		// std::vector<glm::vec3> grassess{
-		// 	glm::vec3(-4.3f, 0.0f, 1.8f),
-		// 	glm::vec3(-0.45f, 0.0f, 1.9f),
-		// 	glm::vec3(0.45f, 0.0f, 1.9f),
-		// };
-		//
-		// Models::Window grassModel{"textures/grass.png"};
-		//
-		// auto grass = registry.createEntity("Grass");
-		// grass.addComponent<TransformComponent>(
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(2.0f));
-		//
-		// grass.addComponent<MeshComponent>(grassModel.getMeshes());
-		// grass.addComponent<MaterialComponent>(grassModel.getTextures(), 32.0f, 1.0f,
-		// 									   TwoSided | Instanced | Transparent);
-		// grass.addComponent<ShaderComponent>(
-		// 	std::make_shared<Shader>("instanced.vert", "models/blend.frag"));
-		// grass.addComponent<BoundingVolumeComponent>(
-		// 	std::make_shared<math::AABB>(
-		// 		math::generateAABB(*windowModel.getMeshes())));
-		//
-		// grass.addComponent<InstanceComponent>(&grassess);
+		ResourceManager::instance().loadModel(helmet.id(), "DamagedHelmet/glTF/DamagedHelmet.gltf");
 
-		// auto angel = registry.createEntity("Anubis");
-		// angel.addComponent<TransformComponent>(
-		// 	glm::vec3(-1.2f, 3.3, 0.0f),
-		// 	glm::vec3(0.0f),
-		// 	glm::vec3(0.02f));
-		//
-		// ResourceManager::instance().loadModel(angel.id(), "anubis/Anubis.obj");
-		//
-		// angel.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(angel.id()));
-		// angel.addComponent<MaterialComponent>(ResourceManager::instance().getTextures(angel.id()), 32.0f);
-		//
-		// angel.addComponent<ShaderComponent>(object);
-		//
-		// angel.addComponent<DebugComponent>(DebugMode::None);
+		helmet.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(helmet.id()));
+		helmet.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(helmet.id()), 32.0f, 1.0f, RenderFlags::Deferred);
+
+		helmet.addComponent<ShaderComponent>(object);
+
+		helmet.addComponent<DebugComponent>();
+
+		helmet.addComponent<BoundingVolumeComponent>(
+		std::make_shared<math::AABB>(
+			math::generateAABB(*ResourceManager::instance().getMeshes(helmet.id()))));
+
+		// Sponza
 
 		auto sponza = registry.createEntity("Sponza");
 		sponza.addComponent<TransformComponent>(

@@ -7,6 +7,7 @@
 #include "lightSystem.h"
 #include "renderFlags.hpp"
 #include "renderItem.hpp"
+#include "instanceGroup.hpp"
 #include "skyboxSystem.h"
 #include "buffers/frameBuffer.h"
 #include "buffers/uniformBuffer.h"
@@ -105,7 +106,7 @@ RenderPipeline::~RenderPipeline() = default;
 PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 
 void RenderPipeline::configure(const Camera& camera) const {
-	mForwardRenderer->configure(renderQueues.opaqueInstancedEntities, renderQueues.transparentInstancedEntities);
+	mForwardRenderer->configure(renderQueues.opaqueInstancedGroup, renderQueues.blendInstancedGroup);
 	mDebugRenderer->configure(*mCameraUBO);
 
 	// Uniform buffer configuration
@@ -158,12 +159,12 @@ void RenderPipeline::render(const Camera& camera) {
 	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueItems, mShadowManager->getShadowMaps());
 
 	mDebugRenderer->render(renderQueues.debugEntities);
-	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedEntities, mShadowManager->getShadowMaps());
+	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedGroup, mShadowManager->getShadowMaps());
 
 	mSkyboxSystem->render(camera);
 
 	mForwardRenderer->transparentPass(renderQueues.blendItems);
-	mForwardRenderer->transparentInstancedPass(renderQueues.transparentInstancedEntities);
+	mForwardRenderer->transparentInstancedPass(renderQueues.blendInstancedGroup);
 	endSceneRender();
 #ifdef HDR
 	mPostProcess->render(mHDRBuffer->texture());
@@ -189,7 +190,7 @@ void RenderPipeline::updateBuffers(const Camera& camera) const {
 void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 	const math::Frustum& frustum = camera.frustum();
 
-	auto cullItems = [&](const std::unordered_map<const Shader*, std::vector<RenderItem>>& renderItems) {
+	auto cullItems = [&](const std::unordered_map<const Shader*, std::vector<RenderItem> >& renderItems) {
 		for (const auto& [shader, items]: renderItems) {
 			for (auto& item: items) {
 				auto& bvc = item.entity->getComponent<BoundingVolumeComponent>();
@@ -199,10 +200,9 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 
 				if (!bvc.isVisible) return;
 				item.mesh->setVisible(aabb->isMeshInFrustum(frustum, item.mesh->min(), item.mesh->max(),
-															tc.position, tc.rotation, tc.scale));
+				                                            tc.position, tc.rotation, tc.scale));
 			}
 		}
-
 	};
 
 	cullItems(renderQueues.forwardOpaqueItems);
@@ -242,43 +242,58 @@ void RenderPipeline::endSceneRender() const {
 
 void RenderPipeline::batchEntities(const Entity& entity) {
 	const auto& matc = entity.getComponent<MaterialComponent>();
-
-	// if (matc.flag == RenderFlags::Instanced) {
-	// 	if (matc.flags & Blend) {
-	// 		renderQueues.transparentInstancedEntities.push_back(entity);
-	// 	} else {
-	// 		renderQueues.opaqueInstancedEntities.push_back(entity);
-	// 	}
-	// 	return;
-	// }
-
 	const auto& shader = *entity.getComponent<ShaderComponent>().shader;
+	const auto& ic = entity.getComponent<InstanceComponent>();
 	const auto& materials = entity.getComponent<MaterialComponent>().materials;
 
 	for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
 		const auto& material = materials->at(matID);
 
+		if (matc.flag == RenderFlags::Instanced) {
+			std::vector<const Mesh*> instanceMeshes;
+
+			for (auto& mesh: meshes) {
+				instanceMeshes.push_back(&mesh);
+
+				// if (material.flag & CastShadow) {
+				// 	RenderItem renderItem{&entity, &mesh, &material};
+				// 	renderQueues.shadowCasters.push_back(renderItem);
+				// }
+			}
+			std::vector<MaterialBatch> instanceMaterials;
+			instanceMaterials.emplace_back(&material, &shader, instanceMeshes);
+
+			InstanceGroup instance{&entity, ic.transforms, instanceMaterials};
+
+			if (material.flag & Blend) {
+				renderQueues.blendInstancedGroup.push_back(instance);
+			} else {
+				renderQueues.opaqueInstancedGroup.push_back(instance);
+			}
+			continue;
+		}
+
 		for (auto& mesh: meshes) {
-			RenderItem item{&entity, &mesh, &material};
+			RenderItem renderItem{&entity, &mesh, &material};
 
 			if (entity.hasComponent<DebugComponent>()) {
-				renderQueues.debugEntities.push_back(item);
+				renderQueues.debugEntities.push_back(renderItem);
 			}
 
 			if (material.flag & CastShadow) {
-				renderQueues.shadowCasters.push_back(item);
+				renderQueues.shadowCasters.push_back(renderItem);
 			}
 
 			if (material.flag & Opaque) {
 				if (matc.flag == RenderFlags::Forward) {
-					renderQueues.forwardOpaqueItems[&shader].push_back(item);
+					renderQueues.forwardOpaqueItems[&shader].push_back(renderItem);
 				} else {
-					renderQueues.deferredItems[&shader].push_back(item);
+					renderQueues.deferredItems[&shader].push_back(renderItem);
 				}
 			} else if (material.flag & Cutout) {
-				renderQueues.forwardOpaqueItems[&shader].push_back(item);
+				renderQueues.forwardOpaqueItems[&shader].push_back(renderItem);
 			} else if (material.flag & Blend) {
-				renderQueues.blendItems[&shader].push_back(item);
+				renderQueues.blendItems[&shader].push_back(renderItem);
 			}
 		}
 	}
@@ -309,17 +324,20 @@ void RenderPipeline::sortEntities(const Camera& camera) {
 	sortBatches(renderQueues.forwardOpaqueItems, false);
 	sortBatches(renderQueues.blendItems, true);
 
-	for (auto& entity: renderQueues.transparentInstancedEntities) {
-		const auto& positions = entity.getComponent<InstanceComponent>().positions;
-
-		std::sort(
-			positions->begin(),
-			positions->end(),
-			[&camPos](const glm::vec3& a, const glm::vec3& b) {
-				const float da = glm::length2(camPos - a);
-				const float db = glm::length2(camPos - b);
-				return da > db; // back to front
-			}
-		);
-	}
+	// for (auto& [transforms, materials]: renderQueues.blendInstancedGroup) {
+	// 	auto transform = *transforms;
+	//
+	// 	for (int i = 0; i < transform.size(); i += 9) {
+	// 		glm::vec3 pos{transform[i], transform[i + 1], transform[i + 2]};
+	// 		std::sort(
+	// 			positions->begin(),
+	// 			positions->end(),
+	// 			[&camPos](const glm::vec3& a, const glm::vec3& b) {
+	// 				const float da = glm::length2(camPos - a);
+	// 				const float db = glm::length2(camPos - b);
+	// 				return da > db; // back to front
+	// 			}
+	// 		);
+	// 	}
+	// }
 }

@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include "../ECS/system.hpp"
 
+struct InstanceGroup;
 struct RenderItem;
 class Mesh;
 class Shader;
@@ -68,8 +69,8 @@ private:
 
 	// Render queue
 	struct {
-		std::vector<Entity> transparentInstancedEntities;
-		std::vector<Entity> opaqueInstancedEntities;
+		std::vector<InstanceGroup> opaqueInstancedGroup;
+		std::vector<InstanceGroup> blendInstancedGroup;
 		std::vector<RenderItem> debugEntities;
 		std::vector<RenderItem> shadowCasters;
 		std::unordered_map<const Shader*, std::vector<RenderItem>> forwardOpaqueItems;
