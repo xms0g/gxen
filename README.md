@@ -7,14 +7,14 @@ Itâ€™s designed for clarity, experimentation, and real-time graphics research â€
 - **Opaque & Transparent Rendering**
   - Opaque objects go through Deferred or Forward (depending on your selected pipeline).
   Transparent objects always render in the Forward pipeline to keep blending sane.
-- **Instanced Rendering**
-  - Works for both opaque and transparent objects.
+- **Instanced Rendering (GPU Instancing)**
+  - Efficiently draw many copies of the same mesh in a single draw call.
 - **Lighting & Shadows**
   - Directional Light + Shadow Mapping
   - Point Light + Shadow Mapping (cubemap-based)
   - Spot Light + Shadow Mapping
 - **HDR Rendering**
-  - Full HDR workflow ready for post-processing.
+  - Full HDR workflow with tone mapping and manual exposure control.
 - **Entity Component System (ECS)**
   - Lightweight, simple, and gets out of your way.
 - **Frustum Culling**

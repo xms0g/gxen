@@ -51,7 +51,7 @@ int main() {
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
 		skybox.addComponent<SkyboxComponent>();
-		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f, 1.0f, RenderFlags::Forward);
+		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f, 1.0f, RenderFlags::Deferred);
 		skybox.addComponent<MeshComponent>(skyboxModel.getMeshes());
 		skybox.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("skybox.vert", "skybox.frag"));
@@ -60,32 +60,50 @@ int main() {
 		auto object = std::make_shared<Shader>("object.vert", "object.frag");
 
 		//
-		std::vector<float> transform = {
+		std::vector<float> transforms = {
 			// Instance 0
-			-20.0f, 1.0f, 0.0f,      // position
-			0.0f, 0.0f, 0.0f,      // rotation
-			1.0f, 1.0f, 1.0f,      // scale
-
+			-10.8f, 1.3f, -1.2f,      95.0f,  12.0f, 270.0f,    1,1,1,
 			// Instance 1
-			-22.0f, 1.0f, -3.0f,     // position
-			0.0f, 45.0f, 0.0f,     // rotation
-			1.0f, 1.0f, 1.0f,      // scale
-
+			-10.4f, 1.2f,  2.7f,     130.0f, 340.0f,  22.0f,    1,1,1,
 			// Instance 2
-			-21.5f, 1.0f, 4.0f,     // position
-			90.0f, 0.0f, 0.0f,     // rotation
-			1.0f, 1.0f, 1.0f,      // scale
-
+			-10.5f, 1.1f,  0.5f,     250.0f,  80.0f, 190.0f,    1,1,1,
 			// Instance 3
-			-23.0f, 1.0f, 1.0f,     // position
-			0.0f, 30.0f, 10.0f,    // rotation
-			1.0f, 1.0f, 1.0f,      // scale
-
+			-10.3f, 1.9f, -2.6f,     310.0f,  10.0f,  45.0f,    1,1,1,
 			// Instance 4
-			-23.0f, 1.0f, -2.0f,    // position
-			45.0f, 45.0f, 45.0f,   // rotation
-			1.0f, 1.0f, 1.0f       // scale
+			-10.2f, 1.0f,  1.8f,     180.0f, 300.0f,  15.0f,    1,1,1,
+			// Instance 5
+			-10.1f, 1.4f, -0.8f,      60.0f,  45.0f, 310.0f,    1,1,1,
+			// Instance 6
+			-10.9f, 1.5f, -3.1f,     350.0f, 120.0f,  70.0f,    1,1,1,
+			// Instance 7
+			-10.7f, 1.2f,  0.0f,     210.0f,  33.0f,  10.0f,    1,1,1,
+			// Instance 8
+			-10.9f, 1.7f,  2.4f,     145.0f, 200.0f, 310.0f,    1,1,1,
+			// Instance 9
+			-10.9f, 1.1f, -1.7f,      25.0f,  88.0f, 132.0f,    1,1,1,
+			// Instance 10
+			-10.4f, 1.3f,  0.9f,     300.0f, 260.0f,  50.0f,    1,1,1,
+			// Instance 11
+			-10.2f, 1.5f, -0.5f,     110.0f, 170.0f, 256.0f,    1,1,1,
+			// Instance 12
+			-10.1f, 1.0f, -3.0f,     270.0f,  30.0f, 200.0f,    1,1,1,
+			// Instance 13
+			-10.4f, 1.6f,  1.3f,      34.0f, 300.0f,  99.0f,    1,1,1,
+			// Instance 14
+			-10.8f, 1.3f,  0.4f,     190.0f, 210.0f, 140.0f,    1,1,1,
+			// Instance 15
+			-10.0f, 1.2f, -2.1f,     360.0f,  44.0f,  18.0f,    1,1,1,
+			// Instance 16
+			-10.7f, 1.0f,  3.0f,      77.0f, 180.0f, 350.0f,    1,1,1,
+			// Instance 17
+			-10.9f, 1.4f, -0.2f,     150.0f, 330.0f,  65.0f,    1,1,1,
+			// Instance 18
+			-10.0f, 1.8f,  1.6f,      12.0f,  99.0f, 280.0f,    1,1,1,
+			// Instance 19
+			-10.6f, 1.1f, -1.0f,     205.0f,  70.0f,  30.0f,    1,1,1,
 		};
+
+
 
 		// Suzanne
 		auto suzanne = registry.createEntity("Suzanne");
@@ -97,9 +115,10 @@ int main() {
 		ResourceManager::instance().loadModel(suzanne.id(), "Suzanne/glTF/Suzanne.gltf");
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
-		suzanne.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0, RenderFlags::Instanced);
+		suzanne.addComponent<MaterialComponent>(
+			ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0, RenderFlags::Deferred);
 
-		suzanne.addComponent<ShaderComponent>(instancedObject);
+		suzanne.addComponent<ShaderComponent>(object);
 
 		suzanne.addComponent<BoundingVolumeComponent>(
 			std::make_shared<math::AABB>(
@@ -107,7 +126,7 @@ int main() {
 
 		suzanne.addComponent<DebugComponent>();
 
-		suzanne.addComponent<InstanceComponent>(&transform);
+		//suzanne.addComponent<InstanceComponent>(&transforms);
 
 		//Plane
 		// Models::Plane planeModel{"textures/wood.png", "textures/wood_specular.png"};
@@ -162,7 +181,8 @@ int main() {
 		ResourceManager::instance().loadModel(helmet.id(), "DamagedHelmet/glTF/DamagedHelmet.gltf");
 
 		helmet.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(helmet.id()));
-		helmet.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(helmet.id()), 32.0f, 1.0f, RenderFlags::Deferred);
+		helmet.addComponent<MaterialComponent>(
+			ResourceManager::instance().getMaterial(helmet.id()), 32.0f, 1.0f, RenderFlags::Deferred);
 
 		helmet.addComponent<ShaderComponent>(object);
 
@@ -183,7 +203,8 @@ int main() {
 		ResourceManager::instance().loadModel(sponza.id(), "Sponza/glTF/Sponza.gltf");
 
 		sponza.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(sponza.id()));
-		sponza.addComponent<MaterialComponent>(ResourceManager::instance().getMaterial(sponza.id()), 32.0f, 1.0f, RenderFlags::Deferred);
+		sponza.addComponent<MaterialComponent>(
+			ResourceManager::instance().getMaterial(sponza.id()), 32.0f, 1.0f, RenderFlags::Deferred);
 
 		sponza.addComponent<ShaderComponent>(object);
 
