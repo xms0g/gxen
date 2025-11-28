@@ -1,6 +1,5 @@
 #pragma once
 #include <memory>
-#include <unordered_map>
 #include "../ECS/system.hpp"
 
 struct InstanceGroup;
@@ -43,7 +42,7 @@ private:
 
 	void endSceneRender() const;
 
-	void batchEntities(const Entity& entity);
+	void batchEntity(const Entity& entity);
 
 	void sortEntities(const Camera& camera);
 	// Systems

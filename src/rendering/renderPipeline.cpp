@@ -135,7 +135,7 @@ void RenderPipeline::configure(const Camera& camera) const {
 
 void RenderPipeline::batchEntities() {
 	for (const auto& entity: getSystemEntities()) {
-		batchEntities(entity);
+		batchEntity(entity);
 	}
 }
 
@@ -196,10 +196,10 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 			const auto& tc = entity->getComponent<TransformComponent>();
 			const auto& aabb = bvc.bv;
 
-			for (auto& [material, shader, meshes]: matBatch) {
-				bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
-				if (!bvc.isVisible) return;
+			bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
+			if (!bvc.isVisible) return;
 
+			for (auto& [material, shader, meshes]: matBatch) {
 				for (auto& mesh: *meshes) {
 					mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(),
 					                                      tc.position, tc.rotation, tc.scale));
@@ -243,7 +243,7 @@ void RenderPipeline::endSceneRender() const {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderPipeline::batchEntities(const Entity& entity) {
+void RenderPipeline::batchEntity(const Entity& entity) {
 	const auto& matc = entity.getComponent<MaterialComponent>();
 	const auto& shader = *entity.getComponent<ShaderComponent>().shader;
 	const auto& materials = entity.getComponent<MaterialComponent>().materials;
