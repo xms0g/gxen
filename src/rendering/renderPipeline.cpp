@@ -246,7 +246,6 @@ void RenderPipeline::endSceneRender() const {
 void RenderPipeline::batchEntities(const Entity& entity) {
 	const auto& matc = entity.getComponent<MaterialComponent>();
 	const auto& shader = *entity.getComponent<ShaderComponent>().shader;
-	const auto& ic = entity.getComponent<InstanceComponent>();
 	const auto& materials = entity.getComponent<MaterialComponent>().materials;
 
 	for (auto& [matID, meshes]: *entity.getComponent<MeshComponent>().meshes) {
@@ -255,6 +254,7 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 		matBatch.emplace_back(&material, &shader, &meshes);
 
 		if (matc.flag == RenderFlags::Instanced) {
+			const auto& ic = entity.getComponent<InstanceComponent>();
 			InstanceGroup instance{&entity, ic.transforms, matBatch};
 
 			if (material.flag & Blend) {
