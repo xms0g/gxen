@@ -106,7 +106,7 @@ RenderPipeline::~RenderPipeline() = default;
 PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 
 void RenderPipeline::configure(const Camera& camera) const {
-	mForwardRenderer->configure(renderQueues.opaqueInstancedGroup, renderQueues.blendInstancedGroup);
+	mForwardRenderer->configure(renderQueues.opaqueInstancedGroups, renderQueues.blendInstancedGroups);
 	mDebugRenderer->configure(*mCameraUBO);
 
 	// Uniform buffer configuration
@@ -145,10 +145,10 @@ void RenderPipeline::render(const Camera& camera) {
 	sortEntities(camera);
 
 	mLightSystem->update();
-	mShadowManager->shadowPass(renderQueues.shadowCasters, *mLightSystem);
+	mShadowManager->shadowPass(renderQueues.shadowCasterGroups, *mLightSystem);
 
 	beginSceneRender();
-	mDeferredRenderer->geometryPass(renderQueues.deferredItems, *mGBuffer, *mGShader);
+	mDeferredRenderer->geometryPass(renderQueues.deferredGroups, *mGBuffer, *mGShader);
 # ifdef HDR
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mHDRBuffer,
 	                                *mDeferredLigthingShader);
@@ -156,15 +156,15 @@ void RenderPipeline::render(const Camera& camera) {
 	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer,
 	                                *mDeferredLigthingShader);
 # endif
-	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueItems, mShadowManager->getShadowMaps());
+	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueGroups, mShadowManager->getShadowMaps());
 
-	mDebugRenderer->render(renderQueues.debugEntities);
-	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedGroup, mShadowManager->getShadowMaps());
+	mDebugRenderer->render(renderQueues.debugGroups);
+	mForwardRenderer->opaqueInstancedPass(renderQueues.opaqueInstancedGroups, mShadowManager->getShadowMaps());
 
 	mSkyboxSystem->render(camera);
 
-	mForwardRenderer->transparentPass(renderQueues.blendItems);
-	mForwardRenderer->transparentInstancedPass(renderQueues.blendInstancedGroup);
+	mForwardRenderer->transparentPass(renderQueues.blendGroups);
+	mForwardRenderer->transparentInstancedPass(renderQueues.blendInstancedGroups);
 	endSceneRender();
 #ifdef HDR
 	mPostProcess->render(mHDRBuffer->texture());
@@ -208,9 +208,9 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 		}
 	};
 
-	cullItems(renderQueues.forwardOpaqueItems);
-	cullItems(renderQueues.deferredItems);
-	cullItems(renderQueues.blendItems);
+	cullItems(renderQueues.forwardOpaqueGroups);
+	cullItems(renderQueues.deferredGroups);
+	cullItems(renderQueues.blendGroups);
 }
 
 void RenderPipeline::beginSceneRender() const {
@@ -258,9 +258,9 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 			InstanceGroup instance{&entity, ic.transforms, matBatch};
 
 			if (material.flag & Blend) {
-				renderQueues.blendInstancedGroup.push_back(instance);
+				renderQueues.blendInstancedGroups.push_back(instance);
 			} else {
-				renderQueues.opaqueInstancedGroup.push_back(instance);
+				renderQueues.opaqueInstancedGroups.push_back(instance);
 			}
 			continue;
 		}
@@ -268,23 +268,23 @@ void RenderPipeline::batchEntities(const Entity& entity) {
 		RenderGroup group{&entity, matBatch};
 
 		if (entity.hasComponent<DebugComponent>()) {
-			renderQueues.debugEntities.push_back(group);
+			renderQueues.debugGroups.push_back(group);
 		}
 
 		if (material.flag & CastShadow) {
-			renderQueues.shadowCasters.push_back(group);
+			renderQueues.shadowCasterGroups.push_back(group);
 		}
 
 		if (material.flag & Opaque) {
 			if (matc.flag == RenderFlags::Forward) {
-				renderQueues.forwardOpaqueItems.push_back(group);
+				renderQueues.forwardOpaqueGroups.push_back(group);
 			} else {
-				renderQueues.deferredItems.push_back(group);
+				renderQueues.deferredGroups.push_back(group);
 			}
 		} else if (material.flag & Cutout) {
-			renderQueues.forwardOpaqueItems.push_back(group);
+			renderQueues.forwardOpaqueGroups.push_back(group);
 		} else if (material.flag & Blend) {
-			renderQueues.blendItems.push_back(group);
+			renderQueues.blendGroups.push_back(group);
 		}
 	}
 }
@@ -307,9 +307,9 @@ void RenderPipeline::sortEntities(const Camera& camera) {
 	};
 
 	// Sort opaque objects front to back
-	sortBatches(renderQueues.deferredItems, false);
-	sortBatches(renderQueues.forwardOpaqueItems, false);
-	sortBatches(renderQueues.blendItems, true);
+	sortBatches(renderQueues.deferredGroups, false);
+	sortBatches(renderQueues.forwardOpaqueGroups, false);
+	sortBatches(renderQueues.blendGroups, true);
 
 	// for (auto& [entity, transforms, materials]: renderQueues.blendInstancedGroup) {
 	// 	auto transform = *transforms;

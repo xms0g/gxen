@@ -69,12 +69,12 @@ private:
 
 	// Render queue
 	struct {
-		std::vector<InstanceGroup> opaqueInstancedGroup;
-		std::vector<InstanceGroup> blendInstancedGroup;
-		std::vector<RenderGroup> debugEntities;
-		std::vector<RenderGroup> shadowCasters;
-		std::vector<RenderGroup> forwardOpaqueItems;
-		std::vector<RenderGroup> deferredItems;
-		std::vector<RenderGroup> blendItems;
+		std::vector<InstanceGroup> opaqueInstancedGroups;
+		std::vector<InstanceGroup> blendInstancedGroups;
+		std::vector<RenderGroup> debugGroups;
+		std::vector<RenderGroup> shadowCasterGroups;
+		std::vector<RenderGroup> forwardOpaqueGroups;
+		std::vector<RenderGroup> deferredGroups;
+		std::vector<RenderGroup> blendGroups;
 	} renderQueues;
 };

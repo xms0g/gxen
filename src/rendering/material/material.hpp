@@ -21,5 +21,5 @@ struct Material {
 struct MaterialBatch {
 	const Material* material{};
 	const Shader* shader{};
-	std::vector<Mesh>* meshes;
+	std::vector<Mesh>* meshes{};
 };
