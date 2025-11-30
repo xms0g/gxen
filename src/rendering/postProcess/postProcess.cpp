@@ -7,6 +7,7 @@
 #include "sharpen.h"
 #include "toneMapping.h"
 #include "edgeDetection.h"
+#include "fxaa.h"
 #include "../shader.h"
 #include "../renderers/renderCommon.h"
 #include "../buffers/frameBuffer.h"
@@ -21,7 +22,8 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 		std::make_shared<Blur>("Blur", false),
 		std::make_shared<Bloom>("Bloom", width, height, false),
 		std::make_shared<ToneMapping>("Tone Mapping", false, 1.1f),
-		std::make_shared<Gamma>("Gamma Correction", true)
+		std::make_shared<FXAA>("FXAA", false),
+		std::make_shared<Gamma>("Gamma Correction", true),
 	};
 
 	for (auto& target: renderTargets) {

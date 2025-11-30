@@ -15,8 +15,6 @@ Itâ€™s designed for clarity, experimentation, and real-time graphics research â€
   - Spot Light + Shadow Mapping
 - **HDR Rendering**
   - Full HDR workflow with tone mapping and manual exposure control.
-- **Entity Component System (ECS)**
-  - Lightweight, simple, and gets out of your way.
 - **Frustum Culling**
   - Per-entity and per-mesh culling.
 - **Skybox Rendering** 
@@ -26,8 +24,12 @@ Itâ€™s designed for clarity, experimentation, and real-time graphics research â€
 - **Rendering Infrastructure**
   - Framebuffers
   - Uniform Buffers
+- **Anti-Aliasing**
+  - FXAA 
 - **Post-Processing**
   - Modular, extendable post-FX chain (bloom, blur, tone mapping, gamma, etc.)
+- **Entity Component System (ECS)**
+    - Data-oriented architecture for flexible, efficient game objects.
 - **Debug Tools**
   - Normal visualization
   - Wireframe mode
