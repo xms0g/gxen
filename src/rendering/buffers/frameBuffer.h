@@ -52,6 +52,8 @@ public:
 private:
 	void setAttachment(uint32_t textureID, uint32_t target);
 
+	void setDepthTextureParameters(uint32_t target, int dim);
+
 	int mWidth{0};
 	int mHeight{0};
 	uint32_t mFBO{0};
