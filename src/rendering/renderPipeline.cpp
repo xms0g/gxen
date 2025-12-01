@@ -66,7 +66,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mSceneBuffer->bind();
 	mSceneBuffer->withTexture16FMultisampled(MULTISAMPLED_COUNT)
 # else
-	mIntermediateBuffer->bind();
 	mIntermediateBuffer->withTexture()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
