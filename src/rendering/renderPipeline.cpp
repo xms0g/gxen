@@ -60,7 +60,7 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mHDRBuffer->unbind();
 #else
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-# ifdef ANTIALIASING
+# ifdef MSAA
 	glEnable(GL_MULTISAMPLE);
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
 	mIntermediateBuffer->withTexture()
@@ -78,22 +78,22 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 			.checkStatus();
 	mSceneBuffer->unbind();
 #endif
-
+#ifdef DEFERRED
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
 			.withTexture16F()
-#ifdef HDR
+# ifdef HDR
 			.withTexture16F()
-#else
+# else
 			.withTexture()
-#endif
+# endif
 			.configureAttachments()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
 	mDeferredLigthingShader = std::make_unique<Shader>("models/quad.vert", "deferred/lighting.frag");
 	mGShader = std::make_unique<Shader>("deferred/gbuffer.vert", "deferred/gbuffer.frag");
 	mDeferredRenderer = std::make_unique<DeferredRenderer>(*mDeferredLigthingShader);
-
+#endif
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
 	mForwardRenderer = std::make_unique<ForwardRenderer>();
@@ -149,16 +149,18 @@ void RenderPipeline::render(const Camera& camera) {
 	mShadowManager->shadowPass(renderQueues.shadowCasterGroups, *mLightSystem);
 
 	beginSceneRender();
+#ifdef DEFERRED
 	mDeferredRenderer->geometryPass(renderQueues.deferredGroups, *mGBuffer, *mGShader);
 	mDeferredRenderer->lightingPass(
 		mShadowManager->getShadowMaps(),
 		*mGBuffer,
-#ifdef HDR
+# ifdef HDR
 		*mHDRBuffer,
-#else
+# else
 		*mSceneBuffer,
-#endif
+# endif
 		*mDeferredLigthingShader);
+#endif
 
 	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueGroups, mShadowManager->getShadowMaps());
 
@@ -173,7 +175,7 @@ void RenderPipeline::render(const Camera& camera) {
 #ifdef HDR
 	mPostProcess->render(mHDRBuffer->texture());
 #else
-# ifdef ANTIALIASING
+# ifdef MSAA
 	mPostProcess->render(mIntermediateBuffer->texture());
 # else
 	mPostProcess->render(mSceneBuffer->texture());
@@ -235,7 +237,7 @@ void RenderPipeline::endSceneRender() const {
 	mHDRBuffer->unbind();
 #else
 	mSceneBuffer->unbind();
-# ifdef ANTIALIASING
+# ifdef MSAA
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(),
