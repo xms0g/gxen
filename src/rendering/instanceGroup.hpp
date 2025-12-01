@@ -3,6 +3,7 @@
 
 class Shader;
 class Mesh;
+class Entity;
 
 struct InstanceGroup {
 	const Entity* entity;
