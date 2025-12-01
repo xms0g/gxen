@@ -15,15 +15,15 @@
 
 PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
 	mEffects = {
+		std::make_shared<Blur>("Blur", false),
+		std::make_shared<Bloom>("Bloom", width, height, false),
+		std::make_shared<ToneMapping>("Tone Mapping", false, 1.1f),
 		std::make_shared<Grayscale>("Grayscale", false),
 		std::make_shared<Sepia>("Sepia", false),
 		std::make_shared<EdgeDetection>("Edge Detection", false),
 		std::make_shared<Sharpen>("Sharpen", false),
-		std::make_shared<Blur>("Blur", false),
-		std::make_shared<Bloom>("Bloom", width, height, false),
-		std::make_shared<ToneMapping>("Tone Mapping", false, 1.1f),
-		std::make_shared<FXAA>("FXAA", false),
 		std::make_shared<Gamma>("Gamma Correction", true),
+		std::make_shared<FXAA>("FXAA", false),
 	};
 
 	for (auto& target: renderTargets) {
