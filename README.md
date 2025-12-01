@@ -25,7 +25,7 @@ Itâ€™s designed for clarity, experimentation, and real-time graphics research â€
   - Framebuffers
   - Uniform Buffers
 - **Anti-Aliasing**
-  - MSAA (only avaliable in forward pipeline) 
+  - MSAA (only avaliable in the forward pipeline) 
   - FXAA 
 - **Post-Processing**
   - Modular, extendable post-FX chain (bloom, blur, tone mapping, gamma, etc.)
