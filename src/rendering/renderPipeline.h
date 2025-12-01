@@ -57,7 +57,6 @@ private:
 
 	// Frame Buffers
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
-	std::unique_ptr<FrameBuffer> mHDRBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
 	std::unique_ptr<FrameBuffer> mGBuffer;
 	// Uniform Buffers

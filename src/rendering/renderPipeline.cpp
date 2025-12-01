@@ -52,17 +52,21 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	registry->addSystem<SkyboxSystem>();
 	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
-#ifdef HDR
-	mHDRBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-	mHDRBuffer->withTexture16F()
-			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
-			.checkStatus();
-	mHDRBuffer->unbind();
-#else
+
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-# ifdef MSAA
+#ifdef MSAA
 	glEnable(GL_MULTISAMPLE);
 	mIntermediateBuffer = std::make_unique<FrameBuffer>(mSceneBuffer->width(), mSceneBuffer->height());
+# ifdef HDR
+	mIntermediateBuffer->withTexture16F()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
+			.checkStatus();
+	mIntermediateBuffer->unbind();
+
+	mSceneBuffer->bind();
+	mSceneBuffer->withTexture16FMultisampled(MULTISAMPLED_COUNT)
+# else
+	mIntermediateBuffer->bind();
 	mIntermediateBuffer->withTexture()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
@@ -70,14 +74,19 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	mSceneBuffer->bind();
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
+# endif
 			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
+#else
+# ifdef HDR
+	mSceneBuffer->withTexture16F()
 # else
 	mSceneBuffer->withTexture()
-			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 # endif
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
+#endif
 			.checkStatus();
 	mSceneBuffer->unbind();
-#endif
+
 #ifdef DEFERRED
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
@@ -109,13 +118,13 @@ PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
 void RenderPipeline::configure(const Camera& camera) const {
 	mForwardRenderer->configure(renderQueues.opaqueInstancedGroups, renderQueues.blendInstancedGroups);
 	mDebugRenderer->configure(*mCameraUBO);
-
+#ifdef DEFERRED
 	// Uniform buffer configuration
 	mCameraUBO->configure(mGShader->ID(), 0, "CameraBlock");
 	mCameraUBO->configure(mDeferredLigthingShader->ID(), 0, "CameraBlock");
 	mLightSystem->getLightUBO().configure(mDeferredLigthingShader->ID(), 1, "LightBlock");
 	mShadowManager->getShadowUBO().configure(mDeferredLigthingShader->ID(), 2, "ShadowBlock");
-
+#endif
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
 
@@ -151,17 +160,8 @@ void RenderPipeline::render(const Camera& camera) {
 	beginSceneRender();
 #ifdef DEFERRED
 	mDeferredRenderer->geometryPass(renderQueues.deferredGroups, *mGBuffer, *mGShader);
-	mDeferredRenderer->lightingPass(
-		mShadowManager->getShadowMaps(),
-		*mGBuffer,
-# ifdef HDR
-		*mHDRBuffer,
-# else
-		*mSceneBuffer,
-# endif
-		*mDeferredLigthingShader);
+	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer, *mDeferredLigthingShader);
 #endif
-
 	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueGroups, mShadowManager->getShadowMaps());
 
 	mDebugRenderer->render(renderQueues.debugGroups);
@@ -172,15 +172,12 @@ void RenderPipeline::render(const Camera& camera) {
 	mForwardRenderer->transparentPass(renderQueues.blendGroups);
 	mForwardRenderer->transparentInstancedPass(renderQueues.blendInstancedGroups);
 	endSceneRender();
-#ifdef HDR
-	mPostProcess->render(mHDRBuffer->texture());
-#else
-# ifdef MSAA
+#ifdef MSAA
 	mPostProcess->render(mIntermediateBuffer->texture());
-# else
+#else
 	mPostProcess->render(mSceneBuffer->texture());
-# endif
 #endif
+
 }
 
 void RenderPipeline::updateBuffers(const Camera& camera) const {
@@ -220,11 +217,7 @@ void RenderPipeline::frustumCullingPass(const Camera& camera) const {
 }
 
 void RenderPipeline::beginSceneRender() const {
-#ifdef HDR
-	mHDRBuffer->bind();
-#else
 	mSceneBuffer->bind();
-#endif
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
@@ -233,17 +226,13 @@ void RenderPipeline::beginSceneRender() const {
 }
 
 void RenderPipeline::endSceneRender() const {
-#ifdef HDR
-	mHDRBuffer->unbind();
-#else
 	mSceneBuffer->unbind();
-# ifdef MSAA
+#ifdef MSAA
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(),
 	                  0, 0, mIntermediateBuffer->width(), mIntermediateBuffer->height(),
 	                  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-# endif
 #endif
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

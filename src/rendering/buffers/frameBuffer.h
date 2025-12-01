@@ -29,6 +29,8 @@ public:
 
 	FrameBuffer& withTexture16F();
 
+	FrameBuffer& withTexture16FMultisampled(int multisampledCount);
+
 	FrameBuffer& withTextureDepth();
 
 	FrameBuffer& withTextureArrayDepth(int layerCount);

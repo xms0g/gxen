@@ -88,6 +88,20 @@ FrameBuffer& FrameBuffer::withTexture16F() {
 	return *this;
 }
 
+FrameBuffer& FrameBuffer::withTexture16FMultisampled(const int multisampledCount) {
+	uint32_t textureID;
+	glGenTextures(1, &textureID);
+	mTextureIDs.push_back(textureID);
+
+	glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureID);
+	glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, multisampledCount, GL_RGBA16F, mWidth, mHeight, GL_TRUE);
+
+	setAttachment(textureID, GL_TEXTURE_2D_MULTISAMPLE);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return *this;
+}
+
 FrameBuffer& FrameBuffer::withTextureDepth() {
 	uint32_t textureID;
 	glGenTextures(1, &textureID);
