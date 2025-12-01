@@ -68,9 +68,10 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 			.checkStatus();
 	mIntermediateBuffer->unbind();
 
+	mSceneBuffer->bind();
 	mSceneBuffer->withTextureMultisampled(MULTISAMPLED_COUNT)
 			.withRenderBufferDepthMultisampled(MULTISAMPLED_COUNT, GL_DEPTH_COMPONENT24)
-#else
+# else
 	mSceneBuffer->withTexture()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 # endif
@@ -81,11 +82,11 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 	mGBuffer->withTexture16F()
 			.withTexture16F()
-# ifdef HDR
+#ifdef HDR
 			.withTexture16F()
-# else
+#else
 			.withTexture()
-# endif
+#endif
 			.configureAttachments()
 			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
 			.checkStatus();
