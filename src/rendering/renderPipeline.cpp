@@ -233,7 +233,7 @@ void RenderPipeline::batchEntity(const Entity& entity) {
 		std::vector<MaterialBatch> matBatch;
 		matBatch.emplace_back(&material, &shader, &meshes);
 
-		if (matc.flag == RenderFlags::Instanced) {
+		if (matc.flag & Instanced) {
 			const auto& ic = entity.getComponent<InstanceComponent>();
 			InstanceGroup instance{&entity, ic.transforms, matBatch};
 
@@ -256,7 +256,7 @@ void RenderPipeline::batchEntity(const Entity& entity) {
 		}
 
 		if (material.flag & Opaque) {
-			if (matc.flag == RenderFlags::Forward) {
+			if (matc.flag & Forward) {
 				renderQueues.forwardOpaqueGroups.push_back(group);
 			} else {
 				renderQueues.deferredGroups.push_back(group);
