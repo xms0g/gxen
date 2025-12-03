@@ -79,29 +79,45 @@ uint32_t texture::loadCubemap(const std::vector<std::string>& faces) {
 
 uint32_t texture::detectAlphaMode(const char* path) {
 	int width, height, channel;
-	unsigned char* data = stbi_load(path, &width, &height, &channel, 0);
+	unsigned char* data = stbi_load(path, &width, &height, &channel, 4);
 
-	if (channel == 3)
-		return Opaque | CastShadow;
+	if (!data) {
+		// Handle error: stbi_load failed (e.g., file not found or corrupted)
+		return Opaque | CastShadow; // Safe default
+	}
 
-	bool hasTransparent{false};
+	bool hasTranslucentPixel = false;
+	bool hasTransparentPixel = false;
 
 	for (int i = 0; i < width * height; i++) {
-		const float a = data[i * channel + 3] / 255.0f;
+		constexpr int NUM_CHANNELS = 4;
+		// Alpha channel is at index 3 in the 4-channel data
+		const float a = data[i * NUM_CHANNELS + 3] / 255.0f;
 
-		if (a <= 0.01f)
-			hasTransparent = true;
+		if (a < 0.99f && a > 0.01f) {
+			// Found a non-binary alpha value (translucency)
+			hasTranslucentPixel = true;
+			break; // Early exit, it must be Blend
+		}
 
-		if (a > 0.01f && a < 0.99f) {
-			stbi_image_free(data);
-			return Blend; // early exit
+		if (a <= 0.01f) {
+			// Found a fully transparent pixel (used for Cutout)
+			hasTransparentPixel = true;
 		}
 	}
 
 	stbi_image_free(data);
 
-	if (hasTransparent)
-		return Cutout | CastShadow; // binary alpha only
+	if (hasTranslucentPixel) {
+		return Blend;
+	}
 
+	if (hasTransparentPixel) {
+		// No translucent pixels found, but fully transparent pixels exist.
+		// This is the definition of binary alpha/cutout.
+		return Cutout | CastShadow;
+	}
+
+	// No transparent or translucent pixels found.
 	return Opaque | CastShadow;
 }

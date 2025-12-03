@@ -1,5 +1,5 @@
 #pragma once
-#include "material/material.hpp"
+#include "../material/material.hpp"
 
 class Shader;
 class Mesh;

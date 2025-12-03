@@ -3,14 +3,14 @@
 #include <vector>
 #include "glm/glm.hpp"
 
-struct RenderGroup;
+struct RenderContext;
 class Entity;
 class Shader;
 class FrameBuffer;
 
 class OmnidirectionalShadowPass {
 public:
-	OmnidirectionalShadowPass(int mapWidth, int mapHeight);
+	explicit OmnidirectionalShadowPass(const RenderContext& context);
 
 	~OmnidirectionalShadowPass();
 
@@ -18,7 +18,7 @@ public:
 
 	[[nodiscard]] FrameBuffer& getDepthMap() const;
 
-	void render(const std::vector<RenderGroup>& shadowCasters, const glm::vec4& position, int layer) const;
+	void render(const RenderContext& context, const glm::vec4& position, int layer) const;
 
 private:
 	std::unique_ptr<FrameBuffer> mDepthMap;

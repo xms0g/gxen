@@ -1,7 +1,7 @@
 #include "grayscale.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderers/renderCommon.h"
+#include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 Grayscale::Grayscale(const std::string& name, const bool enabled) : IPostEffect(name, enabled) {

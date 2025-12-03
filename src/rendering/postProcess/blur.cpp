@@ -1,7 +1,7 @@
 #include "blur.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderers/renderCommon.h"
+#include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 Blur::Blur(const std::string& name, const bool enabled) : IPostEffect(name, enabled) {

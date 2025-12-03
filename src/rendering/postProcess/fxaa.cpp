@@ -1,7 +1,7 @@
 #include "fxaa.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderers/renderCommon.h"
+#include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 #include "../../config/config.hpp"
 

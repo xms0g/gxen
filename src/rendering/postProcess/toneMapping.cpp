@@ -1,7 +1,7 @@
 #include "toneMapping.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderers/renderCommon.h"
+#include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 ToneMapping::ToneMapping(const std::string& name, const bool enabled, const float exp)

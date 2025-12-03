@@ -9,7 +9,7 @@
 #include "edgeDetection.h"
 #include "fxaa.h"
 #include "../shader.h"
-#include "../renderers/renderCommon.h"
+#include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 #include "../models/quad.h"
 

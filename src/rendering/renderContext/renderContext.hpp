@@ -1,0 +1,55 @@
+#pragma once
+#include <array>
+#include <vector>
+
+class LightSystem;
+class FrameBuffer;
+class UniformBuffer;
+class Camera;
+struct RenderQueue;
+struct DirectionalLightComponent;
+struct PointLightComponent;
+struct SpotLightComponent;
+
+struct RenderContext {
+	const RenderQueue* renderQueue;
+	const FrameBuffer* sceneBuffer;
+
+	struct {
+		const UniformBuffer* ubo;
+		const std::vector<DirectionalLightComponent*>* dirLights;
+		const std::vector<PointLightComponent*>* pointLights;
+		const std::vector<SpotLightComponent*>* spotLights;
+	} light;
+
+	struct {
+		const UniformBuffer* ubo;
+		const Camera* self;
+	} camera;
+
+	struct {
+		uint32_t width, height;
+	} screen;
+
+	struct {
+		uint32_t textureSlot;
+		uint32_t width, height;
+
+		struct  {
+			float nearPlane, farPlane, left, right, bottom, top;
+		} directional;
+
+		struct {
+			uint32_t maxLights;
+			float nearPlane, farPlane, fovy;
+		} omnidirectional;
+
+		struct {
+			uint32_t maxLights;
+			float nearPlane, farPlane;
+		} perspective;
+
+		const std::array<uint32_t, 3>* textures;
+		const UniformBuffer* ubo;
+	} shadowMap;
+};

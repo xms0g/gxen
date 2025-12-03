@@ -1,7 +1,7 @@
 #include "bloom.h"
 #include "glad/glad.h"
 #include "../shader.h"
-#include "../renderers/renderCommon.h"
+#include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 
 Bloom::Bloom(const std::string& name, const int width, const int height, const bool enabled)

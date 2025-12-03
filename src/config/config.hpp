@@ -25,8 +25,8 @@ constexpr uint32_t MAX_SPOT_LIGHTS{4};
 
 // Render Settings
 constexpr uint32_t MULTISAMPLED_COUNT{4};
-constexpr uint32_t SHADOW_WIDTH{1024};
-constexpr uint32_t SHADOW_HEIGHT{1024};
+constexpr uint32_t SHADOWMAP_WIDTH{1024};
+constexpr uint32_t SHADOWMAP_HEIGHT{1024};
 constexpr uint32_t SHADOWMAP_TEXTURE_SLOT{4};
 constexpr float SHADOW_DIRECTIONAL_NEAR{1.0f};
 constexpr float SHADOW_DIRECTIONAL_FAR{7.5f};

@@ -1,17 +1,16 @@
 #pragma once
 #include <memory>
-#include <vector>
 #include "glm/glm.hpp"
-#include "../../config/config.hpp"
+#include "../../../config/config.hpp"
 
-struct RenderGroup;
+struct RenderContext;
 class Entity;
 class Shader;
 class FrameBuffer;
 
 class PerspectiveShadowPass {
 public:
-	PerspectiveShadowPass(int mapWidth, int mapHeight);
+	explicit PerspectiveShadowPass(const RenderContext& context);
 
 	~PerspectiveShadowPass();
 
@@ -19,7 +18,7 @@ public:
 
 	[[nodiscard]] glm::mat4 getLightSpaceMatrix(int layer) const;
 
-	void render(const std::vector<RenderGroup>& shadowCasters, const glm::vec4& direction,
+	void render(const RenderContext& context, const glm::vec4& direction,
 	            const glm::vec4& position, float fovy, int layer);
 
 private:

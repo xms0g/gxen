@@ -1,22 +1,23 @@
 #pragma once
 #include <memory>
+#include <vector>
+#include "renderContext/renderQueue.hpp"
 #include "../ECS/system.hpp"
 
-struct InstanceGroup;
-struct RenderGroup;
+struct RenderContext;
+class ShadowPass;
+class DeferredLightingPass;
+class DeferredGeometryPass;
+class IRenderPass;
 class Mesh;
 class Shader;
 class FrameBuffer;
 class UniformBuffer;
 class Camera;
 class Registry;
-class ForwardRenderer;
-class DeferredRenderer;
-class DebugRenderer;
 class GuiSystem;
 class LightSystem;
 class SkyboxSystem;
-class ShadowManager;
 class PostProcess;
 
 class RenderPipeline final : public System {
@@ -27,32 +28,24 @@ public:
 
 	[[nodiscard]] PostProcess& postProcess() const;
 
-	void configure(const Camera& camera) const;
+	void configure(const Camera& camera);
 
 	void batchEntities();
 
-	void render(const Camera& camera);
+	void render();
 
 private:
-	void updateBuffers(const Camera& camera) const;
+	void updateBuffers() const;
 
-	void frustumCullingPass(const Camera& camera) const;
-
-	void beginSceneRender() const;
-
-	void endSceneRender() const;
+	void frustumCullingPass() const;
 
 	void batchEntity(const Entity& entity);
 
-	void sortEntities(const Camera& camera);
+	void sortEntities();
 	// Systems
 	LightSystem* mLightSystem{};
 	SkyboxSystem* mSkyboxSystem{};
 
-	std::unique_ptr<ShadowManager> mShadowManager;
-	std::unique_ptr<DebugRenderer> mDebugRenderer;
-	std::unique_ptr<ForwardRenderer> mForwardRenderer;
-	std::unique_ptr<DeferredRenderer> mDeferredRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
 	// Frame Buffers
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
@@ -60,13 +53,12 @@ private:
 	// Uniform Buffers
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 	// Render queue
-	struct {
-		std::vector<InstanceGroup> opaqueInstancedGroups;
-		std::vector<InstanceGroup> blendInstancedGroups;
-		std::vector<RenderGroup> debugGroups;
-		std::vector<RenderGroup> shadowCasterGroups;
-		std::vector<RenderGroup> forwardOpaqueGroups;
-		std::vector<RenderGroup> deferredGroups;
-		std::vector<RenderGroup> blendGroups;
-	} renderQueues;
+	RenderQueue mRenderQueue;
+	// Render context
+	std::unique_ptr<RenderContext> mContext;
+	// Render passes
+	std::shared_ptr<ShadowPass> mShadowPass;
+	std::shared_ptr<DeferredGeometryPass> mDeferredGeometryPass;
+	std::shared_ptr<DeferredLightingPass> mDeferredLightingPass;
+	std::vector<std::shared_ptr<IRenderPass>> mRenderPasses;
 };
