@@ -2,7 +2,7 @@
 #include "glad/glad.h"
 #include "glm/gtc/type_ptr.hpp"
 #include "../shader.h"
-#include "../renderGroup.hpp"
+#include "../renderContext/renderGroup.hpp"
 #include "../buffers/frameBuffer.h"
 #include "../renderers/renderCommon.h"
 #include "../../config/config.hpp"

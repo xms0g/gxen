@@ -4,11 +4,12 @@
 #include "omnidirectionalShadowPass.h"
 #include "perspectiveShadowPass.h"
 #include "../shader.h"
-#include "../renderGroup.hpp"
+#include "../renderContext/renderContext.hpp"
+#include "../renderContext/renderQueue.hpp"
+#include "../renderContext/renderGroup.hpp"
 #include "../lightSystem.h"
 #include "../buffers/uniformBuffer.h"
 #include "../buffers/frameBuffer.h"
-#include "../renderers/forwardRenderer.h"
 #include "../../config/config.hpp"
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
@@ -32,38 +33,37 @@ ShadowManager::~ShadowManager() = default;
 
 const std::array<uint32_t, 3>& ShadowManager::getShadowMaps() const { return mShadowMaps; }
 
-const UniformBuffer& ShadowManager::getShadowUBO() const { return *mShadowUBO; }
+const UniformBuffer* ShadowManager::getShadowUBO() const { return mShadowUBO.get(); }
 
-void ShadowManager::shadowPass(const std::vector<RenderGroup>& shadowCasters, const LightSystem& lights) {
-	directionalShadowPass(shadowCasters, lights.getDirLights());
-	omnidirectionalShadowPass(shadowCasters, lights.getPointLights());
-	perspectiveShadowPass(shadowCasters, lights.getSpotLights());
+void ShadowManager::shadowPass(const RenderContext& context) {
+	directionalShadowPass(context);
+	omnidirectionalShadowPass(context);
+	perspectiveShadowPass(context);
 
 	mShadowUBO->bind();
 	mShadowUBO->setData(&mShadowData, sizeof(ShadowData), 0);
 	mShadowUBO->unbind();
 }
 
-void ShadowManager::directionalShadowPass(const std::vector<RenderGroup>& shadowCasters,
-                                          const std::vector<DirectionalLightComponent*>& lights) {
-	for (const auto& light: lights) {
-		mDirShadowPass->render(shadowCasters, light->direction);
+void ShadowManager::directionalShadowPass(const RenderContext& context) {
+	for (const auto& light: context.lightSystem->getDirLights()) {
+		mDirShadowPass->render(context.renderQueue->shadowCasterGroups, light->direction);
 		mShadowData.lightSpaceMatrix = mDirShadowPass->getLightSpaceMatrix();
 	}
 }
 
-void ShadowManager::omnidirectionalShadowPass(const std::vector<RenderGroup>& shadowCasters,
-                                              const std::vector<PointLightComponent*>& lights) {
+void ShadowManager::omnidirectionalShadowPass(const RenderContext& context) {
 	mOmnidirShadowPass->getDepthMap().bind();
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
 
+	const auto& lights = context.lightSystem->getPointLights();
 	for (int i = 0; i < lights.size(); i++) {
 		const auto& light = lights[i];
 		if (!light->castShadow) continue;
 
-		mOmnidirShadowPass->render(shadowCasters, light->position, i);
+		mOmnidirShadowPass->render(context.renderQueue->shadowCasterGroups, light->position, i);
 		mShadowData.omniFarPlanes[i] = SHADOW_OMNIDIRECTIONAL_FAR;
 	}
 
@@ -71,13 +71,13 @@ void ShadowManager::omnidirectionalShadowPass(const std::vector<RenderGroup>& sh
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 }
 
-void ShadowManager::perspectiveShadowPass(const std::vector<RenderGroup>& shadowCasters,
-                                          const std::vector<SpotLightComponent*>& lights) {
+void ShadowManager::perspectiveShadowPass(const RenderContext& context) {
+	const auto& lights = context.lightSystem->getSpotLights();
 	for (int i = 0; i < lights.size(); i++) {
 		const auto& light = lights[i];
 		if (!light->castShadow) continue;
 
-		mPerspectiveShadowPass->render(shadowCasters, light->direction, light->position, light->cutOff.y, i);
+		mPerspectiveShadowPass->render(context.renderQueue->shadowCasterGroups, light->direction, light->position, light->cutOff.y, i);
 		mShadowData.persLightSpaceMatrix[i] = mPerspectiveShadowPass->getLightSpaceMatrix(i);
 	}
 }

@@ -1,11 +1,10 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include <SDL_stdinc.h>
-#include <unordered_map>
 #include "glm/glm.hpp"
 #include "../../config/config.hpp"
 
+struct RenderContext;
 struct RenderGroup;
 struct SpotLightComponent;
 struct DirectionalLightComponent;
@@ -17,7 +16,6 @@ class PerspectiveShadowPass;
 class OmnidirectionalShadowPass;
 class DirectionalShadowPass;
 class LightSystem;
-class Entity;
 
 class ShadowManager {
 public:
@@ -27,16 +25,16 @@ public:
 
 	[[nodiscard]] const std::array<uint32_t, 3>& getShadowMaps() const;
 
-	[[nodiscard]] const UniformBuffer& getShadowUBO() const;
+	[[nodiscard]] const UniformBuffer* getShadowUBO() const;
 
-	void shadowPass(const std::vector<RenderGroup>& shadowCasters, const LightSystem& lights);
+	void shadowPass(const RenderContext& context);
 
 private:
-	void directionalShadowPass(const std::vector<RenderGroup>& shadowCasters, const std::vector<DirectionalLightComponent*>& lights);
+	void directionalShadowPass(const RenderContext& context);
 
-	void omnidirectionalShadowPass(const std::vector<RenderGroup>& shadowCasters, const std::vector<PointLightComponent*>& lights);
+	void omnidirectionalShadowPass(const RenderContext& context);
 
-	void perspectiveShadowPass(const std::vector<RenderGroup>& shadowCasters, const std::vector<SpotLightComponent*>& lights);
+	void perspectiveShadowPass(const RenderContext& context);
 
 	struct alignas(16) ShadowData {
 		glm::mat4 lightSpaceMatrix;

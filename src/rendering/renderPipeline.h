@@ -1,7 +1,12 @@
 #pragma once
 #include <memory>
+#include <vector>
+#include "renderContext/renderQueue.hpp"
 #include "../ECS/system.hpp"
 
+class DeferredLightingPass;
+class DeferredGeometryPass;
+class IRenderPass;
 struct InstanceGroup;
 struct RenderGroup;
 class Mesh;
@@ -27,7 +32,7 @@ public:
 
 	[[nodiscard]] PostProcess& postProcess() const;
 
-	void configure(const Camera& camera) const;
+	void configure(const Camera& camera);
 
 	void batchEntities();
 
@@ -50,9 +55,6 @@ private:
 	SkyboxSystem* mSkyboxSystem{};
 
 	std::unique_ptr<ShadowManager> mShadowManager;
-	std::unique_ptr<DebugRenderer> mDebugRenderer;
-	std::unique_ptr<ForwardRenderer> mForwardRenderer;
-	std::unique_ptr<DeferredRenderer> mDeferredRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
 	// Frame Buffers
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
@@ -60,13 +62,8 @@ private:
 	// Uniform Buffers
 	std::unique_ptr<UniformBuffer> mCameraUBO;
 	// Render queue
-	struct {
-		std::vector<InstanceGroup> opaqueInstancedGroups;
-		std::vector<InstanceGroup> blendInstancedGroups;
-		std::vector<RenderGroup> debugGroups;
-		std::vector<RenderGroup> shadowCasterGroups;
-		std::vector<RenderGroup> forwardOpaqueGroups;
-		std::vector<RenderGroup> deferredGroups;
-		std::vector<RenderGroup> blendGroups;
-	} renderQueues;
+	RenderQueue mRenderQueue;
+	std::shared_ptr<DeferredGeometryPass> mDeferredGeometryPass;
+	std::shared_ptr<DeferredLightingPass> mDeferredLightingPass;
+	std::vector<std::shared_ptr<IRenderPass>> mRenderPasses;
 };

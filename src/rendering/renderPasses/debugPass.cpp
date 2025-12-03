@@ -1,28 +1,30 @@
-#include "debugRenderer.h"
-#include "renderCommon.h"
+#include "debugPass.h"
 #include "../shader.h"
-#include "../renderGroup.hpp"
+#include "../renderers/renderCommon.h"
 #include "../buffers/uniformBuffer.h"
+#include "../renderContext/renderContext.hpp"
+#include "../renderContext/renderQueue.hpp"
+#include "../renderContext/renderGroup.hpp"
 #include "../../ECS/components/debug.hpp"
 #include "../../ECS/entity.hpp"
 
-DebugRenderer::DebugRenderer() {
+DebugPass::~DebugPass() = default;
+
+void DebugPass::configure(const RenderContext& context) {
 	mDebugShaders = {
 		nullptr, // for None
 		std::make_shared<Shader>("debug/normal.vert", "debug/normal.frag", "debug/normal.geom"),
 		std::make_shared<Shader>("debug/wireframe.vert", "debug/wireframe.frag", "debug/wireframe.geom")
 	};
-}
 
-void DebugRenderer::configure(const UniformBuffer& cameraUBO) const {
 	for (const auto& shader: mDebugShaders) {
 		if (!shader) continue;
-		cameraUBO.configure(shader->ID(), 0, "CameraBlock");
+		context.cameraUBO->configure(shader->ID(), 0, "CameraBlock");
 	}
 }
 
-void DebugRenderer::render(const std::vector<RenderGroup>& groups) const {
-	for (const auto& [entity, matBatches]: groups) {
+void DebugPass::execute(const RenderContext& context) {
+	for (const auto& [entity, matBatches]: context.renderQueue->debugGroups) {
 		const auto& db = entity->getComponent<DebugComponent>();
 		if (db.mode == None)
 			continue;
