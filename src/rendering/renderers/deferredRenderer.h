@@ -1,6 +1,6 @@
 #pragma once
 #include <vector>
-#include <unordered_map>
+#include <array>
 
 struct RenderGroup;
 struct RenderItem;
@@ -15,16 +15,21 @@ class FrameBuffer;
 
 class DeferredRenderer {
 public:
-	explicit DeferredRenderer(const Shader& lightingShader);
+	explicit DeferredRenderer();
 
 	~DeferredRenderer();
 
-	void geometryPass(const std::vector<RenderGroup>& groups, const FrameBuffer& gBuffer,
-	                  const Shader& gShader) const;
+	const Shader& getGShader() const;
 
-	void lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& gBuffer,
-	                  const FrameBuffer& sceneBuffer, const Shader& lightingShader) const;
+	const Shader& getLightingShader() const;
+
+	void geometryPass(const std::vector<RenderGroup>& groups) const;
+
+	void lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& sceneBuffer) const;
 
 private:
 	std::unique_ptr<Models::SingleQuad> mQuad;
+	std::unique_ptr<FrameBuffer> mGBuffer;
+	std::unique_ptr<Shader> mGShader;
+	std::unique_ptr<Shader> mLigthingShader;
 };

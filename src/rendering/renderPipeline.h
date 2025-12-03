@@ -54,17 +54,11 @@ private:
 	std::unique_ptr<ForwardRenderer> mForwardRenderer;
 	std::unique_ptr<DeferredRenderer> mDeferredRenderer;
 	std::unique_ptr<PostProcess> mPostProcess;
-
 	// Frame Buffers
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
-	std::unique_ptr<FrameBuffer> mGBuffer;
 	// Uniform Buffers
 	std::unique_ptr<UniformBuffer> mCameraUBO;
-	// Shaders
-	std::unique_ptr<Shader> mGShader;
-	std::unique_ptr<Shader> mDeferredLigthingShader;
-
 	// Render queue
 	struct {
 		std::vector<InstanceGroup> opaqueInstancedGroups;

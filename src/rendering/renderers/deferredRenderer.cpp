@@ -9,53 +9,74 @@
 #include "../../ECS/entity.hpp"
 #include "../../ECS/components/bv.hpp"
 
-DeferredRenderer::DeferredRenderer(const Shader& lightingShader) : mQuad(std::make_unique<Models::SingleQuad>()) {
-	lightingShader.activate();
-	lightingShader.setInt("gPosition", 0);
-	lightingShader.setInt("gNormal", 1);
-	lightingShader.setInt("gAlbedoSpec", 2);
-	lightingShader.setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
-	lightingShader.setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
-	lightingShader.setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
+DeferredRenderer::DeferredRenderer() : mQuad(std::make_unique<Models::SingleQuad>()) {
+	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
+	mGBuffer->withTexture16F()
+			.withTexture16F()
+#ifdef HDR
+			.withTexture16F()
+#else
+			.withTexture()
+#endif
+			.configureAttachments()
+			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
+			.checkStatus();
+
+	mLigthingShader = std::make_unique<Shader>("models/quad.vert", "deferred/lighting.frag");
+	mGShader = std::make_unique<Shader>("deferred/gbuffer.vert", "deferred/gbuffer.frag");
+
+	mLigthingShader->activate();
+	mLigthingShader->setInt("gPosition", 0);
+	mLigthingShader->setInt("gNormal", 1);
+	mLigthingShader->setInt("gAlbedoSpec", 2);
+	mLigthingShader->setInt("shadowMap", SHADOWMAP_TEXTURE_SLOT);
+	mLigthingShader->setInt("shadowCubemap", SHADOWMAP_TEXTURE_SLOT + 1);
+	mLigthingShader->setInt("persShadowMap", SHADOWMAP_TEXTURE_SLOT + 2);
 }
 
 DeferredRenderer::~DeferredRenderer() = default;
 
-void DeferredRenderer::geometryPass(const std::vector<RenderGroup>& groups,
-                                    const FrameBuffer& gBuffer, const Shader& gShader) const {
-	gBuffer.bind();
+const Shader& DeferredRenderer::getGShader() const {
+	return *mGShader;
+}
+
+const Shader& DeferredRenderer::getLightingShader() const {
+	return *mLigthingShader;
+}
+
+void DeferredRenderer::geometryPass(const std::vector<RenderGroup>& groups) const {
+	mGBuffer->bind();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	gShader.activate();
+	mGShader->activate();
 	for (const auto& [entity, matBatches]: groups) {
 		if (!entity->getComponent<BoundingVolumeComponent>().isVisible)
 			continue;
 
 		for (const auto& [material, shader, meshes]: matBatches) {
-			RenderCommon::setupTransform(*entity, gShader);
-			RenderCommon::setupMaterial(*entity, gShader);
+			RenderCommon::setupTransform(*entity, *mGShader);
+			RenderCommon::setupMaterial(*entity, *mGShader);
 
-			RenderCommon::bindTextures(material->textures, gShader);
+			RenderCommon::bindTextures(material->textures, *mGShader);
 			RenderCommon::drawMeshes(*meshes);
 			RenderCommon::unbindTextures(material->textures);
 		}
 	}
-	gBuffer.unbind();
+	mGBuffer->unbind();
 }
 
-void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& gBuffer,
-                                    const FrameBuffer& sceneBuffer, const Shader& lightingShader) const {
+void DeferredRenderer::lightingPass(const std::array<uint32_t, 3>& shadowMaps, const FrameBuffer& sceneBuffer) const {
 	// Copy depth buffer of gBuffer to scene buffer for the proper depth testing
-	gBuffer.bindForRead();
+	mGBuffer->bindForRead();
 	sceneBuffer.bindForDraw();
-	glBlitFramebuffer(0, 0, gBuffer.width(), gBuffer.height(),
+	glBlitFramebuffer(0, 0, mGBuffer->width(), mGBuffer->height(),
 	                  0, 0, sceneBuffer.width(), sceneBuffer.height(),
 	                  GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 	sceneBuffer.bind();
-	lightingShader.activate();
+	mLigthingShader->activate();
 
-	for (int i = 0; i < gBuffer.textures().size(); i++) {
+	for (int i = 0; i < mGBuffer->textures().size(); i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, gBuffer.textures()[i]);
+		glBindTexture(GL_TEXTURE_2D, mGBuffer->textures()[i]);
 	}
 
 	RenderCommon::bindShadowMaps(shadowMaps);

@@ -87,20 +87,7 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 	mSceneBuffer->unbind();
 
 #ifdef DEFERRED
-	mGBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
-	mGBuffer->withTexture16F()
-			.withTexture16F()
-# ifdef HDR
-			.withTexture16F()
-# else
-			.withTexture()
-# endif
-			.configureAttachments()
-			.withRenderBufferDepth(GL_DEPTH_COMPONENT24)
-			.checkStatus();
-	mDeferredLigthingShader = std::make_unique<Shader>("models/quad.vert", "deferred/lighting.frag");
-	mGShader = std::make_unique<Shader>("deferred/gbuffer.vert", "deferred/gbuffer.frag");
-	mDeferredRenderer = std::make_unique<DeferredRenderer>(*mDeferredLigthingShader);
+	mDeferredRenderer = std::make_unique<DeferredRenderer>();
 #endif
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
 
@@ -119,10 +106,10 @@ void RenderPipeline::configure(const Camera& camera) const {
 	mDebugRenderer->configure(*mCameraUBO);
 #ifdef DEFERRED
 	// Uniform buffer configuration
-	mCameraUBO->configure(mGShader->ID(), 0, "CameraBlock");
-	mCameraUBO->configure(mDeferredLigthingShader->ID(), 0, "CameraBlock");
-	mLightSystem->getLightUBO().configure(mDeferredLigthingShader->ID(), 1, "LightBlock");
-	mShadowManager->getShadowUBO().configure(mDeferredLigthingShader->ID(), 2, "ShadowBlock");
+	mCameraUBO->configure(mDeferredRenderer->getGShader().ID(), 0, "CameraBlock");
+	mCameraUBO->configure(mDeferredRenderer->getLightingShader().ID(), 0, "CameraBlock");
+	mLightSystem->getLightUBO().configure(mDeferredRenderer->getLightingShader().ID(), 1, "LightBlock");
+	mShadowManager->getShadowUBO().configure(mDeferredRenderer->getLightingShader().ID(), 2, "ShadowBlock");
 #endif
 	for (const auto& entity: getSystemEntities()) {
 		const auto& shader = entity.getComponent<ShaderComponent>().shader;
@@ -158,8 +145,8 @@ void RenderPipeline::render(const Camera& camera) {
 
 	beginSceneRender();
 #ifdef DEFERRED
-	mDeferredRenderer->geometryPass(renderQueues.deferredGroups, *mGBuffer, *mGShader);
-	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mGBuffer, *mSceneBuffer, *mDeferredLigthingShader);
+	mDeferredRenderer->geometryPass(renderQueues.deferredGroups);
+	mDeferredRenderer->lightingPass(mShadowManager->getShadowMaps(), *mSceneBuffer);
 #endif
 	mForwardRenderer->opaquePass(renderQueues.forwardOpaqueGroups, mShadowManager->getShadowMaps());
 
@@ -176,7 +163,6 @@ void RenderPipeline::render(const Camera& camera) {
 #else
 	mPostProcess->render(mSceneBuffer->texture());
 #endif
-
 }
 
 void RenderPipeline::updateBuffers(const Camera& camera) const {
