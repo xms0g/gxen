@@ -1,7 +1,6 @@
 #pragma once
 #include "../material/material.hpp"
 
-class Mesh;
 class Entity;
 
 struct RenderGroup {

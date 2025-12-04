@@ -4,7 +4,6 @@
 #include "glm/glm.hpp"
 
 struct RenderContext;
-class Entity;
 class Shader;
 class FrameBuffer;
 

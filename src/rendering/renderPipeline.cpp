@@ -128,10 +128,11 @@ void RenderPipeline::configure(const Camera& camera) {
 	mContext->shadowMap.ubo = mShadowPass->getShadowUBO();
 	mContext->shadowMap.textures = &mShadowPass->getShadowMaps();
 
+	// Create render passes
 	mRenderPasses.push_back(std::make_shared<FrustumCullingPass>());
 	mRenderPasses.push_back(mShadowPass);
 	mRenderPasses.push_back(std::make_shared<BeginScenePass>());
-	// Create render passes
+
 	if (!mRenderQueue.deferredGroups.empty()) {
 		mDeferredGeometryPass = std::make_shared<DeferredGeometryPass>();
 		mDeferredLightingPass = std::make_shared<DeferredLightingPass>();
@@ -203,7 +204,7 @@ void RenderPipeline::render() {
 	for (const auto& pass: mRenderPasses) {
 		pass->execute(*mContext);
 	}
-	mSceneBuffer->bind();
+
 	mSkyboxSystem->render(*mContext->camera.self);
 	mSceneBuffer->unbind();
 #ifdef MSAA

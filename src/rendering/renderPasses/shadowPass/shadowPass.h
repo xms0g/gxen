@@ -9,13 +9,7 @@
 #include "../../../config/config.hpp"
 
 struct RenderContext;
-struct RenderGroup;
-struct SpotLightComponent;
-struct DirectionalLightComponent;
-struct PointLightComponent;
-class Shader;
 class UniformBuffer;
-class LightSystem;
 
 class ShadowPass final: public IRenderPass {
 public:

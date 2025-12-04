@@ -1,8 +1,6 @@
 #pragma once
 #include "../material/material.hpp"
 
-class Shader;
-class Mesh;
 class Entity;
 
 struct InstanceGroup {

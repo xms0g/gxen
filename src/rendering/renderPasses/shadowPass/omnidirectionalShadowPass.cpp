@@ -7,7 +7,6 @@
 #include "../../renderContext/renderContext.hpp"
 #include "../../buffers/frameBuffer.h"
 #include "../../renderCommon.h"
-#include "../../../ECS/entity.hpp"
 
 OmnidirectionalShadowPass::OmnidirectionalShadowPass(const RenderContext& context) {
 	mDepthMap = std::make_unique<FrameBuffer>(context.shadowMap.width, context.shadowMap.height);

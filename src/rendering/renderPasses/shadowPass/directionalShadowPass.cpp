@@ -6,7 +6,6 @@
 #include "../../renderContext/renderGroup.hpp"
 #include "../../buffers/frameBuffer.h"
 #include "../../renderCommon.h"
-#include "../../../ECS/entity.hpp"
 #include "../../renderContext/renderQueue.hpp"
 
 DirectionalShadowPass::DirectionalShadowPass(const RenderContext& context) {

@@ -1,9 +1,6 @@
 #include "shadowPass.h"
 #include "glad/glad.h"
-#include "../../shader.h"
 #include "../../renderContext/renderContext.hpp"
-#include "../../renderContext/renderQueue.hpp"
-#include "../../lightSystem.h"
 #include "../../buffers/uniformBuffer.h"
 #include "../../buffers/frameBuffer.h"
 #include "../../../ECS/components/directionalLight.hpp"
@@ -63,7 +60,7 @@ void ShadowPass::omnidirectionalShadowPass(const RenderContext& context) {
 	}
 
 	mOmnidirShadowPass->getDepthMap().unbind();
-	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
+	glViewport(0, 0, static_cast<int32_t>(context.screen.width), static_cast<int32_t>(context.screen.height));
 }
 
 void ShadowPass::perspectiveShadowPass(const RenderContext& context) {

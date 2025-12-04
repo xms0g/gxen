@@ -4,7 +4,6 @@
 #include "../../../config/config.hpp"
 
 struct RenderContext;
-class Entity;
 class Shader;
 class FrameBuffer;
 

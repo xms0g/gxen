@@ -2,7 +2,6 @@
 #include <array>
 #include <vector>
 
-class LightSystem;
 class FrameBuffer;
 class UniformBuffer;
 class Camera;
