@@ -12,7 +12,6 @@
 #include "renderContext/renderFlags.hpp"
 #include "renderContext/renderGroup.hpp"
 #include "renderContext/instanceGroup.hpp"
-#include "postProcess/postProcess.h"
 #include "renderPasses/shadowPass/shadowPass.h"
 #include "renderPasses/IRenderPass.hpp"
 #include "renderPasses/deferredGeometryPass.h"
@@ -23,7 +22,8 @@
 #include "renderPasses/blendPass.h"
 #include "renderPasses/opaqueInstancedPass.h"
 #include "renderPasses/beginScenePass.h"
-#include "mesh/mesh.h"
+#include "renderPasses/frustumCullingPass.h"
+#include "postProcess/postProcess.h"
 #include "material/material.hpp"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
@@ -33,10 +33,7 @@
 #include "../ECS/components/material.hpp"
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
-#include "../ECS/components/bv.hpp"
 #include "../ECS/components/instance.hpp"
-#include "../math/frustum.hpp"
-#include "../math/boundingVolume.h"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -131,6 +128,7 @@ void RenderPipeline::configure(const Camera& camera) {
 	mContext->shadowMap.ubo = mShadowPass->getShadowUBO();
 	mContext->shadowMap.textures = &mShadowPass->getShadowMaps();
 
+	mRenderPasses.push_back(std::make_shared<FrustumCullingPass>());
 	mRenderPasses.push_back(mShadowPass);
 	mRenderPasses.push_back(std::make_shared<BeginScenePass>());
 	// Create render passes
@@ -198,11 +196,10 @@ void RenderPipeline::batchEntities() {
 
 void RenderPipeline::render() {
 	updateBuffers();
-	frustumCullingPass();
 	sortEntities();
 
 	mLightSystem->update();
-	
+
 	for (const auto& pass: mRenderPasses) {
 		pass->execute(*mContext);
 	}
@@ -231,32 +228,6 @@ void RenderPipeline::updateBuffers() const {
 	mContext->camera.ubo->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
 	mContext->camera.ubo->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
 	mContext->camera.ubo->unbind();
-}
-
-void RenderPipeline::frustumCullingPass() const {
-	const math::Frustum& frustum = mContext->camera.self->frustum();
-
-	auto cullItems = [&](const std::vector<RenderGroup>& groups) {
-		for (const auto& [entity, matBatch]: groups) {
-			auto& bvc = entity->getComponent<BoundingVolumeComponent>();
-			const auto& tc = entity->getComponent<TransformComponent>();
-			const auto& aabb = bvc.bv;
-
-			bvc.isVisible = aabb->isOnFrustum(frustum, tc.position, tc.rotation, tc.scale);
-			if (!bvc.isVisible) return;
-
-			for (auto& [material, shader, meshes]: matBatch) {
-				for (auto& mesh: *meshes) {
-					mesh.setVisible(aabb->isMeshInFrustum(frustum, mesh.min(), mesh.max(),
-					                                      tc.position, tc.rotation, tc.scale));
-				}
-			}
-		}
-	};
-
-	cullItems(mRenderQueue.forwardOpaqueGroups);
-	cullItems(mRenderQueue.deferredGroups);
-	cullItems(mRenderQueue.blendGroups);
 }
 
 void RenderPipeline::batchEntity(const Entity& entity) {

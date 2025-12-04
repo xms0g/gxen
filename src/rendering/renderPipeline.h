@@ -9,13 +9,10 @@ class ShadowPass;
 class DeferredLightingPass;
 class DeferredGeometryPass;
 class IRenderPass;
-class Mesh;
-class Shader;
 class FrameBuffer;
 class UniformBuffer;
 class Camera;
 class Registry;
-class GuiSystem;
 class LightSystem;
 class SkyboxSystem;
 class PostProcess;
@@ -36,8 +33,6 @@ public:
 
 private:
 	void updateBuffers() const;
-
-	void frustumCullingPass() const;
 
 	void batchEntity(const Entity& entity);
 
