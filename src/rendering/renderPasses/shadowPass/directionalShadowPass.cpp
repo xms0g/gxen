@@ -4,9 +4,9 @@
 #include "../../shader.h"
 #include "../../renderContext/renderContext.hpp"
 #include "../../renderContext/renderGroup.hpp"
+#include "../../renderContext/renderQueue.hpp"
 #include "../../buffers/frameBuffer.h"
 #include "../../renderCommon.h"
-#include "../../renderContext/renderQueue.hpp"
 
 DirectionalShadowPass::DirectionalShadowPass(const RenderContext& context) {
 	mDepthMap = std::make_unique<FrameBuffer>(context.shadowMap.width, context.shadowMap.height);
