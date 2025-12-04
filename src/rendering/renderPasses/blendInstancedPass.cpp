@@ -47,7 +47,7 @@ void BlendInstancedPass::prepareInstanceBuffer(const RenderContext& context) {
 	glGenBuffers(1, &vbo.buffer);
 
 	size_t requiredGPUBufferSize = 0;
-	for (const auto& [entity, transforms, materials]: context.renderQueue->opaqueInstancedGroups) {
+	for (const auto& [entity, transforms, materials]: context.renderQueue->blendInstancedGroups) {
 		for (const auto& material: materials) {
 			for (const auto& mesh: *material.meshes) {
 				mesh.enableInstanceAttributes(vbo.buffer, vbo.offset);
@@ -67,7 +67,7 @@ void BlendInstancedPass::prepareInstanceBuffer(const RenderContext& context) {
 }
 
 void BlendInstancedPass::prepareInstanceData(const RenderContext& context) const {
-	for (const auto& [entity, transforms, materials]: context.renderQueue->opaqueInstancedGroups) {
+	for (const auto& [entity, transforms, materials]: context.renderQueue->blendInstancedGroups) {
 		std::vector<InstanceData> gpuData;
 		gpuData.reserve(transforms->size() / 9);
 
