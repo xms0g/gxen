@@ -5,11 +5,9 @@
 #include "camera.h"
 #include "window.h"
 #include "gui/guiSystem.h"
-#include "../config/config.hpp"
 #include "../ECS/registry.h"
 #include "../rendering/renderPipeline.h"
-#include "../rendering/postProcess/postProcess.h"
-#include "../rendering/shader.h"
+#include "../rendering/postProcess/postProcessPass.h"
 
 Engine::Engine() = default;
 

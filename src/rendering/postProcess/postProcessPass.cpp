@@ -1,4 +1,4 @@
-#include "postProcess.h"
+#include "postProcessPass.h"
 #include "grayscale.h"
 #include "sepia.h"
 #include "bloom.h"
@@ -12,11 +12,16 @@
 #include "../renderCommon.h"
 #include "../buffers/frameBuffer.h"
 #include "../models/quad.h"
+#include "../renderContext/renderContext.hpp"
 
-PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models::Quad>()) {
+PostProcessPass::~PostProcessPass() = default;
+
+void PostProcessPass::configure(const RenderContext& context) {
+	mQuad = std::make_unique<Models::Quad>();
+
 	mEffects = {
 		std::make_shared<Blur>("Blur", false),
-		std::make_shared<Bloom>("Bloom", width, height, false),
+		std::make_shared<Bloom>("Bloom", context.screen.width, context.screen.height, false),
 		std::make_shared<ToneMapping>("Tone Mapping", false, 1.1f),
 		std::make_shared<Grayscale>("Grayscale", false),
 		std::make_shared<Sepia>("Sepia", false),
@@ -27,7 +32,7 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 	};
 
 	for (auto& target: renderTargets) {
-		target = std::make_unique<FrameBuffer>(width, height);
+		target = std::make_unique<FrameBuffer>(context.screen.width, context.screen.height);
 #ifdef HDR
 		target->withTexture16F()
 #else
@@ -37,10 +42,8 @@ PostProcess::PostProcess(int width, int height) : mQuad(std::make_unique<Models:
 	}
 }
 
-PostProcess::~PostProcess() = default;
-
-void PostProcess::render(const uint32_t sceneTexture) const {
-	uint32_t inputTex = sceneTexture;
+void PostProcessPass::execute(const RenderContext& context) const {
+	uint32_t inputTex = context.sceneBuffer->texture();
 	int toggle = 0;
 
 	for (const auto& effect: mEffects) {

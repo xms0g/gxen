@@ -1,7 +1,6 @@
 #include "guiPanels.h"
 #include "guiBackend.h"
 #include "glad/glad.h"
-#include "glm/gtc/type_ptr.hpp"
 #include "imgui/imgui.h"
 #include "../../ECS/registry.h"
 #include "../../ECS/components/transform.hpp"
@@ -9,7 +8,6 @@
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
-#include "../../rendering/postProcess/postProcess.h"
 #include "../../rendering/postProcess/toneMapping.h"
 
 void GuiPanels::renderGraphicsInfoPanel(const uint32_t fps) {

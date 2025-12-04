@@ -23,7 +23,7 @@
 #include "renderPasses/beginScenePass.h"
 #include "renderPasses/frustumCullingPass.h"
 #include "renderPasses/skyboxPass.h"
-#include "postProcess/postProcess.h"
+#include "postProcess/postProcessPass.h"
 #include "material/material.hpp"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
@@ -90,12 +90,12 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	mShadowPass = std::make_shared<ShadowPass>();
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-	mPostProcess = std::make_unique<PostProcess>(SCR_WIDTH, SCR_HEIGHT);
+	mPostProcessPass = std::make_unique<PostProcessPass>();
 }
 
 RenderPipeline::~RenderPipeline() = default;
 
-PostProcess& RenderPipeline::postProcess() const { return *mPostProcess; }
+PostProcessPass& RenderPipeline::postProcess() const { return *mPostProcessPass; }
 
 void RenderPipeline::configure(const Camera& camera) {
 	mContext = std::make_unique<RenderContext>(&mRenderQueue, mSceneBuffer.get());
@@ -164,6 +164,7 @@ void RenderPipeline::configure(const Camera& camera) {
 	for (const auto& pass: mRenderPasses) {
 		pass->configure(*mContext);
 	}
+	mPostProcessPass->configure(*mContext);
 
 	if (!mRenderQueue.deferredGroups.empty()) {
 		mDeferredLightingPass->configureInput(mDeferredGeometryPass->getGBuffer());
@@ -209,9 +210,11 @@ void RenderPipeline::render() {
 	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(),
 					  0, 0, mIntermediateBuffer->width(), mIntermediateBuffer->height(),
 					  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	mPostProcess->render(mIntermediateBuffer->texture());
+	mContext->sceneBuffer = mIntermediateBuffer.get();
+	mPostProcessPass->execute(*mContext);
+	mContext->sceneBuffer = mSceneBuffer.get();
 #else
-	mPostProcess->render(mContext->sceneBuffer->texture());
+	mPostProcessPass->execute(*mContext);
 #endif
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);

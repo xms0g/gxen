@@ -3,6 +3,8 @@
 #include <vector>
 #include "IPostEffect.hpp"
 
+struct RenderContext;
+
 namespace Models {
 class Quad;
 }
@@ -10,15 +12,15 @@ class Quad;
 class FrameBuffer;
 class Shader;
 
-class PostProcess {
+class PostProcessPass {
 public:
-	PostProcess(int width, int height);
+	~PostProcessPass();
 
-	~PostProcess();
+	void configure(const RenderContext& context);
+
+	void execute(const RenderContext& context) const;
 
 	std::vector<std::shared_ptr<IPostEffect> >& effects() { return mEffects; }
-
-	void render(uint32_t sceneTexture) const;
 
 private:
 	std::unique_ptr<Models::Quad> mQuad;

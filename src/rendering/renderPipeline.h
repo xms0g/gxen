@@ -15,7 +15,7 @@ class Camera;
 class Registry;
 class LightSystem;
 class SkyboxSystem;
-class PostProcess;
+class PostProcessPass;
 
 class RenderPipeline final : public System {
 public:
@@ -23,7 +23,7 @@ public:
 
 	~RenderPipeline() override;
 
-	[[nodiscard]] PostProcess& postProcess() const;
+	[[nodiscard]] PostProcessPass& postProcess() const;
 
 	void configure(const Camera& camera);
 
@@ -40,7 +40,7 @@ private:
 	// Systems
 	LightSystem* mLightSystem{};
 
-	std::unique_ptr<PostProcess> mPostProcess;
+
 	// Frame Buffers
 	std::unique_ptr<FrameBuffer> mSceneBuffer;
 	std::unique_ptr<FrameBuffer> mIntermediateBuffer;
@@ -52,6 +52,7 @@ private:
 	std::unique_ptr<RenderContext> mContext;
 	// Render passes
 	std::shared_ptr<ShadowPass> mShadowPass;
+	std::unique_ptr<PostProcessPass> mPostProcessPass;
 	std::shared_ptr<DeferredGeometryPass> mDeferredGeometryPass;
 	std::shared_ptr<DeferredLightingPass> mDeferredLightingPass;
 	std::vector<std::shared_ptr<IRenderPass>> mRenderPasses;
