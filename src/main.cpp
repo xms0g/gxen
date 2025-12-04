@@ -22,7 +22,7 @@
 #include "rendering/models/cube.h"
 #include "rendering/models/cubemap.h"
 #include "rendering/models/plane.h"
-#include "rendering/renderFlags.hpp"
+#include "rendering/renderContext/renderFlags.hpp"
 
 #define VERSION_MAJOR 0
 #define VERSION_MINOR 2
@@ -50,8 +50,12 @@ int main() {
 
 		Models::Cubemap skyboxModel{faces};
 		auto skybox = registry.createEntity("Skybox");
+		skybox.addComponent<TransformComponent>(
+			glm::vec3(0.0f),
+			glm::vec3(0.0f),
+			glm::vec3(0.0f));
 		skybox.addComponent<SkyboxComponent>();
-		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial(), 32.0f, 1.0f, RenderFlags::Deferred);
+		skybox.addComponent<MaterialComponent>(skyboxModel.getMaterial());
 		skybox.addComponent<MeshComponent>(skyboxModel.getMeshes());
 		skybox.addComponent<ShaderComponent>(
 			std::make_shared<Shader>("skybox.vert", "skybox.frag"));
@@ -116,7 +120,7 @@ int main() {
 
 		suzanne.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(suzanne.id()));
 		suzanne.addComponent<MaterialComponent>(
-			ResourceManager::instance().getMaterial(suzanne.id()), 32.0f, 1.0, RenderFlags::Deferred);
+			ResourceManager::instance().getMaterial(suzanne.id()));
 
 		suzanne.addComponent<ShaderComponent>(object);
 
@@ -182,7 +186,7 @@ int main() {
 
 		helmet.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(helmet.id()));
 		helmet.addComponent<MaterialComponent>(
-			ResourceManager::instance().getMaterial(helmet.id()), 32.0f, 1.0f, RenderFlags::Deferred);
+			ResourceManager::instance().getMaterial(helmet.id()));
 
 		helmet.addComponent<ShaderComponent>(object);
 
@@ -204,7 +208,7 @@ int main() {
 
 		sponza.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(sponza.id()));
 		sponza.addComponent<MaterialComponent>(
-			ResourceManager::instance().getMaterial(sponza.id()), 32.0f, 1.0f, RenderFlags::Deferred);
+			ResourceManager::instance().getMaterial(sponza.id()));
 
 		sponza.addComponent<ShaderComponent>(object);
 

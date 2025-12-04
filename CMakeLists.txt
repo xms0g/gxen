@@ -41,10 +41,6 @@ if(DEBUG_ENABLED)
     target_compile_definitions(${PROJECT_NAME} PRIVATE DEBUG)
 endif()
 
-if(DEFERRED_ENABLED)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE DEFERRED)
-endif()
-
 if(HDR_ENABLED)
     target_compile_definitions(${PROJECT_NAME} PRIVATE HDR)
 endif()
