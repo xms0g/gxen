@@ -1,6 +1,11 @@
 #pragma once
 #include <array>
 #include <vector>
+#include "glm/glm.hpp"
+
+namespace math {
+struct Frustum;
+}
 
 class FrameBuffer;
 class UniformBuffer;
@@ -24,6 +29,8 @@ struct RenderContext {
 	struct {
 		const UniformBuffer* ubo;
 		const Camera* self;
+		const math::Frustum* frustum;
+		glm::mat4 skyView;
 	} camera;
 
 	struct {

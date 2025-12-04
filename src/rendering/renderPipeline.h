@@ -32,14 +32,13 @@ public:
 	void render();
 
 private:
-	void updateBuffers() const;
+	void refreshCameraData() const;
 
 	void batchEntity(const Entity& entity);
 
 	void sortEntities();
 	// Systems
 	LightSystem* mLightSystem{};
-	SkyboxSystem* mSkyboxSystem{};
 
 	std::unique_ptr<PostProcess> mPostProcess;
 	// Frame Buffers

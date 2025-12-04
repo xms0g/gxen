@@ -1,8 +1,9 @@
 #version 410 core
 layout (location = 0) in vec3 aPos;
 
-uniform mat4 projection;
-uniform mat4 view;
+#include "ub/camera.glsl"
+
+uniform mat4 skyView;
 
 out VS_OUT
 {
@@ -11,6 +12,6 @@ out VS_OUT
 
 void main() {
     vs_out.TexCoord = aPos;
-    vec4 pos = projection * view * vec4(aPos, 1.0);
+    vec4 pos = projection * skyView * vec4(aPos, 1.0);
     gl_Position = pos.xyww;
 }

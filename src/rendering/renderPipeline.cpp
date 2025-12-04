@@ -5,7 +5,6 @@
 #include "glm/gtx/norm.hpp"
 #include "shader.h"
 #include "lightSystem.h"
-#include "skyboxSystem.h"
 #include "buffers/frameBuffer.h"
 #include "buffers/uniformBuffer.h"
 #include "renderContext/renderContext.hpp"
@@ -23,6 +22,7 @@
 #include "renderPasses/opaqueInstancedPass.h"
 #include "renderPasses/beginScenePass.h"
 #include "renderPasses/frustumCullingPass.h"
+#include "renderPasses/skyboxPass.h"
 #include "postProcess/postProcess.h"
 #include "material/material.hpp"
 #include "../config/config.hpp"
@@ -34,6 +34,7 @@
 #include "../ECS/components/mesh.hpp"
 #include "../ECS/components/shader.hpp"
 #include "../ECS/components/instance.hpp"
+#include "../ECS/components/skybox.hpp"
 
 RenderPipeline::RenderPipeline(Registry* registry) {
 	RequireComponent<MeshComponent>();
@@ -53,9 +54,6 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	registry->addSystem<LightSystem>();
 	mLightSystem = &registry->getSystem<LightSystem>();
-
-	registry->addSystem<SkyboxSystem>();
-	mSkyboxSystem = &registry->getSystem<SkyboxSystem>();
 
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 #ifdef MSAA
@@ -161,6 +159,7 @@ void RenderPipeline::configure(const Camera& camera) {
 		mRenderPasses.push_back(std::make_shared<BlendInstancedPass>());
 	}
 
+	mRenderPasses.push_back(std::make_shared<SkyboxPass>());
 	// Configure render passes
 	for (const auto& pass: mRenderPasses) {
 		pass->configure(*mContext);
@@ -180,8 +179,8 @@ void RenderPipeline::configure(const Camera& camera) {
 	}
 
 	const glm::mat4 projectionMat = glm::perspective(
-		glm::radians(camera.zoom()),
-		static_cast<float>(SCR_WIDTH) / static_cast<float>(SCR_HEIGHT),
+		glm::radians(mContext->camera.self->zoom()),
+		static_cast<float>(mContext->screen.width) / static_cast<float>(mContext->screen.height),
 		ZNEAR, ZFAR);
 
 	mContext->camera.ubo->bind();
@@ -196,7 +195,7 @@ void RenderPipeline::batchEntities() {
 }
 
 void RenderPipeline::render() {
-	updateBuffers();
+	refreshCameraData();
 	sortEntities();
 
 	mLightSystem->update();
@@ -204,9 +203,6 @@ void RenderPipeline::render() {
 	for (const auto& pass: mRenderPasses) {
 		pass->execute(*mContext);
 	}
-
-	mSkyboxSystem->render(*mContext->camera.self);
-	mSceneBuffer->unbind();
 #ifdef MSAA
 	mSceneBuffer->bindForRead();
 	mIntermediateBuffer->bindForDraw();
@@ -221,10 +217,13 @@ void RenderPipeline::render() {
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void RenderPipeline::updateBuffers() const {
+void RenderPipeline::refreshCameraData() const {
+	const auto skyView = glm::mat4(glm::mat3(mContext->camera.self->viewMatrix()));
+	mContext->camera.skyView = skyView;
+	mContext->camera.frustum = &mContext->camera.self->frustum();
+
 	auto view = mContext->camera.self->viewMatrix();
 	auto viewPos = glm::vec4(mContext->camera.self->position(), 1.0);
-
 	mContext->camera.ubo->bind();
 	mContext->camera.ubo->setData(glm::value_ptr(view), sizeof(glm::mat4), 0);
 	mContext->camera.ubo->setData(glm::value_ptr(viewPos), sizeof(glm::vec4), 2 * sizeof(glm::mat4));
@@ -232,6 +231,11 @@ void RenderPipeline::updateBuffers() const {
 }
 
 void RenderPipeline::batchEntity(const Entity& entity) {
+	if (entity.hasComponent<SkyboxComponent>()) {
+		mRenderQueue.skyboxEntity = &entity;
+		return;
+	}
+
 	const auto& matc = entity.getComponent<MaterialComponent>();
 	const auto& shader = *entity.getComponent<ShaderComponent>().shader;
 	const auto& materials = entity.getComponent<MaterialComponent>().materials;
