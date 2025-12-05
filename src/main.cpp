@@ -178,8 +178,8 @@ int main() {
 		// Helmet
 		auto helmet = registry.createEntity("Helmet");
 		helmet.addComponent<TransformComponent>(
-			glm::vec3(-1.2f, 3.3, 0.0f),
-			glm::vec3(0.0f),
+			glm::vec3(-1.2f, 1.3f, 0.0f),
+			glm::vec3(90.0f, 0.0f, 0.0f),
 			glm::vec3(1.0f));
 
 		ResourceManager::instance().loadModel(helmet.id(), "DamagedHelmet/glTF/DamagedHelmet.gltf");
@@ -196,8 +196,27 @@ int main() {
 		std::make_shared<math::AABB>(
 			math::generateAABB(*ResourceManager::instance().getMeshes(helmet.id()))));
 
-		// Sponza
+		auto angel = registry.createEntity("Angel");
+		angel.addComponent<TransformComponent>(
+			glm::vec3(-5.2f, 0.0f, -1.0f),
+			glm::vec3(-90.0f, 0.0f, 0.0f),
+			glm::vec3(2.0f));
 
+		ResourceManager::instance().loadModel(angel.id(), "cemetery_angel/scene.gltf");
+
+		angel.addComponent<MeshComponent>(ResourceManager::instance().getMeshes(angel.id()));
+		angel.addComponent<MaterialComponent>(
+			ResourceManager::instance().getMaterial(angel.id()));
+
+		angel.addComponent<ShaderComponent>(object);
+
+		angel.addComponent<DebugComponent>();
+
+		angel.addComponent<BoundingVolumeComponent>(
+			std::make_shared<math::AABB>(
+				math::generateAABB(*ResourceManager::instance().getMeshes(angel.id()))));
+
+		// Sponza
 		auto sponza = registry.createEntity("Sponza");
 		sponza.addComponent<TransformComponent>(
 			glm::vec3(0.0f, 0.0f, 0.0f),
