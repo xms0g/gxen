@@ -1,9 +1,9 @@
 #include "fxaa.h"
 #include "glad/glad.h"
-#include "../shader.h"
-#include "../renderCommon.h"
-#include "../buffers/frameBuffer.h"
-#include "../../config/config.hpp"
+#include "../../shader.h"
+#include "../../renderCommon.h"
+#include "../../buffers/frameBuffer.h"
+#include "../../../config/config.hpp"
 
 FXAA::FXAA(const std::string& name, const bool enabled) : IPostEffect(name, enabled) {
 	shader = std::make_unique<Shader>("models/quad.vert", "post-processing/fxaa.frag");

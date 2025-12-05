@@ -8,11 +8,11 @@
 #include "toneMapping.h"
 #include "edgeDetection.h"
 #include "fxaa.h"
-#include "../shader.h"
-#include "../renderCommon.h"
-#include "../buffers/frameBuffer.h"
-#include "../models/quad.h"
-#include "../renderContext/renderContext.hpp"
+#include "../../shader.h"
+#include "../../renderCommon.h"
+#include "../../buffers/frameBuffer.h"
+#include "../../models/quad.h"
+#include "../../renderContext/renderContext.hpp"
 
 PostProcessPass::~PostProcessPass() = default;
 
@@ -42,7 +42,7 @@ void PostProcessPass::configure(const RenderContext& context) {
 	}
 }
 
-void PostProcessPass::execute(const RenderContext& context) const {
+void PostProcessPass::execute(const RenderContext& context) {
 	uint32_t inputTex = context.sceneBuffer->texture();
 	int toggle = 0;
 

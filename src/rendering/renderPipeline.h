@@ -52,7 +52,7 @@ private:
 	std::unique_ptr<RenderContext> mContext;
 	// Render passes
 	std::shared_ptr<ShadowPass> mShadowPass;
-	std::unique_ptr<PostProcessPass> mPostProcessPass;
+	std::shared_ptr<PostProcessPass> mPostProcessPass;
 	std::shared_ptr<DeferredGeometryPass> mDeferredGeometryPass;
 	std::shared_ptr<DeferredLightingPass> mDeferredLightingPass;
 	std::vector<std::shared_ptr<IRenderPass>> mRenderPasses;

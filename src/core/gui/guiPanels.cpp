@@ -8,7 +8,7 @@
 #include "../../ECS/components/directionalLight.hpp"
 #include "../../ECS/components/pointLight.hpp"
 #include "../../ECS/components/spotLight.hpp"
-#include "../../rendering/postProcess/toneMapping.h"
+#include "../../rendering/renderPasses/postProcess/toneMapping.h"
 
 void GuiPanels::renderGraphicsInfoPanel(const uint32_t fps) {
 	if (ImGui::Begin("Graphics")) {

@@ -51,6 +51,7 @@ void DeferredLightingPass::execute(const RenderContext& context) {
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glBindVertexArray(0);
 	glEnable(GL_DEPTH_TEST);
+	context.sceneBuffer->unbind();
 }
 
 

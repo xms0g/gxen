@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include "IRenderPass.hpp"
 
 class OpaqueInstancedPass final : public IRenderPass {

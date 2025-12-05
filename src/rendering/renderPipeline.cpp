@@ -11,7 +11,6 @@
 #include "renderContext/renderFlags.hpp"
 #include "renderContext/renderGroup.hpp"
 #include "renderContext/instanceGroup.hpp"
-#include "renderPasses/shadowPass/shadowPass.h"
 #include "renderPasses/IRenderPass.hpp"
 #include "renderPasses/deferredGeometryPass.h"
 #include "renderPasses/deferredLightingPass.h"
@@ -23,7 +22,9 @@
 #include "renderPasses/beginScenePass.h"
 #include "renderPasses/frustumCullingPass.h"
 #include "renderPasses/skyboxPass.h"
-#include "postProcess/postProcessPass.h"
+#include "renderPasses/resolvePass.h"
+#include "renderPasses/postProcess/postProcessPass.h"
+#include "renderPasses/shadowPass/shadowPass.h"
 #include "material/material.hpp"
 #include "../config/config.hpp"
 #include "../ECS/registry.h"
@@ -54,7 +55,14 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 
 	registry->addSystem<LightSystem>();
 	mLightSystem = &registry->getSystem<LightSystem>();
+}
 
+RenderPipeline::~RenderPipeline() = default;
+
+PostProcessPass& RenderPipeline::postProcess() const { return *mPostProcessPass; }
+
+void RenderPipeline::configure(const Camera& camera) {
+	// Create framebuffers
 	mSceneBuffer = std::make_unique<FrameBuffer>(SCR_WIDTH, SCR_HEIGHT);
 #ifdef MSAA
 	glEnable(GL_MULTISAMPLE);
@@ -88,45 +96,13 @@ RenderPipeline::RenderPipeline(Registry* registry) {
 			.checkStatus();
 	mSceneBuffer->unbind();
 
-	mShadowPass = std::make_shared<ShadowPass>();
+	// Create camera buffer
 	mCameraUBO = std::make_unique<UniformBuffer>(2 * sizeof(glm::mat4) + sizeof(glm::vec4), 0);
-	mPostProcessPass = std::make_unique<PostProcessPass>();
-}
-
-RenderPipeline::~RenderPipeline() = default;
-
-PostProcessPass& RenderPipeline::postProcess() const { return *mPostProcessPass; }
-
-void RenderPipeline::configure(const Camera& camera) {
-	mContext = std::make_unique<RenderContext>(&mRenderQueue, mSceneBuffer.get());
-	mContext->light.ubo = &mLightSystem->getLightUBO();
-	mContext->light.dirLights = &mLightSystem->getDirLights();
-	mContext->light.pointLights = &mLightSystem->getPointLights();
-	mContext->light.spotLights = &mLightSystem->getSpotLights();
-	mContext->camera.self = &camera;
-	mContext->camera.ubo = mCameraUBO.get();
-	mContext->screen.width = SCR_WIDTH;
-	mContext->screen.height = SCR_HEIGHT;
-	mContext->shadowMap.textureSlot = SHADOWMAP_TEXTURE_SLOT;
-	mContext->shadowMap.width = SHADOWMAP_WIDTH;
-	mContext->shadowMap.height = SHADOWMAP_HEIGHT;
-	mContext->shadowMap.directional.nearPlane = SHADOW_DIRECTIONAL_NEAR;
-	mContext->shadowMap.directional.farPlane = SHADOW_DIRECTIONAL_FAR;
-	mContext->shadowMap.directional.left = SHADOW_DIRECTIONAL_LEFT;
-	mContext->shadowMap.directional.right = SHADOW_DIRECTIONAL_RIGHT;
-	mContext->shadowMap.directional.bottom = SHADOW_DIRECTIONAL_BOTTOM;
-	mContext->shadowMap.directional.top = SHADOW_DIRECTIONAL_TOP;
-	mContext->shadowMap.omnidirectional.maxLights = MAX_POINT_LIGHTS;
-	mContext->shadowMap.omnidirectional.nearPlane = SHADOW_OMNIDIRECTIONAL_NEAR;
-	mContext->shadowMap.omnidirectional.farPlane = SHADOW_OMNIDIRECTIONAL_FAR;
-	mContext->shadowMap.omnidirectional.fovy = SHADOW_OMNIDIRECTIONAL_FOVY;
-	mContext->shadowMap.perspective.maxLights = MAX_SPOT_LIGHTS;
-	mContext->shadowMap.perspective.nearPlane = SHADOW_PERSPECTIVE_NEAR;
-	mContext->shadowMap.perspective.farPlane = SHADOW_PERSPECTIVE_FAR;
-	mContext->shadowMap.ubo = mShadowPass->getShadowUBO();
-	mContext->shadowMap.textures = &mShadowPass->getShadowMaps();
 
 	// Create render passes
+	mShadowPass = std::make_shared<ShadowPass>();
+	mPostProcessPass = std::make_shared<PostProcessPass>();
+
 	mRenderPasses.push_back(std::make_shared<FrustumCullingPass>());
 	mRenderPasses.push_back(mShadowPass);
 	mRenderPasses.push_back(std::make_shared<BeginScenePass>());
@@ -160,11 +136,43 @@ void RenderPipeline::configure(const Camera& camera) {
 	}
 
 	mRenderPasses.push_back(std::make_shared<SkyboxPass>());
+#ifdef MSAA
+	mRenderPasses.push_back(std::make_shared<ResolvePass>());
+#endif
+	mRenderPasses.push_back(mPostProcessPass);
+
+	mContext = std::make_unique<RenderContext>(&mRenderQueue, mSceneBuffer.get(), mIntermediateBuffer.get());
+	mContext->light.ubo = &mLightSystem->getLightUBO();
+	mContext->light.dirLights = &mLightSystem->getDirLights();
+	mContext->light.pointLights = &mLightSystem->getPointLights();
+	mContext->light.spotLights = &mLightSystem->getSpotLights();
+	mContext->camera.self = &camera;
+	mContext->camera.ubo = mCameraUBO.get();
+	mContext->screen.width = SCR_WIDTH;
+	mContext->screen.height = SCR_HEIGHT;
+	mContext->shadowMap.textureSlot = SHADOWMAP_TEXTURE_SLOT;
+	mContext->shadowMap.width = SHADOWMAP_WIDTH;
+	mContext->shadowMap.height = SHADOWMAP_HEIGHT;
+	mContext->shadowMap.directional.nearPlane = SHADOW_DIRECTIONAL_NEAR;
+	mContext->shadowMap.directional.farPlane = SHADOW_DIRECTIONAL_FAR;
+	mContext->shadowMap.directional.left = SHADOW_DIRECTIONAL_LEFT;
+	mContext->shadowMap.directional.right = SHADOW_DIRECTIONAL_RIGHT;
+	mContext->shadowMap.directional.bottom = SHADOW_DIRECTIONAL_BOTTOM;
+	mContext->shadowMap.directional.top = SHADOW_DIRECTIONAL_TOP;
+	mContext->shadowMap.omnidirectional.maxLights = MAX_POINT_LIGHTS;
+	mContext->shadowMap.omnidirectional.nearPlane = SHADOW_OMNIDIRECTIONAL_NEAR;
+	mContext->shadowMap.omnidirectional.farPlane = SHADOW_OMNIDIRECTIONAL_FAR;
+	mContext->shadowMap.omnidirectional.fovy = SHADOW_OMNIDIRECTIONAL_FOVY;
+	mContext->shadowMap.perspective.maxLights = MAX_SPOT_LIGHTS;
+	mContext->shadowMap.perspective.nearPlane = SHADOW_PERSPECTIVE_NEAR;
+	mContext->shadowMap.perspective.farPlane = SHADOW_PERSPECTIVE_FAR;
+	mContext->shadowMap.ubo = mShadowPass->getShadowUBO();
+	mContext->shadowMap.textures = &mShadowPass->getShadowMaps();
+
 	// Configure render passes
 	for (const auto& pass: mRenderPasses) {
 		pass->configure(*mContext);
 	}
-	mPostProcessPass->configure(*mContext);
 
 	if (!mRenderQueue.deferredGroups.empty()) {
 		mDeferredLightingPass->configureInput(mDeferredGeometryPass->getGBuffer());
@@ -204,18 +212,8 @@ void RenderPipeline::render() {
 	for (const auto& pass: mRenderPasses) {
 		pass->execute(*mContext);
 	}
-#ifdef MSAA
-	mSceneBuffer->bindForRead();
-	mIntermediateBuffer->bindForDraw();
-	glBlitFramebuffer(0, 0, mSceneBuffer->width(), mSceneBuffer->height(),
-					  0, 0, mIntermediateBuffer->width(), mIntermediateBuffer->height(),
-					  GL_COLOR_BUFFER_BIT, GL_NEAREST);
-	mContext->sceneBuffer = mIntermediateBuffer.get();
-	mPostProcessPass->execute(*mContext);
+
 	mContext->sceneBuffer = mSceneBuffer.get();
-#else
-	mPostProcessPass->execute(*mContext);
-#endif
 	glViewport(0, 0, static_cast<int32_t>(SCR_WIDTH), static_cast<int32_t>(SCR_HEIGHT));
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }

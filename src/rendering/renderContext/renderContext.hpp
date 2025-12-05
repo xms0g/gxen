@@ -17,7 +17,8 @@ struct SpotLightComponent;
 
 struct RenderContext {
 	const RenderQueue* renderQueue;
-	const FrameBuffer* sceneBuffer;
+	mutable const FrameBuffer* sceneBuffer;
+	const FrameBuffer* intermediateBuffer;
 
 	struct {
 		const UniformBuffer* ubo;

@@ -1,8 +1,8 @@
 #include "toneMapping.h"
 #include "glad/glad.h"
-#include "../shader.h"
-#include "../renderCommon.h"
-#include "../buffers/frameBuffer.h"
+#include "../../shader.h"
+#include "../../renderCommon.h"
+#include "../../buffers/frameBuffer.h"
 
 ToneMapping::ToneMapping(const std::string& name, const bool enabled, const float exp)
 	: IPostEffect(name, enabled),

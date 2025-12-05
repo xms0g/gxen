@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include "IPostEffect.hpp"
+#include "../IRenderPass.hpp"
 
 struct RenderContext;
 
@@ -12,13 +13,13 @@ class Quad;
 class FrameBuffer;
 class Shader;
 
-class PostProcessPass {
+class PostProcessPass final : public IRenderPass {
 public:
-	~PostProcessPass();
+	~PostProcessPass() override;
 
-	void configure(const RenderContext& context);
+	void configure(const RenderContext& context) override;
 
-	void execute(const RenderContext& context) const;
+	void execute(const RenderContext& context) override;
 
 	std::vector<std::shared_ptr<IPostEffect> >& effects() { return mEffects; }
 

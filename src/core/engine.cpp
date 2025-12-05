@@ -7,7 +7,7 @@
 #include "gui/guiSystem.h"
 #include "../ECS/registry.h"
 #include "../rendering/renderPipeline.h"
-#include "../rendering/postProcess/postProcessPass.h"
+#include "../rendering/renderPasses/postProcess/postProcessPass.h"
 
 Engine::Engine() = default;
 
@@ -22,7 +22,7 @@ void Engine::init(Registry* registry) {
 	registry->addSystem<GuiSystem>(mWindow->nativeHandle(), mWindow->glContext());
 	mGuiSystem = &registry->getSystem<GuiSystem>();
 
-	registry->addSystem<RenderPipeline>(registry);
+	registry->addSystem<RenderPipeline>(mRegistry);
 	mRenderPipeline = &registry->getSystem<RenderPipeline>();
 
 	mCamera = std::make_unique<Camera>(glm::vec3(0.0f, 2.0f, 5.0f));
