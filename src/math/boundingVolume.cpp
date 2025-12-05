@@ -49,17 +49,9 @@ bool math::AABB::isOnFrustum(const Frustum& camFrustum, const glm::vec3& positio
 	const glm::vec3 up = modelMatrix[1] * extents.y;
 	const glm::vec3 forward = -modelMatrix[2] * extents.z;
 
-	const float newIi = std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, right)) +
-	                    std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, up)) +
-	                    std::abs(glm::dot(glm::vec3{1.f, 0.f, 0.f}, forward));
-
-	const float newIj = std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, right)) +
-	                    std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, up)) +
-	                    std::abs(glm::dot(glm::vec3{0.f, 1.f, 0.f}, forward));
-
-	const float newIk = std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, right)) +
-	                    std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, up)) +
-	                    std::abs(glm::dot(glm::vec3{0.f, 0.f, 1.f}, forward));
+	const float newIi = std::abs(right.x) + std::abs(up.x) + std::abs(forward.x);
+	const float newIj = std::abs(right.y) + std::abs(up.y) + std::abs(forward.y);
+	const float newIk = std::abs(right.z) + std::abs(up.z) + std::abs(forward.z);
 
 	const AABB globalAABB(globalCenter, newIi, newIj, newIk);
 
@@ -75,29 +67,37 @@ bool math::AABB::isMeshInFrustum(const Frustum& camFrustum, const glm::vec3& min
                                  const glm::vec3& position, const glm::vec3& rotation, const glm::vec3& scale) const {
 	const glm::mat4 modelMatrix = computeModelMatrix(position, rotation, scale);
 
-	const glm::vec3 corners[8] = {
+	// Define local corners
+	const glm::vec3 localCorners[8] = {
 		{min.x, min.y, min.z}, {max.x, min.y, min.z},
 		{min.x, max.y, min.z}, {max.x, max.y, min.z},
 		{min.x, min.y, max.z}, {max.x, min.y, max.z},
 		{min.x, max.y, max.z}, {max.x, max.y, max.z}
 	};
 
+	// Transform to world space immediately
+	glm::vec3 worldCorners[8];
+	for(int i = 0; i < 8; ++i) {
+		worldCorners[i] = glm::vec3(modelMatrix * glm::vec4(localCorners[i], 1.0f));
+	}
+
 	const Plane planes[6] = {
 		camFrustum.topFace, camFrustum.bottomFace,
 		camFrustum.rightFace, camFrustum.leftFace,
 		camFrustum.farFace, camFrustum.nearFace
-	};
+	 };
 
 	for (const auto& plane: planes) {
 		int inside = 0;
 
-		for (const auto& corner: corners) {
-			auto wc = glm::vec3(modelMatrix * glm::vec4(corner, 1.0f));
-
-			if (plane.computeSignedDistanceToPlane(wc) >= 0)
+		for (const auto& corner: worldCorners) {
+			if (plane.computeSignedDistanceToPlane(corner) >= 0) {
 				inside++;
+			}
 		}
 
+		// If inside is 0, it means ALL corners are behind this specific plane.
+		// Therefore, the object is outside the frustum.
 		if (inside == 0)
 			return false;
 	}
